@@ -1059,14 +1059,14 @@ explicit_constructor_invocation ::=
 		THIS LPAREN argument_list_opt RPAREN SEMICOLON 
 		{:
 			if (parsingClassLevel == 0) {
-				parser.parsingTopMethod.setContainsExplConstructorCall(true);
+				parser.parsingTopMethod.setContainsExplThisConstructorCall(true);
 			}
 		:}
 	|	type_arguments THIS LPAREN argument_list_opt RPAREN SEMICOLON
 	|	SUPER LPAREN argument_list_opt RPAREN SEMICOLON
 		{:
 			if (parsingClassLevel == 0) {
-				parser.parsingTopMethod.setContainsExplConstructorCall(true);
+				parser.parsingTopMethod.setContainsExplSuperConstructorCall(true);
 			}
 		:}
 	|	type_arguments SUPER LPAREN argument_list_opt RPAREN SEMICOLON

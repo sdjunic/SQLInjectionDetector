@@ -27,7 +27,7 @@ public class Main {
 	
 	private static List<LibraryMethodDecl> libraryMethList; 
 
-	public static PrintStream infoPS = null; /* System.out; */
+	public static PrintStream infoPS = System.out; /* null; */
 	
 	public static void main(String args[]) throws Exception {
 		

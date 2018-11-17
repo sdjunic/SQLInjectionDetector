@@ -12,6 +12,7 @@ public class MethCallStatement extends CallStatement {
 
 	private String methodToCall = null;
 	private VariableExec thisObj = null;
+	private boolean isInitFieldsMethod = false;
 	
 	private Method staticMethodToCall = null; // only for static methods
 	
@@ -28,6 +29,11 @@ public class MethCallStatement extends CallStatement {
 		this.arguments = arguments;
 	}
 	
+	public void setInitFieldsMethod()
+	{
+		isInitFieldsMethod = true;
+	}
+	
 	public List<VariableExec> getArguments() {
 		return arguments;
 	}
@@ -39,6 +45,15 @@ public class MethCallStatement extends CallStatement {
 	@Override
 	public void execute(ValuesHolder values) throws Exception {
 		Method methodToCall = staticMethodToCall;
+		
+		if (isInitFieldsMethod)
+		{
+			Method.methCallStack.push(methodToCall);
+			methodToCall.executeMethod(values);
+			Method.methCallStack.pop();
+			return;
+		}
+		
 		ValuesHolder callingMethValues = new ValuesHolder(null);
 		
 		if (methodToCall == null) {

@@ -23,7 +23,8 @@ public class Method implements Obj {
 	private Scope myScope = null;
 	
 	private boolean constructor = false;
-	private boolean containsExplConstructorCall = false;
+	private boolean containsExplThisConstructorCall = false;
+	private boolean containsExplSuperConstructorCall = false;
 	
 	private String methodDefFilePath = null;
 	
@@ -69,12 +70,20 @@ public class Method implements Obj {
 		return name;
 	}
 
-	public boolean isContainsExplConstructorCall() {
-		return containsExplConstructorCall;
+	public boolean isContainsExplSuperConstructorCall() {
+		return containsExplSuperConstructorCall;
 	}
 
-	public void setContainsExplConstructorCall(boolean containsExplConstructorCall) {
-		this.containsExplConstructorCall = containsExplConstructorCall;
+	public void setContainsExplSuperConstructorCall(boolean containsExplConstructorCall) {
+		this.containsExplSuperConstructorCall = containsExplConstructorCall;
+	}
+	
+	public boolean isContainsExplThisConstructorCall() {
+		return containsExplThisConstructorCall;
+	}
+
+	public void setContainsExplThisConstructorCall(boolean containsExplConstructorCall) {
+		this.containsExplThisConstructorCall = containsExplConstructorCall;
 	}
 
 	public void incBracksAfterParamsNum(){
@@ -240,21 +249,10 @@ public class Method implements Obj {
 		if (Main.infoPS != null) Main.infoPS.println("Exec "+ this.getName() +" method!");
 		if (isDefined) {
 			if (!parsed) {
-				this.parseMethod();
 				if (this.constructor) {
-					if (!this.containsExplConstructorCall) {
-						if (this.getParentClass().getSuperClass() != null && this.getParentClass().getSuperClass().type != null) {
-							Class superClass = (Class)this.getParentClass().getSuperClass().type;
-							List<VariableExec> args = new LinkedList<VariableExec>();
-							Field superField = this.getParentClass().findField("super");
-							List<String> name = new LinkedList<String>();
-							name.add("this"); name.add("super");
-							ConstructorCallStatement superConstrCall = new ConstructorCallStatement(new VariableExec(name, superField), superClass.findConstructor(args), args);
-							body.addStatement(superConstrCall, 0);
-						}
-					}
-					body.setReturnVar(new VariableExec("this", this.getParentClass()));
+					throw new Exception("Constructors need to be parsed in ConstructorCallStatement!");
 				}
+				this.parseMethod();
 			}
 			return body.execute(values);
 		} else {

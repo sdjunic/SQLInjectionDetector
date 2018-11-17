@@ -36,6 +36,7 @@ public class Main {
 		String str = ik.metodaUInnerKlasi();
 		
 		Bicikl a = new Bicikl("bemix", str);
+		a = new Bicikl("bemix", str);
 		
 		Bicikl b = new Bicikl("bemix", "mojBajs") {
 			

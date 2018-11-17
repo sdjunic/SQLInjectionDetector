@@ -1,15 +1,17 @@
 package object;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import object.values.ObjValue;
 import object.values.ValuesHolder;
+import symbol.object.Class;
+import symbol.object.Field;
 import symbol.object.Method;
 
 public class ConstructorCallStatement extends CallStatement {
 
 	private Method constructor = null;
-	Method fieldInitMethod = null;
 	
 	public ConstructorCallStatement(VariableExec left, Method constructor, List<VariableExec> arguments) {
 		this.left = left;
@@ -26,16 +28,38 @@ public class ConstructorCallStatement extends CallStatement {
 		if (constructor.isMethodAlreadyOnStack()) return;
 		Method.methCallStack.push(constructor);
 		
-		if (fieldInitMethod == null) {
-			fieldInitMethod = constructor.getParentClass().getFieldsInitializerMethod();
-		}
 		ValuesHolder callingMethValues = new ValuesHolder(null);
-		
 		callingMethValues.addObject(constructor.getParentClass(), "this", true);
 		
-		//field initialize
-		if (fieldInitMethod != null) {
-			fieldInitMethod.executeMethod(callingMethValues);
+		if (!constructor.isParsed())
+		{
+			constructor.parseMethod();
+			if (!constructor.isContainsExplThisConstructorCall()) {				
+				Method fieldInitMethod = constructor.getParentClass().getFieldsInitializerMethod();
+				if (fieldInitMethod != null)
+				{
+					List<VariableExec> args = new LinkedList<VariableExec>();
+					MethCallStatement fieldInitMethCall = new MethCallStatement(null, fieldInitMethod, args);
+					fieldInitMethCall.setInitFieldsMethod();
+					constructor.getBody().addStatement(fieldInitMethCall, 0);
+				}
+				
+				if (!constructor.isContainsExplSuperConstructorCall()) {
+					if (constructor.getParentClass().getSuperClass() != null && constructor.getParentClass().getSuperClass().type != null) {
+						Class superClass = (Class)constructor.getParentClass().getSuperClass().type;
+						List<VariableExec> args = new LinkedList<VariableExec>();
+						Field superField = constructor.getParentClass().findField("super");
+						List<String> name = new LinkedList<String>();
+						name.add("this"); name.add("super");
+						ConstructorCallStatement superConstrCall = new ConstructorCallStatement(new VariableExec(name, superField), superClass.findConstructor(args), args);
+						constructor.getBody().addStatement(superConstrCall, 0);
+					}
+				}
+			}
+			else
+			{
+				throw new Exception("Calling this() in constructor isn't supported!");
+			}
 		}
 		
 		//constructor call
@@ -48,9 +72,9 @@ public class ConstructorCallStatement extends CallStatement {
 			callingMethValues.put(constructor.getMethParamList().get(i).getName(), argumentVal);
 		}
 			
-		ObjValue returnVal = constructor.executeMethod(callingMethValues);
+		constructor.executeMethod(callingMethValues);
 		if (left != null) {
-			values.put(left.name, returnVal);
+			values.put(left.name, callingMethValues.get("this"));
 		}
 		
 		Method.methCallStack.pop();
@@ -67,14 +91,7 @@ public class ConstructorCallStatement extends CallStatement {
 			sb.append(arguments.get(i));
 			if (i < arguments.size()-1) sb.append(", ");
 		}
-		sb.append(")");
-		
-		if (fieldInitMethod != null) {
-			sb.append(" { field_init: ");
-			sb.append(fieldInitMethod.getName());
-			sb.append(" }");
-		}
-		sb.append("\r\n");
+		sb.append(")\r\n");
 	}
 	
 }
