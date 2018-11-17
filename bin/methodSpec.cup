@@ -1,0 +1,2158 @@
+package Parse;
+
+import java_cup.runtime.*;
+import symbol.*;
+import symbol.object.*;
+import symbol.object.Class;
+import symbol.object.Modifiers.Modifier;
+import object.*;
+import object.values.*;
+import java.util.*;
+import java.io.*;
+
+import java.io.PrintStream;
+
+
+parser code {:
+
+	public boolean errorDetected = false;
+   	PrintStream errorStream = null;
+   	PrintStream infoStream = null;
+   	
+   	private String prevToken = null;
+   	
+   	Method parsingTopMethod = null;
+   	
+	//public ValuesHolder values = new ValuesHolder();
+	public ObjValue returnValue = null;
+    
+	public void setInfoPS(PrintStream infoPS) {
+		this.infoStream = infoPS;
+	}
+
+	public void setErrorPS(PrintStream errorPS) {
+		this.errorStream = errorPS;
+	}   
+
+	public void setParsingTopMethod(Method parsingTopMethod) {
+		this.parsingTopMethod = parsingTopMethod;
+		Table.setScope(parsingTopMethod.getScope().getOuter());
+	}
+
+    public void report_fatal_error(String message, Object info) throws java.lang.Exception {
+      done_parsing();
+      report_error(message, info);
+    }
+  
+    public void syntax_error(Symbol cur_token) {
+        report_error("\nSintaksna greska", cur_token);
+    }
+  
+    public void unrecovered_syntax_error(Symbol cur_token) throws java.lang.Exception {
+        report_fatal_error("Fatalna greska, parsiranje se ne moze nastaviti", cur_token);
+    }
+
+    public void report_error(String message, Object info) {
+    	errorDetected = true;
+    	StringBuilder msg = new StringBuilder(message); 
+    	if (info instanceof Symbol)
+            msg.append (" na liniji ").append(((Symbol)info).left);
+            msg.append (" - simbol: ").append(((Symbol)info)).append(" ("+((Symbol)info).value + ")");
+        if (errorStream != null) errorStream.println(msg.toString());
+    }
+    
+    public void report_info(String message, Object info) {
+    	StringBuilder msg = new StringBuilder(message); 
+    	if (info instanceof Symbol)
+            msg.append (" na liniji ").append(((Symbol)info).left);
+            msg.append (" - simbol: ").append(((Symbol)info)).append(" ("+((Symbol)info).value + ")");
+        if (infoStream != null) infoStream.println(msg.toString());
+    }
+    
+:}
+
+
+scan with {:
+	Symbol s = this.getScanner().next_token();
+	if (s != null && s.value != null) {
+		if (infoStream != null) infoStream.println(s.toString() + " " + s.value.toString());
+		if(prevToken != null) {
+			CUP$MethodParser$actions.appendToCurrentClassContent(prevToken);
+		}
+		
+		switch (s.sym) {
+			case Sym.CHARACTER_LITERAL: prevToken = "'"+s.value.toString()+"'"; break;
+			case Sym.STRING_LITERAL: prevToken = "\""+s.value.toString()+"\""; break;
+			default: prevToken = s.value.toString(); 
+		}
+	}
+	return s;
+:}
+
+
+init with {: :}
+
+
+action code {:
+	
+	private boolean topMethodDeclFound = false;
+	private static StringBuilder classContent = null;
+	private static int parsingClassLevel = 0;
+	private Class currentClass = null;
+	
+	public static void appendToCurrentClassContent(String s) {
+		if (parsingClassLevel > 0) {
+			if (classContent == null) classContent = new StringBuilder();
+	    	classContent.append(s + " ");
+    	}
+	}
+	
+	private class Variable {
+		public String name;
+		public int arrayLevel;
+		public VariableExec initValue;
+		
+		public Variable(String name){
+			this.name = name;
+			this.arrayLevel = 0;
+			this.initValue = null;
+		}
+		
+		public Variable(String name,int arrayLevel){
+			this.name = name;
+			this.arrayLevel = arrayLevel;
+			this.initValue = null;
+		}
+		
+		public Variable(String name,int arrayLevel, VariableExec initValue){
+			this.name = name;
+			this.arrayLevel = arrayLevel;
+			this.initValue = initValue;
+		}
+	}
+	
+:}
+
+
+terminal String BOOLEAN; // primitive_type
+terminal String BYTE, SHORT, INT, LONG, CHAR; // integral_type
+terminal String FLOAT, DOUBLE; // floating_point_type
+terminal LBRACK, RBRACK; // array_type
+terminal String IDENTIFIER; // name
+terminal DOT; // qualified_name
+terminal SEMICOLON, MULT, COMMA, LBRACE, RBRACE, EQ, LPAREN, RPAREN, COLON;
+terminal PACKAGE; // package_declaration
+terminal IMPORT; // import_declaration
+terminal PUBLIC, PROTECTED, PRIVATE; // modifier
+terminal STATIC; // modifier
+terminal ABSTRACT, FINAL, NATIVE, SYNCHRONIZED, TRANSIENT, VOLATILE;
+terminal CLASS; // class_declaration
+terminal EXTENDS; // super
+terminal IMPLEMENTS; // interfaces
+terminal VOID; // method_header
+terminal THROWS; // throws
+terminal THIS, SUPER; // explicit_constructor_invocation
+terminal INTERFACE; // interface_declaration
+terminal IF, ELSE; // if_then_statement, if_then_else_statement
+terminal SWITCH; // switch_statement
+terminal CASE, DEFAULT; // switch_label
+terminal DO, WHILE; // while_statement, do_statement
+terminal FOR; // for_statement
+terminal BREAK; // break_statement
+terminal CONTINUE; // continue_statement
+terminal RETURN; // return_statement
+terminal THROW; // throw_statement
+terminal TRY; // try_statement
+terminal CATCH; // catch_clause
+terminal FINALLY; // finally
+terminal NEW; // class_instance_creation_expression
+terminal PLUSPLUS; // postincrement_expression
+terminal MINUSMINUS; // postdecrement_expression
+terminal PLUS, MINUS, COMP, NOT, DIV, MOD;
+terminal LSHIFT, RSHIFT, URSHIFT; // shift_expression
+terminal LT, GT, LTEQ, GTEQ, INSTANCEOF; // relational_expression
+terminal EQEQ, NOTEQ; // equality_expression
+terminal AND; // and_expression
+terminal XOR; // exclusive_or_expression
+terminal OR;  // inclusive_or_expression
+terminal ANDAND; // conditional_and_expression
+terminal OROR; // conditional_or_expression
+terminal QUESTION; // conditional_expression
+terminal MULTEQ, DIVEQ, MODEQ, PLUSEQ, MINUSEQ; // assignment_operator
+terminal LSHIFTEQ, RSHIFTEQ, URSHIFTEQ; // assignment_operator
+terminal ANDEQ, XOREQ, OREQ; // assignment_operator
+terminal AT;           // support annotations
+
+terminal java.lang.Number INTEGER_LITERAL;
+terminal java.lang.Number FLOATING_POINT_LITERAL;
+terminal java.lang.Boolean BOOLEAN_LITERAL;
+terminal java.lang.Character CHARACTER_LITERAL;
+terminal java.lang.String STRING_LITERAL;
+terminal NULL_LITERAL;
+
+
+// Reserved but unused:
+terminal CONST, GOTO;
+// strictfp keyword, new in Java 1.2
+terminal STRICTFP;
+// assert keyword, new in Java 1.4
+terminal ASSERT; // assert_statement
+// ellipsis token for varargs, new in Java 1.5 (JSR-201)
+terminal ELLIPSIS;
+// enum keyword, new in Java 1.5 (JSR-201)
+terminal ENUM;
+
+
+non terminal constructor_LBRACE;
+
+
+// 19.2) The Syntactic Grammar
+non terminal goal;
+// 19.3) Lexical Structure
+non terminal VariableExec literal;
+// 19.4) Types, Values, and Variables
+non terminal TypeReference type, primitive_type;
+non terminal String numeric_type, integral_type, floating_point_type;
+non terminal TypeReference reference_type;
+non terminal TypeReference class_or_interface_type;
+non terminal TypeReference class_type, interface_type;
+non terminal TypeReference array_type;
+// 19.5) Names
+non terminal List<String> name, qualified_name;
+non terminal String simple_name;
+// 19.7) Productions used only in the LALR(1) grammar
+non terminal Modifiers modifiers_opt, modifiers, modifiers_at;
+non terminal Modifier adhoc_modifier;
+non terminal Modifiers mixed_modifiers, mixed_modifiers_at;
+// 19.8.1) Class Declaration
+non terminal class_declaration;
+non terminal TypeReference super_ext, super_opt;
+non terminal interfaces, interfaces_opt, interface_type_list;
+non terminal class_body, class_body_opt;
+non terminal class_body_declarations, class_body_declarations_opt;
+non terminal class_body_declaration, class_member_declaration;
+// JSR-201) Enum Declaration
+non terminal enum_declaration;
+non terminal enum_body, enum_constants_opt, enum_constants, enum_constant;
+non terminal enum_arguments_opt, enum_body_declarations_opt;
+// 19.8.2) Field Declarations
+non terminal field_declaration;
+non terminal Variable variable_declarator_id, variable_declarator;
+non terminal List<Variable> variable_declarators;
+non terminal VariableExec variable_initializer;
+// 19.8.3) Method Declarations
+non terminal method_declaration, method_header;
+non terminal Method method_declarator;
+non terminal formal_parameter_list_opt, formal_parameter_list;
+non terminal formal_parameter;
+non terminal formal_parameter_modifiers_opt, formal_parameter_modifiers;
+non terminal formal_parameter_modifier;
+non terminal throws_opt, throws;
+non terminal class_type_list, method_body;
+// 19.8.4) Static Initializers
+non terminal static_initializer;
+// 19.8.5) Constructor Declarations
+non terminal constructor_declaration;
+non terminal Method constructor_declarator;
+non terminal constructor_body;
+non terminal explicit_constructor_invocation;
+// 19.9.1) Interface Declarations
+non terminal interface_declaration;
+non terminal normal_interface_declaration, annotation_type_declaration;
+non terminal extends_interfaces_opt, extends_interfaces;
+non terminal interface_body;
+non terminal interface_member_declarations_opt, interface_member_declarations;
+non terminal interface_member_declaration, constant_declaration;
+non terminal abstract_method_declaration;
+// 19.10) Arrays
+non terminal VariableExec array_initializer;
+non terminal variable_initializers;
+// 19.11) Blocks and Statements
+non terminal block;
+non terminal block_statements_opt, block_statements, block_statement;
+non terminal local_variable_declaration_statement, local_variable_declaration;
+non terminal statement, statement_no_short_if;
+non terminal statement_without_trailing_substatement;
+non terminal empty_statement;
+non terminal labeled_statement, labeled_statement_no_short_if;
+non terminal expression_statement, statement_expression;
+non terminal if_then_statement;
+non terminal if_then_else_statement, if_then_else_statement_no_short_if;
+non terminal switch_statement, switch_block;
+non terminal switch_block_statement_groups;
+non terminal switch_block_statement_group;
+non terminal switch_labels, switch_label;
+non terminal while_statement, while_statement_no_short_if;
+non terminal do_statement;
+non terminal foreach_statement, foreach_statement_no_short_if;
+non terminal for_statement, for_statement_no_short_if;
+non terminal for_init_opt, for_init;
+non terminal for_update_opt, for_update;
+non terminal statement_expression_list;
+non terminal identifier_opt;
+non terminal break_statement, continue_statement;
+non terminal return_statement, throw_statement;
+non terminal synchronized_statement, try_statement;
+non terminal catches_opt, catches, catch_clause;
+non terminal finally;
+non terminal assert_statement;
+// 19.12) Expressions
+non terminal VariableExec primary, primary_no_new_array;
+non terminal VariableExec class_instance_creation_expression;
+non terminal List<VariableExec> argument_list_opt, argument_list;
+non terminal VariableExec array_creation_init, array_creation_uninit;
+non terminal dim_exprs, dim_expr, dims_opt;
+non terminal Integer dims;
+non terminal VariableExec field_access, method_invocation, array_access;
+non terminal VariableExec postfix_expression;
+non terminal postincrement_expression, postdecrement_expression;
+non terminal VariableExec unary_expression, unary_expression_not_plus_minus;
+non terminal preincrement_expression, predecrement_expression;
+non terminal cast_expression;
+non terminal VariableExec multiplicative_expression, additive_expression;
+non terminal VariableExec shift_expression, relational_expression, equality_expression;
+non terminal VariableExec and_expression, exclusive_or_expression, inclusive_or_expression;
+non terminal VariableExec conditional_and_expression, conditional_or_expression;
+non terminal VariableExec conditional_expression, assignment_expression;
+non terminal VariableExec assignment;
+non terminal Integer assignment_operator;
+non terminal VariableExec expression_opt, expression;
+non terminal constant_expression;
+// JSR-14 2.1) Type Syntax 2.3) Handling Consecutive Type Brackets
+non terminal TypeReference class_or_interface;
+non terminal type_variable;
+non terminal type_arguments, type_arguments_opt;
+non terminal type_argument_list;
+non terminal type_argument_list_1, reference_type_1;
+non terminal type_argument_list_2, reference_type_2;
+non terminal type_argument_list_3, reference_type_3;
+// JSR-14 2.2) Parameterized Type Declarations 2.3) Handling Consecutive...
+non terminal type_parameters, type_parameters_opt;
+non terminal type_parameter, type_parameter_list;
+non terminal type_parameter_1, type_parameter_list_1;
+non terminal type_bound, type_bound_opt;
+non terminal type_bound_1;
+non terminal additional_bound_list, additional_bound_list_opt;
+non terminal additional_bound_list_1;
+non terminal additional_bound;
+non terminal additional_bound_1;
+non terminal wildcard, wildcard_1, wildcard_2, wildcard_3;
+non terminal type_argument, type_argument_1, type_argument_2, type_argument_3;
+// not mentioned in JSR-14: need to reduce the precedence of instanceof
+// Alternatively, you can tweak the relational_expression production a little.
+non terminal VariableExec instanceof_expression;
+//// expressions which are Not a Name
+non terminal VariableExec postfix_expression_nn;
+non terminal VariableExec unary_expression_nn;
+non terminal VariableExec unary_expression_not_plus_minus_nn;
+non terminal VariableExec multiplicative_expression_nn;
+non terminal VariableExec additive_expression_nn;
+non terminal VariableExec shift_expression_nn;
+non terminal VariableExec relational_expression_nn;
+non terminal VariableExec instanceof_expression_nn;
+non terminal VariableExec equality_expression_nn;
+non terminal VariableExec and_expression_nn;
+non terminal VariableExec exclusive_or_expression_nn;
+non terminal VariableExec inclusive_or_expression_nn;
+non terminal VariableExec conditional_and_expression_nn;
+non terminal VariableExec conditional_or_expression_nn;
+non terminal VariableExec conditional_expression_nn;
+non terminal VariableExec assignment_expression_nn;
+non terminal VariableExec expression_nn;
+/// annotation expressions
+non terminal annotations_opt, annotations, annotations_at, annotation, annotation_body;
+non terminal normal_annotation_body, marker_annotation_body;
+non terminal single_element_annotation_body;
+non terminal annotation_type_body, annotation_type_element_declarations;
+non terminal annotation_type_element_declarations_opt;
+non terminal annotation_type_element_declaration, default_value_opt, default_value;
+non terminal element_value_pairs_opt, element_value_pairs, element_value_pair;
+non terminal element_values_opt, element_values, element_value, element_value_array_initializer;
+
+start with goal;
+
+goal ::=
+		method_declaration
+	|	static_initializer
+	|	constructor_declaration
+	|	block
+	;
+
+// 19.3) Lexical Structure.
+literal ::=	INTEGER_LITERAL {: RESULT = null; :}
+	|	FLOATING_POINT_LITERAL {: RESULT = null; :}
+	|	BOOLEAN_LITERAL {: RESULT = null; :}
+	|	CHARACTER_LITERAL {: RESULT = null; :}
+	|	STRING_LITERAL {: if (parsingClassLevel == 0) { RESULT = new VariableExec(new StringVal(true)); } :}
+	|	NULL_LITERAL {: if (parsingClassLevel == 0) { RESULT = new VariableExec(new NullValue()); } :}
+	;
+
+// 19.4) Types, Values, and Variables
+type ::= primitive_type:t {: RESULT = t; :}
+	| reference_type:t {: RESULT = t; :}
+	;
+	
+primitive_type ::=
+		numeric_type:str 
+		{: 
+			if (parsingClassLevel == 0) {
+				Obj type = Table.universe().findSymbol(str); 
+				if (type != null && type instanceof Type) RESULT = new TypeReference((Type)type);
+				else RESULT = null;
+			}
+		:}
+	|	BOOLEAN:str
+		{: 
+			if (parsingClassLevel == 0) {
+				Obj type = Table.universe().findSymbol(str); 
+				if (type != null && type instanceof Type) RESULT = new TypeReference((Type)type);
+				else RESULT = null;
+			}
+		:}
+	;
+	
+numeric_type::=	integral_type:x {: RESULT = x; :}
+	|	floating_point_type:x {: RESULT = x; :}
+	;
+	
+integral_type ::= 
+		BYTE:x {: RESULT = x; :}
+	|	SHORT:x {: RESULT = x; :}
+	|	INT:x {: RESULT = x; :} 
+	|	LONG:x {: RESULT = x; :} 
+	|	CHAR:x {: RESULT = x; :} 
+	;
+	
+floating_point_type ::= 
+		FLOAT:x {: RESULT = x; :} 
+	|	DOUBLE:x {: RESULT = x; :}
+	;
+
+reference_type ::=
+		class_or_interface_type:t {: RESULT = t; :}
+	|	array_type:t {: RESULT = t; :}
+	;
+	
+type_variable ::=
+		IDENTIFIER
+	;
+	
+class_or_interface ::=
+		name:n
+		{: 
+			if (parsingClassLevel == 0) {
+				Obj obj = ParseData.findName(n, parser.parsingTopMethod.getImportedObjects(), parser.parsingTopMethod.getImportedScopes(), Table.currentScope());  
+				if (obj instanceof Type) RESULT = new TypeReference((Type)obj);
+				else RESULT = new TypeReference(new UnknownType(n, parser.parsingTopMethod.getImportedObjects(), parser.parsingTopMethod.getImportedScopes(), Table.currentScope()));
+			}
+		:}
+	|	class_or_interface LT type_argument_list_1 DOT name {: /*TODO*/ :}
+	;
+	
+class_or_interface_type ::=
+		class_or_interface:x {: RESULT = x; :}
+	|	class_or_interface:x LT type_argument_list_1 {: /*TODO*/ :}
+	;
+
+class_type ::=	class_or_interface_type:x {: RESULT = x; :} ;
+
+interface_type ::= class_or_interface_type:x {: RESULT = x; :} ;		
+
+array_type ::=	primitive_type:t dims:num {: if (parsingClassLevel == 0) { RESULT = new TypeReference(new ArrayType(t, num)); } :}
+	|	name:n dims:num 
+		{: 
+			if (parsingClassLevel == 0) {
+				Obj obj = ParseData.findName(n, parser.parsingTopMethod.getImportedObjects(), parser.parsingTopMethod.getImportedScopes(), Table.currentScope());  
+				TypeReference type;
+				if (obj instanceof Type) type = new TypeReference((Type)obj);
+				else type = new TypeReference(new UnknownType(n, parser.parsingTopMethod.getImportedObjects(), parser.parsingTopMethod.getImportedScopes(), Table.currentScope()));
+				RESULT = new TypeReference(new ArrayType(type, num));
+			}
+		:}
+	|	class_or_interface LT type_argument_list_1 DOT name dims {: /*TODO*/ :}
+	|	class_or_interface LT type_argument_list_1 dims {: /* TODO */ :}
+	;
+
+type_arguments_opt ::= type_arguments | ;
+
+type_arguments ::=
+		LT type_argument_list_1
+	;
+wildcard ::=	QUESTION
+	|	QUESTION EXTENDS reference_type
+	|	QUESTION SUPER reference_type
+	;
+wildcard_1 ::=	QUESTION GT
+	|	QUESTION EXTENDS reference_type_1
+	|	QUESTION SUPER reference_type_1
+	;
+wildcard_2 ::=	QUESTION RSHIFT
+	|	QUESTION EXTENDS reference_type_2
+	|	QUESTION SUPER reference_type_2
+	;
+wildcard_3 ::=	QUESTION URSHIFT
+	|	QUESTION EXTENDS reference_type_3
+	|	QUESTION SUPER reference_type_3
+	;
+reference_type_1 ::=
+		reference_type GT
+	|	class_or_interface LT type_argument_list_2
+	;
+reference_type_2 ::=
+		reference_type RSHIFT
+	|	class_or_interface LT type_argument_list_3
+	;
+reference_type_3 ::=
+		reference_type URSHIFT
+	;
+type_argument_list ::=
+		type_argument
+	|	type_argument_list COMMA type_argument
+	;
+type_argument_list_1 ::=
+		type_argument_1
+	|	type_argument_list COMMA type_argument_1
+	;
+type_argument_list_2 ::=
+		type_argument_2
+	|	type_argument_list COMMA type_argument_2
+	;
+type_argument_list_3 ::=
+		type_argument_3
+	|	type_argument_list COMMA type_argument_3
+	;
+type_argument ::=
+		reference_type
+	|	wildcard
+	;
+type_argument_1 ::=
+		reference_type_1
+	|	wildcard_1
+	;
+type_argument_2 ::=
+		reference_type_2
+	|	wildcard_2
+	;
+type_argument_3 ::=
+		reference_type_3
+	|	wildcard_3
+	;
+
+// 19.5) Names
+name ::=	simple_name:x {: if (parsingClassLevel == 0) { RESULT = new LinkedList<String>(); RESULT.add(x); } :}
+	|	qualified_name:x {: RESULT = x; :}
+	;
+	
+simple_name ::=	IDENTIFIER:x {: RESULT = x; :}
+	;
+	
+qualified_name ::=
+		name:list DOT IDENTIFIER:id {: if (parsingClassLevel == 0) { list.add(id); RESULT = list; } :}
+	;
+
+// 19.7) Productions used only in the LALR(1) grammar
+modifiers_opt::= {: RESULT = null; :}
+	|	modifiers:mods {: RESULT = mods; :}
+	;
+modifiers_at ::=
+		mixed_modifiers_at:mods {: RESULT = mods; :}
+	|	annotations_at
+	;
+modifiers ::=
+		mixed_modifiers:mods {: RESULT = mods; :}
+	|	annotations
+	;
+mixed_modifiers_at ::=
+		mixed_modifiers:mods AT {: RESULT = mods; :}
+	;
+mixed_modifiers ::=
+		adhoc_modifier:m {: if (parsingClassLevel == 0) { RESULT = new Modifiers(m); } :}
+	|	annotations adhoc_modifier:m {: if (parsingClassLevel == 0) { RESULT = new Modifiers(m); } :}
+	|	mixed_modifiers:mods adhoc_modifier:m {: if (parsingClassLevel == 0) { mods.addModifier(m); RESULT = mods; } :}
+	|	mixed_modifiers_at:mods annotation_body {: if (parsingClassLevel == 0) { RESULT = mods; } :}
+	;
+adhoc_modifier ::=	
+	  PUBLIC {: RESULT = Modifier.PUBLIC; :} 
+	| PROTECTED {: RESULT = Modifier.PROTECTED; :}
+	| PRIVATE {: RESULT = Modifier.PRIVATE; :}
+	| STATIC {: RESULT = Modifier.STATIC; :}
+	| ABSTRACT {: RESULT = Modifier.ABSTRACT; :}
+	| FINAL {: RESULT = Modifier.FINAL; :}
+	| NATIVE {: RESULT = Modifier.NATIVE; :}
+	| SYNCHRONIZED {: RESULT = Modifier.SYNCHRONIZED; :}
+	| TRANSIENT {: RESULT = Modifier.TRANSIENT; :}
+	| VOLATILE {: RESULT = Modifier.VOLATILE; :}
+	| STRICTFP {: RESULT = Modifier.STRICTFP; :}
+	;
+	
+annotations_opt ::=
+	|	annotations
+	;
+annotations ::= 
+	        AT annotation_body
+	|    	annotations_at annotation_body
+	;
+annotations_at ::=
+	       annotations AT
+	;
+annotation ::=
+	       AT annotation_body
+	;
+annotation_body ::=
+	        normal_annotation_body
+        |       marker_annotation_body 
+        |	single_element_annotation_body 
+        ;
+normal_annotation_body ::=
+	        IDENTIFIER LPAREN element_value_pairs_opt RPAREN
+        ;
+marker_annotation_body ::=
+                IDENTIFIER
+        ;
+single_element_annotation_body ::=
+                IDENTIFIER LPAREN element_value RPAREN
+        ;
+element_value_pairs_opt ::=
+  	|	element_value_pairs
+	;		
+element_value_pairs ::=
+		element_value_pair
+	|	element_value_pairs COMMA element_value_pair
+	;
+element_value_pair ::=
+		IDENTIFIER EQ element_value
+	;
+element_value ::=
+	        annotation 
+	|	element_value_array_initializer
+	|	conditional_expression
+	;
+element_value_array_initializer ::=
+		LBRACE element_values_opt RBRACE
+	;
+element_values_opt ::=
+	|	element_values
+	;
+element_values ::=
+	        element_value
+	|	element_values COMMA element_value
+	;
+// 19.8) Classes
+
+// 19.8.1) Class Declaration:
+class_declaration ::= 
+	modifiers_opt:mod CLASS IDENTIFIER:name type_parameters_opt super_opt:superClass interfaces_opt 
+	{:
+		if (parsingClassLevel == 0) {
+			Class currentClass = new Class(name, superClass);
+			currentClass.setModifiers(mod);
+			Table.insert(currentClass);
+			Table.openScope(currentClass);
+			currentClass.setScope(Table.currentScope());
+			classContent = null;
+		}
+		parsingClassLevel++;
+	:}
+	class_body
+	{:
+		parsingClassLevel--;
+		if (parsingClassLevel == 0) {
+			Reader fr = new StringReader(classContent.toString());
+			lex.Lexer l = new lex.Lexer(fr, 5);
+
+			ClassContentParser g = new ClassContentParser(l);
+			g.setErrorPS(parser.errorStream);
+			g.setInfoPS(parser.infoStream);
+			g.parse();
+				
+			fr.close();
+			Table.closeScope();
+		}
+	:}
+	;
+	
+super_ext ::= EXTENDS class_type:t {: RESULT = t; :}
+	;
+	
+super_opt ::= {: RESULT = null; :}
+	|	super_ext:t {: RESULT = t; :}
+	;
+	
+interfaces ::=	IMPLEMENTS interface_type_list
+	;
+	
+interfaces_opt::=
+	|	interfaces 
+	;
+	
+interface_type_list ::= 
+		interface_type
+	|	interface_type_list COMMA interface_type
+	;
+	
+class_body ::=	LBRACE class_body_declarations_opt RBRACE 
+	;
+	
+class_body_opt ::=
+	|	class_body ;
+	
+class_body_declarations_opt ::= 
+	|	class_body_declarations ;
+	
+class_body_declarations ::= 
+		class_body_declaration 
+	|	class_body_declarations class_body_declaration 
+	;
+
+class_body_declaration ::=
+		class_member_declaration
+	|	static_initializer
+	|	constructor_declaration:meth
+	|	block
+	;
+	
+class_member_declaration ::=
+		field_declaration
+	|	method_declaration:meth 
+	|	modifiers_opt:mod CLASS IDENTIFIER:name type_parameters_opt super_opt:superClass interfaces_opt
+		{:
+			if (parsingClassLevel == 0) {
+				Class currentClass = new Class(name, superClass);
+				currentClass.setModifiers(mod);
+				Table.insert(currentClass);
+				Table.openScope(currentClass);
+				currentClass.setScope(Table.currentScope());
+				classContent = null;
+			}
+			parsingClassLevel++;
+		:}
+		class_body
+		{:
+			parsingClassLevel--;
+			if (parsingClassLevel == 0) {
+				Reader fr = new StringReader(classContent.toString());
+				lex.Lexer l = new lex.Lexer(fr, 5);
+	
+				ClassContentParser g = new ClassContentParser(l);
+				g.setErrorPS(parser.errorStream);
+				g.setInfoPS(parser.infoStream);
+				g.parse();
+					
+				fr.close();
+				Table.closeScope();
+			}
+		:}
+	|	enum_declaration
+	|	interface_declaration
+	|	SEMICOLON
+	;
+
+// JSR-201) Enum Declaration
+enum_declaration ::=
+		modifiers_opt ENUM IDENTIFIER interfaces_opt enum_body
+	;
+	
+enum_body ::=
+		LBRACE enum_constants_opt enum_body_declarations_opt RBRACE
+	;
+	
+enum_constants_opt ::=
+	|	enum_constants
+	;
+	
+enum_constants ::=
+		enum_constant
+	|	enum_constants COMMA enum_constant
+	;
+	
+enum_constant ::=
+		annotations_opt IDENTIFIER enum_arguments_opt
+	|	annotations_opt IDENTIFIER enum_arguments_opt class_body
+	;
+	
+enum_arguments_opt ::=
+	|	LPAREN argument_list_opt RPAREN
+	;
+	
+enum_body_declarations_opt ::=
+	|	SEMICOLON class_body_declarations_opt
+	;
+
+// 19.8.2) Field Declarations
+field_declaration ::= 
+		modifiers_opt:mod type:t variable_declarators:decls SEMICOLON
+		{:
+			if (parsingClassLevel == 0) {
+				for(Variable v : decls){
+					TypeReference varType = t;
+					if (v.arrayLevel > 0) {
+						varType = new TypeReference(t.type);
+						varType.addArrayLevel(v.arrayLevel);
+					}
+					Table.insert(new Field(v.name, varType, mod));
+				}
+			}
+		:}
+	;
+	
+variable_declarators ::=
+		variable_declarator:decl 
+		{: 
+			if (parsingClassLevel == 0) {
+				List<Variable> retList = new LinkedList<Variable>(); 
+				retList.add(decl); 
+				RESULT = retList; 
+			}
+		:}
+	|	variable_declarators:list COMMA variable_declarator:decl 
+		{: 
+			if (parsingClassLevel == 0) {
+				list.add(decl);
+				RESULT = list;
+			}
+		:}
+	;
+	
+variable_declarator ::=
+		variable_declarator_id:id {: RESULT = id; :}
+	|	variable_declarator_id:id EQ variable_initializer:init 
+		{: 
+			if (parsingClassLevel == 0) {
+				id.initValue = init;
+				RESULT = id;
+			}
+		:}
+	;
+	
+variable_declarator_id ::=
+		IDENTIFIER:id {: if (parsingClassLevel == 0) { RESULT = new Variable(id); } :}
+	|	variable_declarator_id:id LBRACK RBRACK {: if (parsingClassLevel == 0) { id.arrayLevel++; RESULT = id; } :}
+	;
+	
+variable_initializer ::=
+		expression:res {: RESULT = res; :}
+	|	array_initializer:res {: RESULT = res; :}
+	;
+
+// 19.8.3) Method Declarations
+method_declaration ::=
+		method_header method_body 
+		{:
+			if (parsingClassLevel == 0) { 
+				Table.closeScope();
+				ParseData.currentMethod = null;
+			}
+		:}
+	;
+method_header ::=
+		modifiers_opt:mod type:t method_declarator:meth throws_opt 
+		{: 
+			if (parsingClassLevel == 0) { 
+				// jer je deklaracija top metode vec u tabeli simbola nakon poziva programParsera 
+				if (!topMethodDeclFound) {
+					Table.setScope(parser.parsingTopMethod.getScope()); 
+				} else {
+					meth.setModifiers(mod); 
+					meth.setRetType(t);
+				}
+				topMethodDeclFound = true;
+			}
+		:}
+	|	modifiers_opt:mod LT type_parameter_list_1 type:t method_declarator:meth throws_opt 
+		{: 
+			/*TODO*/ 
+		:}
+	|	modifiers_opt:mod VOID method_declarator:meth throws_opt 
+		{: 
+			if (parsingClassLevel == 0) {
+				// jer je deklaracija top metode vec u tabeli simbola nakon poziva programParsera 
+				if (!topMethodDeclFound) {
+					Table.setScope(parser.parsingTopMethod.getScope()); 
+				} else {
+					meth.setModifiers(mod); 
+					meth.setRetType(null);
+				}
+				topMethodDeclFound = true;
+			}
+		:}
+	|	modifiers_opt:mod LT type_parameter_list_1 VOID method_declarator:meth throws_opt 
+		{: 
+			/*TODO*/
+		:}
+	;
+	
+method_declarator ::=
+		IDENTIFIER:x 
+		{: 
+			if (parsingClassLevel == 0) {
+				ParseData.currentMethod = new Method(x);		
+				ParseData.currentMethod.setImportedObjects(parser.parsingTopMethod.getImportedObjects());
+				ParseData.currentMethod.setImportedScopes(parser.parsingTopMethod.getImportedScopes());
+				Table.openScope(ParseData.currentMethod);	
+				ParseData.currentMethod.setScope(Table.currentScope());	
+			}
+		:} 
+		LPAREN formal_parameter_list_opt RPAREN 
+		{:
+			if (parsingClassLevel == 0) {
+				if (topMethodDeclFound)
+					Table.parrentScope().addToLocals(ParseData.currentMethod);
+				RESULT = ParseData.currentMethod;
+			}
+		:}
+	|	method_declarator:meth LBRACK 
+		{: 	
+			if (parsingClassLevel == 0) {
+				meth.incBracksAfterParamsNum(); // ovaj broj se sabira sa brojem zagrada navedenih uz povratni tip
+				RESULT = meth; 
+			}
+		:} 
+		RBRACK // deprecated
+	;
+	
+formal_parameter_list_opt ::= 
+		{: 
+			if (parsingClassLevel == 0) {
+				ParseData.currentMethod.complFormalParamAdding();
+			}
+		:}
+	|	formal_parameter_list
+		{: 
+			if (parsingClassLevel == 0) {
+				ParseData.currentMethod.complFormalParamAdding();
+			}
+		:}
+	;
+	
+formal_parameter_list ::=
+		formal_parameter
+	|	formal_parameter_list COMMA formal_parameter
+	;
+	
+formal_parameter ::=
+		formal_parameter_modifiers_opt type:t variable_declarator_id:id 
+		{:  
+			if (parsingClassLevel == 0) {
+				if (id.arrayLevel != 0 && t != null) {
+					if (t.type instanceof ArrayType) {
+						((ArrayType)t.type).setArrayLevel(((ArrayType)t.type).getArrayLevel()+id.arrayLevel);
+					} else {
+						t = new TypeReference(new ArrayType(t, id.arrayLevel)); 
+					}
+				}
+				MethParam param = new MethParam(t, id.name);
+				Table.insert(param);
+				if (ParseData.currentMethod != null) {
+					ParseData.currentMethod.addFormalParam(param);
+				}
+			}
+		:}
+	|	formal_parameter_modifiers_opt type ELLIPSIS IDENTIFIER {: /*TODO*/ :}
+	;
+	
+formal_parameter_modifiers_opt ::=
+        | formal_parameter_modifiers
+        ;
+        
+formal_parameter_modifiers ::=
+	        formal_parameter_modifier
+        |   formal_parameter_modifiers formal_parameter_modifier
+		;
+	
+formal_parameter_modifier ::=
+                FINAL
+        |       annotation
+        ;
+        
+throws_opt ::=	
+	|	throws
+	;
+	
+throws ::=	THROWS class_type_list
+	;
+	
+class_type_list ::=
+		class_type
+	|	class_type_list COMMA class_type
+	;
+	
+method_body ::=	block
+	|	SEMICOLON
+	;
+
+// 19.8.4) Static Initializers
+static_initializer ::=
+		STATIC block
+	;
+
+// 19.8.5) Constructor Declarations
+constructor_declaration ::=
+		modifiers_opt:mod constructor_declarator:con throws_opt 
+		{:
+			if (parsingClassLevel == 0) {
+				// jer je deklaracija top metode vec u tabeli simbola nakon poziva programParsera 
+				if (!topMethodDeclFound) {
+					Table.setScope(parser.parsingTopMethod.getScope()); 
+				} else {
+					con.setModifiers(mod); 
+					con.setRetType(null);
+				}
+				topMethodDeclFound = true;
+			}
+		:} 
+		constructor_body
+		{:
+			if (parsingClassLevel == 0) {
+				Table.closeScope();
+				ParseData.currentMethod = null;
+			}
+		:}
+	|	modifiers_opt:mod LT type_parameter_list_1 constructor_declarator:con throws_opt constructor_body
+		{:
+			if (parsingClassLevel == 0) {
+				/* TODO */
+				Table.closeScope();
+				ParseData.currentMethod = null;
+			}
+		:}
+	;
+	
+constructor_declarator ::=
+		simple_name:name 
+		{:
+			if (parsingClassLevel == 0) {
+				ParseData.currentMethod = new Method(name, true);
+				ParseData.currentMethod.setImportedObjects(parser.parsingTopMethod.getImportedObjects());
+				ParseData.currentMethod.setImportedScopes(parser.parsingTopMethod.getImportedScopes());
+				Table.openScope(ParseData.currentMethod);
+				ParseData.currentMethod.setScope(Table.currentScope());
+			}
+		:}
+		LPAREN formal_parameter_list_opt RPAREN
+		{:
+			if (parsingClassLevel == 0) {
+				if (topMethodDeclFound)
+					Table.parrentScope().addToLocals(ParseData.currentMethod);
+				RESULT = ParseData.currentMethod;
+			}
+		:}
+	;
+	
+constructor_LBRACE ::= LBRACE 
+						{:
+							if (parsingClassLevel == 0) {
+								Block block = new Block();
+								Table.insert(block);
+								Table.openScope(block);
+								block.setScope(Table.currentScope());
+							}
+						:};
+	
+constructor_body ::=
+		constructor_LBRACE explicit_constructor_invocation block_statements RBRACE {: if (parsingClassLevel == 0) { Table.closeScope(); } :}
+	|	constructor_LBRACE explicit_constructor_invocation RBRACE {: if (parsingClassLevel == 0) { Table.closeScope(); } :}
+	|	constructor_LBRACE block_statements RBRACE {: if (parsingClassLevel == 0) { Table.closeScope(); } :}
+	|	constructor_LBRACE RBRACE {: if (parsingClassLevel == 0) { Table.closeScope(); } :}
+	;
+	
+explicit_constructor_invocation ::=
+		THIS LPAREN argument_list_opt RPAREN SEMICOLON 
+		{:
+			if (parsingClassLevel == 0) {
+				parser.parsingTopMethod.setContainsExplConstructorCall(true);
+			}
+		:}
+	|	type_arguments THIS LPAREN argument_list_opt RPAREN SEMICOLON
+	|	SUPER LPAREN argument_list_opt RPAREN SEMICOLON
+		{:
+			if (parsingClassLevel == 0) {
+				parser.parsingTopMethod.setContainsExplConstructorCall(true);
+			}
+		:}
+	|	type_arguments SUPER LPAREN argument_list_opt RPAREN SEMICOLON
+	|	primary DOT SUPER LPAREN argument_list_opt RPAREN SEMICOLON
+	|	primary DOT type_arguments SUPER
+			LPAREN argument_list_opt RPAREN SEMICOLON
+	|	name DOT SUPER LPAREN argument_list_opt RPAREN SEMICOLON
+	|	name DOT type_arguments SUPER LPAREN argument_list_opt RPAREN SEMICOLON
+	;
+
+// 19.9) Interfaces
+
+// 19.9.1) Interface Declarations
+interface_declaration ::=
+		normal_interface_declaration
+        |       annotation_type_declaration
+        ;
+
+normal_interface_declaration ::=
+		modifiers_opt INTERFACE IDENTIFIER type_parameters_opt
+		  extends_interfaces_opt interface_body
+	;
+	
+annotation_type_declaration ::=
+		AT INTERFACE IDENTIFIER annotation_type_body
+	|	modifiers_at INTERFACE IDENTIFIER annotation_type_body
+	;
+	
+annotation_type_body ::=
+        	LBRACE annotation_type_element_declarations_opt RBRACE
+	;
+	
+annotation_type_element_declarations_opt ::=
+	|       annotation_type_element_declarations
+	;
+	
+annotation_type_element_declarations ::=
+	        annotation_type_element_declaration
+        |	annotation_type_element_declarations annotation_type_element_declaration
+	;
+	
+annotation_type_element_declaration ::=
+        	constant_declaration
+	|	modifiers_opt type IDENTIFIER LPAREN RPAREN default_value_opt SEMICOLON
+        |	class_declaration 
+        |	enum_declaration 
+        |	interface_declaration 
+	|	SEMICOLON
+    ;
+        
+default_value_opt ::=
+        | 	default_value
+        ;
+        
+default_value ::=
+        DEFAULT element_value
+        ;
+        
+extends_interfaces_opt ::=
+	|	extends_interfaces
+	;
+	
+extends_interfaces ::=
+		EXTENDS interface_type
+	|	extends_interfaces COMMA interface_type
+	;
+	
+interface_body ::=
+		LBRACE interface_member_declarations_opt RBRACE
+	;
+	
+interface_member_declarations_opt ::=
+	|	interface_member_declarations
+	;
+	
+interface_member_declarations ::=
+		interface_member_declaration
+	|	interface_member_declarations interface_member_declaration
+	;
+	
+interface_member_declaration ::=
+		constant_declaration
+	|	abstract_method_declaration
+	|	class_declaration
+	|	enum_declaration
+	|	interface_declaration
+	|	SEMICOLON
+	;
+	
+constant_declaration ::=
+		field_declaration
+	;
+	
+abstract_method_declaration ::=
+		method_header SEMICOLON
+	;
+
+// 19.10) Arrays
+array_initializer ::=
+		LBRACE variable_initializers COMMA RBRACE
+	|	LBRACE variable_initializers RBRACE
+	|	LBRACE COMMA RBRACE
+	|	LBRACE RBRACE
+	;
+	
+variable_initializers ::=
+		variable_initializer
+	|	variable_initializers COMMA variable_initializer
+	;
+
+// 19.11) Blocks and Statements
+block ::=	LBRACE
+			{:
+				if (parsingClassLevel == 0) {
+					Block block = new Block();
+					Table.insert(block);
+					Table.openScope(block);
+					block.setScope(Table.currentScope());
+				}
+			:}
+			block_statements_opt RBRACE
+			{:
+				if (parsingClassLevel == 0) {
+					Table.closeScope();
+				}
+			:}
+	;
+	
+block_statements_opt ::=
+	|	block_statements
+	;
+	
+block_statements ::=
+		block_statement
+	|	block_statements block_statement
+	;
+	
+block_statement ::=
+		local_variable_declaration_statement
+	|	statement
+	|	class_declaration
+	|	enum_declaration
+	|	interface_declaration
+	;
+	
+local_variable_declaration_statement ::=
+		local_variable_declaration SEMICOLON
+	;
+	
+local_variable_declaration ::=
+		type:t variable_declarators:decls
+		{:
+			if (parsingClassLevel == 0) { 
+				for(Variable v : decls){
+					TypeReference varType = t;
+					if (v.arrayLevel > 0) {
+						varType = new TypeReference(t.type);
+						varType.addArrayLevel(v.arrayLevel);
+					}
+					symbol.object.Variable varObject = new symbol.object.Variable(v.name, varType);
+					Table.insert(varObject);
+					if (t.isRefType()) {
+						if (v.initValue != null) {
+							VariableExec left = new VariableExec(v.name, varObject);
+							parser.parsingTopMethod.addStatement(new AssignmentStatement(left, v.initValue));
+						}
+					}
+				}
+			}
+		:}
+	|	modifiers:mod type:t variable_declarators:decls
+		{:
+			if (parsingClassLevel == 0) {
+				for(Variable v : decls){
+					TypeReference varType = t;
+					if (v.arrayLevel > 0) {
+						varType = new TypeReference(t.type);
+						varType.addArrayLevel(v.arrayLevel);
+					}
+					symbol.object.Variable varObject = new symbol.object.Variable(v.name, varType, mod);
+					Table.insert(varObject);
+					if (t.isRefType()) {
+						if (v.initValue != null) {
+							VariableExec left = new VariableExec(v.name, varObject);
+							parser.parsingTopMethod.addStatement(new AssignmentStatement(left, v.initValue));
+						}
+					}
+				}
+			}
+		:}
+	;
+	
+statement ::=	statement_without_trailing_substatement
+	|	labeled_statement
+	|	if_then_statement
+	|	if_then_else_statement
+	|	while_statement
+	|	for_statement
+	|	foreach_statement
+	;
+	
+statement_no_short_if ::=
+		statement_without_trailing_substatement
+	|	labeled_statement_no_short_if
+	|	if_then_else_statement_no_short_if
+	|	while_statement_no_short_if
+	|	for_statement_no_short_if
+	|	foreach_statement_no_short_if
+	;
+	
+statement_without_trailing_substatement ::=
+		block
+	|	empty_statement
+	|	expression_statement
+	|	switch_statement
+	|	do_statement
+	|	break_statement
+	|	continue_statement
+	|	return_statement
+	|	synchronized_statement
+	|	throw_statement
+	|	try_statement
+	|	assert_statement
+	;
+	
+empty_statement ::=
+		SEMICOLON
+	;
+	
+labeled_statement ::=
+		IDENTIFIER COLON statement
+	;
+	
+labeled_statement_no_short_if ::=
+		IDENTIFIER COLON statement_no_short_if
+	;
+	
+expression_statement ::=
+		statement_expression SEMICOLON
+	;
+	
+statement_expression ::=
+		assignment
+	|	preincrement_expression
+	|	predecrement_expression
+	|	postincrement_expression
+	|	postdecrement_expression
+	|	method_invocation
+	|	class_instance_creation_expression
+	;
+	
+if_then_statement ::=
+		IF LPAREN expression RPAREN statement
+	;
+	
+if_then_else_statement ::=
+		IF LPAREN expression RPAREN statement_no_short_if 
+			ELSE statement
+	;
+	
+if_then_else_statement_no_short_if ::=
+		IF LPAREN expression RPAREN statement_no_short_if
+			ELSE statement_no_short_if
+	;
+	
+switch_statement ::=
+		SWITCH LPAREN expression RPAREN switch_block
+	;
+	
+switch_block ::=
+		LBRACE switch_block_statement_groups switch_labels RBRACE
+	|	LBRACE switch_block_statement_groups RBRACE
+	|	LBRACE switch_labels RBRACE
+	|	LBRACE RBRACE
+	;
+	
+switch_block_statement_groups ::=
+		switch_block_statement_group
+	|	switch_block_statement_groups switch_block_statement_group
+	;
+	
+switch_block_statement_group ::=
+		switch_labels block_statements
+	;
+	
+switch_labels ::=
+		switch_label
+	|	switch_labels switch_label
+	;
+	
+switch_label ::=
+		CASE constant_expression COLON
+	|	DEFAULT COLON
+	;
+
+while_statement ::=
+		WHILE LPAREN expression RPAREN statement
+	;
+	
+while_statement_no_short_if ::=
+		WHILE LPAREN expression RPAREN statement_no_short_if
+	;
+	
+do_statement ::=
+		DO statement WHILE LPAREN expression RPAREN SEMICOLON
+	;
+	
+foreach_statement ::=
+		FOR LPAREN type variable_declarator_id COLON expression RPAREN
+			statement
+	;
+	
+foreach_statement_no_short_if ::=
+		FOR LPAREN type variable_declarator_id COLON expression RPAREN
+			statement_no_short_if
+	;
+	
+for_statement ::=
+		FOR LPAREN for_init_opt SEMICOLON expression_opt SEMICOLON
+			for_update_opt RPAREN statement
+	;
+	
+for_statement_no_short_if ::=
+		FOR LPAREN for_init_opt SEMICOLON expression_opt SEMICOLON
+			for_update_opt RPAREN statement_no_short_if
+	;
+	
+for_init_opt ::=
+	|	for_init
+	;
+	
+for_init ::=	statement_expression_list
+	|	local_variable_declaration
+	;
+	
+for_update_opt ::=
+	|	for_update
+	;
+	
+for_update ::=	statement_expression_list
+	;
+	
+statement_expression_list ::=
+		statement_expression
+	|	statement_expression_list COMMA statement_expression
+	;
+
+identifier_opt ::= 
+	|	IDENTIFIER
+	;
+
+break_statement ::=
+		BREAK identifier_opt SEMICOLON
+	;
+
+continue_statement ::=
+		CONTINUE identifier_opt SEMICOLON
+	;
+	
+return_statement ::=
+		RETURN expression:ret SEMICOLON 
+		{:
+			if (parsingClassLevel == 0) {
+				parser.parsingTopMethod.setReturnVariable(ret);
+			}
+		:}
+	|   RETURN SEMICOLON
+	;
+	
+throw_statement ::=
+		THROW expression SEMICOLON
+	;
+	
+synchronized_statement ::=
+		SYNCHRONIZED LPAREN expression RPAREN block
+	;
+	
+try_statement ::=
+		TRY block catches
+	|	TRY block catches_opt finally
+	;
+	
+catches_opt ::=
+	|	catches
+	;
+	
+catches ::=	catch_clause
+	|	catches catch_clause
+	;
+	
+catch_clause ::=
+		CATCH LPAREN formal_parameter RPAREN block
+	;
+	
+finally ::=	FINALLY block
+	;
+	
+assert_statement ::=
+		ASSERT expression SEMICOLON
+	|	ASSERT expression COLON expression SEMICOLON
+	;
+
+// 19.12) Expressions
+primary ::=	primary_no_new_array:value {: if (parsingClassLevel == 0) { RESULT = value; } :}
+	|	array_creation_init:value {: if (parsingClassLevel == 0) { RESULT = value; } :}
+	|	array_creation_uninit:value {: if (parsingClassLevel == 0) { RESULT = value; } :}
+	;
+	
+primary_no_new_array ::=
+		literal:value {: RESULT = value; :}
+	|	THIS 
+		{: 
+			if (parsingClassLevel == 0) { RESULT = new VariableExec("this", parser.parsingTopMethod.getParentClass()); } 
+		:}
+	|	LPAREN name:n RPAREN 
+		{:  
+			if (parsingClassLevel == 0) {
+				Obj obj = ParseData.findName(n.subList(0,1), parser.parsingTopMethod.getImportedObjects(), parser.parsingTopMethod.getImportedScopes(), Table.currentScope());
+				if (obj != null) {
+					if (obj instanceof Field) {
+						n.add(0, "this");
+					}
+				}
+				obj = ParseData.findName(n, parser.parsingTopMethod.getImportedObjects(), parser.parsingTopMethod.getImportedScopes(), Table.currentScope());
+				RESULT = new VariableExec(n, obj);
+			}
+		:}
+	|	LPAREN expression_nn:res RPAREN {: RESULT = res; :}
+	|	class_instance_creation_expression:res {: RESULT = res; :}
+	|	field_access:res {: RESULT = res; :}
+	|	method_invocation:res {: RESULT = res; :}
+	|	array_access
+	|	name DOT THIS
+	|	VOID DOT CLASS
+	|	primitive_type DOT CLASS
+	|	primitive_type dims DOT CLASS
+	|	name DOT CLASS
+	|	name dims DOT CLASS
+	;
+
+class_instance_creation_expression ::=
+		NEW class_or_interface_type:cl LPAREN argument_list_opt:args RPAREN 
+		{:
+			if (parsingClassLevel == 0) {
+				RESULT = null;
+				if (cl.type instanceof Class) { 
+					Method m = ((Class)cl.type).findConstructor(args); /* this call can generate default constructor if that is necessary */
+					if (m != null && m.isConstructor()) { 
+						VariableExec var = AssignmentStatement.getNewTempVariable(cl.type);
+						ConstructorCallStatement methCall = new ConstructorCallStatement(var, m, args);
+						parser.parsingTopMethod.addStatement(methCall);
+						RESULT = var;
+					} 
+				}
+			}
+		:}
+	|	NEW class_or_interface_type:cl LPAREN argument_list_opt:args RPAREN 
+		{:
+			if (parsingClassLevel == 0) {
+				if (cl.type instanceof Class) {
+					currentClass = new Class(((Class)cl.type).getAnonymousClassName(), cl);
+					Table.insert(currentClass);
+					Table.openScope(currentClass);
+					currentClass.setScope(Table.currentScope());
+					classContent = null;
+				}
+			}
+			parsingClassLevel++;
+		:}
+		class_body
+		{:
+			parsingClassLevel--;
+			if (parsingClassLevel == 0) {
+				if (currentClass != null) {
+					Reader fr = new StringReader(classContent.toString());
+					lex.Lexer l = new lex.Lexer(fr, 5);
+		
+					ClassContentParser g = new ClassContentParser(l);
+					g.setErrorPS(parser.errorStream);
+					g.setInfoPS(parser.infoStream);
+					g.parse();
+						
+					fr.close();
+					
+					Method parentClassConstr = ((Class)cl.type).findMethod(cl.getName(), args);
+					Method innerClassImplicitCon = new Method(currentClass.getName(), true);
+					innerClassImplicitCon.getBody().setReturnVar(new VariableExec("this", currentClass));
+					for (MethParam mp : parentClassConstr.getMethParamList()) {
+						innerClassImplicitCon.addFormalParam(mp);
+					}
+					innerClassImplicitCon.complFormalParamAdding();
+					innerClassImplicitCon.setParsed(true);
+					
+					innerClassImplicitCon.setImportedObjects(parser.parsingTopMethod.getImportedObjects());
+					innerClassImplicitCon.setImportedScopes(parser.parsingTopMethod.getImportedScopes());
+					Table.openScope(innerClassImplicitCon);
+					innerClassImplicitCon.setScope(Table.currentScope());
+					Table.closeScope();
+					
+					List<String> superName = new LinkedList<String>();
+					superName.add("this"); superName.add("super");
+					VariableExec superField = new VariableExec(superName, currentClass.findField("super"));
+					ConstructorCallStatement superConstCall = new ConstructorCallStatement(superField, parentClassConstr, args);
+					innerClassImplicitCon.addStatement(superConstCall);
+					
+					Table.insert(innerClassImplicitCon);
+					
+					Table.closeScope();
+					 
+					VariableExec var = AssignmentStatement.getNewTempVariable(currentClass);
+					ConstructorCallStatement methCall = new ConstructorCallStatement(var, innerClassImplicitCon, args);
+					parser.parsingTopMethod.addStatement(methCall);
+					RESULT = var;
+					
+					currentClass = null;
+				}
+			}
+		:}	
+	|	NEW type_arguments class_or_interface_type LPAREN argument_list_opt RPAREN class_body_opt
+	|	primary DOT NEW type_arguments_opt IDENTIFIER type_arguments_opt
+			LPAREN argument_list_opt RPAREN class_body_opt
+	|	name DOT NEW type_arguments_opt IDENTIFIER type_arguments_opt
+			LPAREN argument_list_opt RPAREN class_body_opt
+	;
+	
+argument_list_opt ::= {: if (parsingClassLevel == 0) { RESULT = new LinkedList<VariableExec>(); } :}
+	|	argument_list:res {: if (parsingClassLevel == 0) { RESULT = res; } :}
+	;
+	
+argument_list ::=
+		expression:res 
+		{: 
+			if (parsingClassLevel == 0) {
+				List<VariableExec> args = new LinkedList<VariableExec>(); 
+				args.add(res);
+				RESULT = args;
+			}	
+		:}
+	|	argument_list:res COMMA expression:exp
+		{:
+			if (parsingClassLevel == 0) {
+				res.add(exp);
+				RESULT = res;
+			}
+		:}
+	;
+	
+array_creation_uninit ::=
+		NEW primitive_type dim_exprs dims_opt
+	|	NEW class_or_interface_type dim_exprs dims_opt
+	;
+	
+array_creation_init ::=
+		NEW primitive_type dims array_initializer
+	|	NEW class_or_interface_type dims array_initializer
+	;
+	
+dim_exprs ::=	dim_expr
+	|	dim_exprs dim_expr
+	;
+	
+dim_expr ::=	LBRACK expression RBRACK
+	;
+	
+dims_opt ::=
+	|	dims
+	;
+	
+dims ::=	LBRACK RBRACK {: if (parsingClassLevel == 0) { RESULT = new Integer(1); } :}
+	|	dims:x LBRACK RBRACK {: if (parsingClassLevel == 0) { if (x!=null) RESULT = new Integer(x.intValue()+1); else RESULT = null; } :}
+	;
+	
+field_access ::=
+		primary:res DOT IDENTIFIER:id 
+		{:  
+			if (parsingClassLevel == 0) {
+				if (res == null || res.name == null) {
+					Obj obj = ParseData.findName(res.name, parser.parsingTopMethod.getImportedObjects(), parser.parsingTopMethod.getImportedScopes(), Table.currentScope());  
+					
+					if (obj != null) {
+						Type t = null;
+						if (obj instanceof Class) t = (Class)obj;
+						else if (obj instanceof Field) t = ((Field)obj).getType().type;
+						else if (obj instanceof MethParam) t = ((MethParam)obj).getType().type;
+						else if (obj instanceof symbol.object.Variable) t = ((symbol.object.Variable)obj).getType().type;
+	
+						if (t != null && t instanceof Class) {
+							Class classType = (Class)t;
+							Field f = classType.findField(id);
+							
+							List<String> name = new LinkedList<String>(res.name);
+							name.add(id);
+							
+							RESULT = new VariableExec(name, f);
+						}
+					}
+				}
+			}
+		:}
+	|	SUPER DOT IDENTIFIER:id
+		{:
+			List<String> name = new LinkedList<String>();
+			name.add("this");
+			name.add("super");
+			name.add(id);
+			
+			Class superClass = (Class)parser.parsingTopMethod.getParentClass().getSuperClass().type;
+			Field f = superClass.findField(id);
+			
+			RESULT = new VariableExec(name, f);
+		:}
+	|	name DOT SUPER DOT IDENTIFIER
+	;
+	
+method_invocation ::=
+		name:n LPAREN argument_list_opt:args RPAREN
+		{:
+			if (parsingClassLevel == 0) {
+				VariableExec thisObj = null;
+				Method m = null;
+				if (n.size() > 1) {
+					Obj obj = ParseData.findName(n.subList(0, n.size()-1), parser.parsingTopMethod.getImportedObjects(), parser.parsingTopMethod.getImportedScopes(), Table.currentScope());  
+					if (obj != null) {
+						if (obj instanceof Class) { //STATIC method
+							m = ((Class)obj).findMethod(n.get(n.size()-1), args);
+						} else {
+							if (obj instanceof symbol.object.Variable || obj instanceof Field || obj instanceof MethParam) {
+								thisObj = new VariableExec(n.subList(0, n.size()-1), obj);
+								Type t = null;
+								if (obj instanceof symbol.object.Variable) t = ((symbol.object.Variable)obj).getType().type;
+								else if (obj instanceof Field) t = ((Field)obj).getType().type;
+								else if (obj instanceof MethParam) t = ((MethParam)obj).getType().type;
+								
+								if (t instanceof Class) m = ((Class)t).findMethod(n.get(n.size()-1), args);
+							}
+						}
+					}
+				} else {
+					m = parser.parsingTopMethod.getParentClass().findMethod(n.get(n.size()-1), args);
+					if (m != null && !m.isStatic()) thisObj = new VariableExec("this", parser.parsingTopMethod.getParentClass());
+				}
+				if (m != null) {
+					VariableExec var = null; /* VOID method */
+					if (m.getRetType() != null && m.getRetType().type != null) var = AssignmentStatement.getNewTempVariable(m.getRetType().type);
+				
+					MethCallStatement methCall = null;
+					if (m.isStatic() || !m.isDefined()) {
+						methCall = new MethCallStatement(var, m, args);
+					} else {
+						methCall = new MethCallStatement(var, n.get(n.size()-1), thisObj, args);
+					}
+					
+					parser.parsingTopMethod.addStatement(methCall);
+					RESULT = var;
+				} else {
+					RESULT = null;	
+				}
+			}
+		:}
+	|	primary:thisObj DOT IDENTIFIER:id LPAREN argument_list_opt:args RPAREN
+		{:
+			if (parsingClassLevel == 0) {
+				RESULT = null;
+				if (thisObj != null && thisObj.getObjectType() != null) {
+					Method m = thisObj.getObjectType().findMethod(id, args); /* just to check return type, real method will be chosen in execution time */
+					if (m != null) {
+						VariableExec var = null; /* VOID method */
+						if (m.getRetType() != null && m.getRetType().type != null) var = AssignmentStatement.getNewTempVariable(m.getRetType().type);
+					
+						MethCallStatement methCall = null;
+						if (m.isStatic() || !m.isDefined()) {
+							methCall = new MethCallStatement(var, m, args);
+						} else {
+							methCall = new MethCallStatement(var, id, thisObj, args);
+						}
+						
+						parser.parsingTopMethod.addStatement(methCall);
+						RESULT = var;
+					}
+				}
+			}
+		:}
+	|	primary DOT type_arguments IDENTIFIER LPAREN argument_list_opt RPAREN
+	|	name DOT type_arguments IDENTIFIER LPAREN argument_list_opt RPAREN
+	|	SUPER DOT IDENTIFIER LPAREN argument_list_opt RPAREN
+	|	SUPER DOT type_arguments IDENTIFIER LPAREN argument_list_opt RPAREN
+	|	name DOT SUPER DOT IDENTIFIER LPAREN argument_list_opt RPAREN
+	|	name DOT SUPER DOT type_arguments IDENTIFIER LPAREN argument_list_opt RPAREN
+	;
+	
+array_access ::=
+		name LBRACK expression RBRACK
+	|	primary_no_new_array LBRACK expression RBRACK
+	|	array_creation_init LBRACK expression RBRACK
+	;
+	
+postfix_expression ::=
+		primary:res 
+		{: 
+			if (parsingClassLevel == 0) {
+				RESULT = null;
+				if (res != null) {
+					if (res.value != null) RESULT = res;
+					else if (res.object != null) {
+						Obj obj = res.object;
+						if (obj != null) {
+							if ((obj instanceof Field && ((Field)obj).getType().type.isRefType())
+								|| (obj instanceof symbol.object.Variable && ((symbol.object.Variable)obj).getType().type.isRefType())
+								|| (obj instanceof MethParam && ((MethParam)obj).getType().type.isRefType())
+								|| (obj instanceof Class && ((Class)obj).isRefType())) RESULT = res;
+						}
+					}
+				} 
+			}
+		:}
+	|	name:n
+		{:  
+			if (parsingClassLevel == 0) {
+				RESULT = null;
+				
+				Obj obj = ParseData.findName(n.subList(0,1), parser.parsingTopMethod.getImportedObjects(), parser.parsingTopMethod.getImportedScopes(), Table.currentScope());
+				if (obj != null) {
+					if (obj instanceof Field) {
+						n.add(0, "this");
+					}
+				}
+				obj = ParseData.findName(n, parser.parsingTopMethod.getImportedObjects(), parser.parsingTopMethod.getImportedScopes(), Table.currentScope());
+				if (obj != null) {
+					if ((obj instanceof Field && ((Field)obj).getType().type.isRefType())
+					|| (obj instanceof symbol.object.Variable && ((symbol.object.Variable)obj).getType().type.isRefType())
+					|| (obj instanceof MethParam && ((MethParam)obj).getType().type.isRefType())
+					|| (obj instanceof Class && ((Class)obj).isRefType())) RESULT = new VariableExec(n, obj);
+				}
+			}
+		:}
+	|	postincrement_expression
+	|	postdecrement_expression
+	;
+	
+postincrement_expression ::=
+		postfix_expression PLUSPLUS
+	;
+	
+postdecrement_expression ::=
+		postfix_expression MINUSMINUS
+	;
+	
+unary_expression ::=
+		preincrement_expression
+	|	predecrement_expression
+	|	PLUS unary_expression
+	|	MINUS unary_expression
+	|	unary_expression_not_plus_minus:res {: RESULT = res; :}
+	;
+	
+preincrement_expression ::=
+		PLUSPLUS unary_expression
+	;
+	
+predecrement_expression ::=
+		MINUSMINUS unary_expression
+	;
+	
+unary_expression_not_plus_minus ::=
+		postfix_expression:res {: RESULT = res; :}
+	|	COMP unary_expression
+	|	NOT unary_expression
+	|	cast_expression
+	;
+	
+cast_expression ::=
+		LPAREN primitive_type dims_opt RPAREN unary_expression
+	|	LPAREN name RPAREN unary_expression_not_plus_minus
+	|	LPAREN name dims RPAREN unary_expression_not_plus_minus
+	|	LPAREN name LT type_argument_list_1 dims_opt RPAREN
+			unary_expression_not_plus_minus
+	|	LPAREN name LT type_argument_list_1 DOT
+			class_or_interface_type dims_opt RPAREN
+			unary_expression_not_plus_minus
+	;
+	
+multiplicative_expression ::=
+		unary_expression:res {: RESULT = res; :}
+	|	multiplicative_expression MULT unary_expression
+	|	multiplicative_expression DIV unary_expression
+	|	multiplicative_expression MOD unary_expression
+	;
+	
+additive_expression ::=
+		multiplicative_expression:res {: RESULT = res; :}
+	|	additive_expression:res1 PLUS multiplicative_expression:res2
+		{:
+			if (parsingClassLevel == 0) {
+				RESULT = null;
+				VariableExec var = AssignmentStatement.getNewTempVariable(symbol.Table.getStringClass());
+				StringConcat strCon = new StringConcat(var, res1, res2);
+				parser.parsingTopMethod.addStatement(strCon);
+				RESULT = var;
+			}
+		:}
+	|	additive_expression MINUS multiplicative_expression
+	;
+	
+shift_expression ::=
+		additive_expression:res {: RESULT = res; :}
+	|	shift_expression LSHIFT additive_expression
+	|	shift_expression RSHIFT additive_expression
+	|	shift_expression URSHIFT additive_expression
+	;
+	
+relational_expression ::=
+		shift_expression:res {: RESULT = res; :}
+	|	relational_expression LT shift_expression
+	|	relational_expression GT shift_expression
+	|	relational_expression LTEQ shift_expression
+	|	relational_expression GTEQ shift_expression
+	;
+	
+instanceof_expression ::=
+		relational_expression:res {: RESULT = res; :}
+	|	instanceof_expression INSTANCEOF reference_type
+	;
+	
+equality_expression ::=
+		instanceof_expression:res {: RESULT = res; :}
+	|	equality_expression EQEQ instanceof_expression
+	|	equality_expression NOTEQ instanceof_expression
+	;
+	
+and_expression ::=
+		equality_expression:res {: RESULT = res; :}
+	|	and_expression AND equality_expression
+	;
+	
+exclusive_or_expression ::=
+		and_expression:res {: RESULT = res; :}
+	|	exclusive_or_expression XOR and_expression
+	;
+	
+inclusive_or_expression ::=
+		exclusive_or_expression:res {: RESULT = res; :}
+	|	inclusive_or_expression OR exclusive_or_expression
+	;
+	
+conditional_and_expression ::=
+		inclusive_or_expression:res {: RESULT = res; :}
+	|	conditional_and_expression ANDAND inclusive_or_expression
+	;
+	
+conditional_or_expression ::=
+		conditional_and_expression:res {: RESULT = res; :}
+	|	conditional_or_expression OROR conditional_and_expression
+	;
+	
+conditional_expression ::=
+		conditional_or_expression:res {: RESULT = res; :}
+	|	conditional_or_expression QUESTION expression 
+			COLON conditional_expression
+	;
+	
+assignment_expression ::=
+		conditional_expression:res {: RESULT = res; :}
+	|	assignment:res {: RESULT = res; :}
+	;
+	
+assignment ::=	postfix_expression:left assignment_operator:op assignment_expression:right 
+				{:
+					if (parsingClassLevel == 0) {
+						if (op.equals(Sym.EQ) && left != null && right != null) {
+							AssignmentStatement assignment = new AssignmentStatement(left, right);
+							parser.parsingTopMethod.addStatement(assignment);
+						}
+						RESULT = right;
+					}
+				:}
+				;
+	
+assignment_operator ::=
+		EQ {: RESULT = new Integer(Sym.EQ); :}
+	|	MULTEQ {: RESULT = new Integer(Sym.MULTEQ); :}
+	|	DIVEQ {: RESULT = new Integer(Sym.DIVEQ); :}
+	|	MODEQ {: RESULT = new Integer(Sym.MODEQ); :}
+	|	PLUSEQ {: RESULT = new Integer(Sym.PLUSEQ); :}
+	|	MINUSEQ {: RESULT = new Integer(Sym.MINUSEQ); :}
+	|	LSHIFTEQ {: RESULT = new Integer(Sym.LSHIFTEQ); :}
+	|	RSHIFTEQ {: RESULT = new Integer(Sym.RSHIFTEQ); :}
+	|	URSHIFTEQ {: RESULT = new Integer(Sym.URSHIFTEQ); :}
+	|	ANDEQ {: RESULT = new Integer(Sym.ANDEQ); :}
+	|	XOREQ {: RESULT = new Integer(Sym.XOREQ); :}
+	|	OREQ {: RESULT = new Integer(Sym.OREQ); :}
+	;
+	
+expression_opt ::=
+	|	expression:res {: RESULT = res; :}
+	;
+	
+expression ::=	assignment_expression:res {: RESULT = res; :}
+	;
+
+constant_expression ::=
+		expression
+	;
+
+// JLS-14 productions.
+type_parameters_opt ::= type_parameters | ;
+
+type_parameters ::=
+		LT type_parameter_list_1
+	;
+	
+type_parameter_list ::=
+		type_parameter_list COMMA type_parameter
+	|	type_parameter
+	;
+	
+type_parameter_list_1 ::=
+		type_parameter_1
+	|	type_parameter_list COMMA type_parameter_1
+	;
+	
+type_parameter ::=
+		type_variable type_bound_opt
+	;
+	
+type_parameter_1 ::=
+		type_variable GT
+	|	type_variable type_bound_1
+	;
+	
+type_bound_opt ::= type_bound | ;
+type_bound ::=
+		EXTENDS reference_type additional_bound_list_opt
+	;
+	
+type_bound_1 ::=
+		EXTENDS reference_type_1
+	|	EXTENDS reference_type additional_bound_list_1
+	;
+	
+additional_bound_list_opt ::= additional_bound_list | ;
+
+additional_bound_list ::=
+		additional_bound additional_bound_list
+	|	additional_bound
+	;
+	
+additional_bound_list_1 ::=
+		additional_bound additional_bound_list_1
+	|	additional_bound_1
+	;
+	
+additional_bound ::=
+		AND interface_type
+	;
+	
+additional_bound_1 ::=
+		AND reference_type_1
+	;
+	
+//////////////////////////////////////////////
+// the following productions are copied from the standard ones, but
+// 'name' all alone is not allowed.  The '_nn' stands for 'not name'.
+// we also expand the productions so that they recursively depend on the
+// '_nn' forms of their left hand side, then adding a new production
+// with 'name' explicit on the left-hand side.
+// this allows us to postpone the decision whether '(x)' is an expression
+// or a type-cast until we can see enough right context to make the proper
+// choice.
+
+postfix_expression_nn ::=
+		primary:res {: RESULT = res; :}
+	// the 'name' production was removed here.
+	|	postincrement_expression
+	|	postdecrement_expression
+	;
+	
+unary_expression_not_plus_minus_nn ::=
+		postfix_expression_nn:res {: RESULT = res; :}
+	|	COMP unary_expression
+	|	NOT unary_expression
+	|	cast_expression
+	;
+	
+unary_expression_nn ::=
+		preincrement_expression
+	|	predecrement_expression
+	|	PLUS unary_expression
+	|	MINUS unary_expression
+	|	unary_expression_not_plus_minus_nn:res {: RESULT = res; :}
+	;
+	
+multiplicative_expression_nn ::=
+		unary_expression_nn:res {: RESULT = res; :}
+	|	name                         MULT unary_expression
+	|	multiplicative_expression_nn MULT unary_expression
+	|	name                         DIV unary_expression
+	|	multiplicative_expression_nn DIV unary_expression
+	|	name                         MOD unary_expression
+	|	multiplicative_expression_nn MOD unary_expression
+	;
+	
+additive_expression_nn ::=
+		multiplicative_expression_nn:res {: RESULT = res; :}
+	|	name                   PLUS multiplicative_expression {: /*TODO*/ :}
+	|	additive_expression_nn PLUS multiplicative_expression
+	|	name                   MINUS multiplicative_expression
+	|	additive_expression_nn MINUS multiplicative_expression
+	;
+	
+shift_expression_nn ::=
+		additive_expression_nn:res {: RESULT = res; :}
+	|	name                LSHIFT additive_expression
+	|	shift_expression_nn LSHIFT additive_expression
+	|	name                RSHIFT additive_expression
+	|	shift_expression_nn RSHIFT additive_expression
+	|	name                URSHIFT additive_expression
+	|	shift_expression_nn URSHIFT additive_expression
+	;
+	
+relational_expression_nn ::=
+		shift_expression_nn:res {: RESULT = res; :}
+	|	name                LT shift_expression
+	|	shift_expression_nn LT shift_expression
+	|	name                GT shift_expression
+	|	shift_expression_nn GT shift_expression
+	|	name                     LTEQ shift_expression
+	|	relational_expression_nn LTEQ shift_expression
+	|	name                     GTEQ shift_expression
+	|	relational_expression_nn GTEQ shift_expression
+	;
+	
+instanceof_expression_nn ::=
+		relational_expression_nn:res {: RESULT = res; :}
+	|	name                     INSTANCEOF reference_type
+	|	instanceof_expression_nn INSTANCEOF reference_type
+	;
+	
+equality_expression_nn ::=
+		instanceof_expression_nn:res {: RESULT = res; :}
+	|	name                   EQEQ instanceof_expression
+	|	equality_expression_nn EQEQ instanceof_expression
+	|	name                   NOTEQ instanceof_expression
+	|	equality_expression_nn NOTEQ instanceof_expression
+	;
+	
+and_expression_nn ::=
+		equality_expression_nn:res {: RESULT = res; :}
+	|	name              AND equality_expression
+	|	and_expression_nn AND equality_expression
+	;
+	
+exclusive_or_expression_nn ::=
+		and_expression_nn:res {: RESULT = res; :}
+	|	name                       XOR and_expression
+	|	exclusive_or_expression_nn XOR and_expression
+	;
+	
+inclusive_or_expression_nn ::=
+		exclusive_or_expression_nn:res {: RESULT = res; :}
+	|	name                       OR exclusive_or_expression
+	|	inclusive_or_expression_nn OR exclusive_or_expression
+	;
+	
+conditional_and_expression_nn ::=
+		inclusive_or_expression_nn:res {: RESULT = res; :}
+	|	name                          ANDAND inclusive_or_expression
+	|	conditional_and_expression_nn ANDAND inclusive_or_expression
+	;
+	
+conditional_or_expression_nn ::=
+		conditional_and_expression_nn:res {: RESULT = res; :}
+	|	name                         OROR conditional_and_expression
+	|	conditional_or_expression_nn OROR conditional_and_expression
+	;
+	
+conditional_expression_nn ::=
+		conditional_or_expression_nn:res {: RESULT = res; :}
+	|	name QUESTION expression COLON conditional_expression
+	|	conditional_or_expression_nn QUESTION expression 
+			COLON conditional_expression
+	;
+	
+assignment_expression_nn ::=
+		conditional_expression_nn:res {: RESULT = res; :}
+	|	assignment:res {: RESULT = res; :}
+	;
+	
+expression_nn ::=	assignment_expression_nn:res {: RESULT = res; :}
+	;

@@ -1,0 +1,6 @@
+<test-metadata>
+   <testName>student4</testName>
+   <vulnerability>true</vulnerability>
+   <analyzeFromMain>false</analyzeFromMain>
+   <initArgumentsSafe>false</initArgumentsSafe>
+</test-metadata>
