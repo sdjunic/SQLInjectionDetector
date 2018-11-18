@@ -306,7 +306,7 @@ public class Main {
 					} finally {
 						StringBuilder sb2 = new StringBuilder();
 						sb2.append("\r\n\r\n--------- METHOD BODY ---------\r\n\r\n");
-						m.getBody().print(sb2);
+						m.getBody().print(sb2, "");
 						sb2.append("\r\n------- END METHOD BODY -------\r\n");
 						if (infoPS != null) infoPS.println(sb2);
 						

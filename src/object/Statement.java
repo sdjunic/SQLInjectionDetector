@@ -6,5 +6,5 @@ public abstract class Statement {
 	
 	public abstract void execute(ValuesHolder values) throws Exception;
 	
-	public abstract void print(StringBuilder sb);
+	public abstract void print(StringBuilder sb, String indention);
 }

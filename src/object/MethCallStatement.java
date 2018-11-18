@@ -91,8 +91,8 @@ public class MethCallStatement extends CallStatement {
 	}
 	
 	@Override
-	public void print(StringBuilder sb) {
-		if (left != null) sb.append(left + " = ");
+	public void print(StringBuilder sb, String indention) {
+		if (left != null) sb.append(indention + left + " = ");
 		if (thisObj != null) {
 			sb.append(ParseData.makeFullNameWithDots(thisObj.name)).append(".");
 		}

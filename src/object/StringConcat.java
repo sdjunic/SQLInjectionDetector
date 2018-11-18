@@ -37,8 +37,8 @@ public class StringConcat extends Statement {
 	}
 
 	@Override
-	public void print(StringBuilder sb) {
-		sb.append(left + " = " + right1 + " + " + right2 + "\r\n");
+	public void print(StringBuilder sb, String indention) {
+		sb.append(indention + left + " = " + right1 + " + " + right2 + "\r\n");
 	}
 
 }

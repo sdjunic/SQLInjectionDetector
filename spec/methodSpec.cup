@@ -276,15 +276,18 @@ non terminal statement_without_trailing_substatement;
 non terminal empty_statement;
 non terminal labeled_statement, labeled_statement_no_short_if;
 non terminal expression_statement, statement_expression;
+non terminal IfElseStatement if_expression, if_expression_else; 
 non terminal if_then_statement;
 non terminal if_then_else_statement, if_then_else_statement_no_short_if;
 non terminal switch_statement, switch_block;
 non terminal switch_block_statement_groups;
 non terminal switch_block_statement_group;
 non terminal switch_labels, switch_label;
+non terminal while_expression;
 non terminal while_statement, while_statement_no_short_if;
 non terminal do_statement;
 non terminal foreach_statement, foreach_statement_no_short_if;
+non terminal for_loop_init, for_loop_condition, for_loop_update;
 non terminal for_statement, for_statement_no_short_if;
 non terminal for_init_opt, for_init;
 non terminal for_update_opt, for_update;
@@ -1324,18 +1327,57 @@ statement_expression ::=
 	|	class_instance_creation_expression
 	;
 	
-if_then_statement ::=
-		IF LPAREN expression RPAREN statement
+if_expression ::=
+		IF LPAREN expression RPAREN 
+		{:
+			if (parsingClassLevel == 0) {
+				IfElseStatement ifElseStmt = new IfElseStatement(parser.parsingTopMethod.getCurrentBlock());
+				parser.parsingTopMethod.addStatement(ifElseStmt);
+				parser.parsingTopMethod.setCurrentBlock(ifElseStmt.getIfThenBody());
+				RESULT = ifElseStmt;
+			}
+		:}
 	;
 	
+if_then_statement ::=
+		if_expression:ifElseStmt statement
+		{:
+			if (parsingClassLevel == 0) {
+				parser.parsingTopMethod.executableBlockEnd();
+				assert parser.parsingTopMethod.getCurrentBlock() == ifElseStmt.getIfThenBody().getParentExecutableBlock();
+			}
+		:}
+	;
+	
+if_expression_else ::=
+		if_expression:ifElseStmt statement_no_short_if ELSE
+		{:
+			if (parsingClassLevel == 0) {
+				ifElseStmt.addElseBody();
+				parser.parsingTopMethod.setCurrentBlock(ifElseStmt.getElseBody());
+				RESULT = ifElseStmt;
+			}
+		:}
+	;	
+	
 if_then_else_statement ::=
-		IF LPAREN expression RPAREN statement_no_short_if 
-			ELSE statement
+		if_expression_else:ifElseStmt statement
+		{:
+			if (parsingClassLevel == 0) {
+				parser.parsingTopMethod.executableBlockEnd();
+				assert parser.parsingTopMethod.getCurrentBlock() == ifElseStmt.getElseBody().getParentExecutableBlock();
+			}
+		:}
 	;
 	
 if_then_else_statement_no_short_if ::=
-		IF LPAREN expression RPAREN statement_no_short_if
-			ELSE statement_no_short_if
+		if_expression_else:ifElseStmt statement_no_short_if
+		{:
+			if (parsingClassLevel == 0) {
+				parser.parsingTopMethod.executableBlockEnd();
+				assert parser.parsingTopMethod.getCurrentBlock() == ifElseStmt.getElseBody().getParentExecutableBlock();
+			}
+		:}
 	;
 	
 switch_statement ::=
@@ -1368,36 +1410,83 @@ switch_label ::=
 	|	DEFAULT COLON
 	;
 
+while_expression ::=
+		WHILE LPAREN expression RPAREN
+		{:
+		//TODO: create loop statement
+		:}
+	;
+
 while_statement ::=
-		WHILE LPAREN expression RPAREN statement
+		while_expression statement
+		{:
+		//TODO: close loop statement
+		:}
 	;
 	
 while_statement_no_short_if ::=
-		WHILE LPAREN expression RPAREN statement_no_short_if
+		while_expression statement_no_short_if
+		{:
+		//TODO: close loop statement
+		:}
 	;
 	
 do_statement ::=
-		DO statement WHILE LPAREN expression RPAREN SEMICOLON
+		DO 
+		{:
+		//TODO: create loop statement
+		:}
+		statement WHILE LPAREN expression RPAREN SEMICOLON
+		{:
+		//TODO: close loop statement
+		:}
 	;
 	
+//TODO: consider adding foreach loop
 foreach_statement ::=
-		FOR LPAREN type variable_declarator_id COLON expression RPAREN
+		FOR LPAREN type variable_declarator_id COLON expression RPAREN 
 			statement
 	;
-	
+
+//TODO: consider adding foreach loop	
 foreach_statement_no_short_if ::=
 		FOR LPAREN type variable_declarator_id COLON expression RPAREN
 			statement_no_short_if
 	;
 	
+for_loop_init ::=
+		FOR LPAREN for_init_opt
+		{:
+		//TODO: create loop statement and open loop conditional expression body
+		:}
+	;
+
+for_loop_condition ::=
+		for_loop_init SEMICOLON expression_opt
+		{:
+		//TODO: open loop update expression body
+		:}
+	;
+		
+for_loop_update ::=
+		for_loop_condition SEMICOLON for_update_opt
+		{:
+		//TODO: open loop body
+		:}
+	;
+	
 for_statement ::=
-		FOR LPAREN for_init_opt SEMICOLON expression_opt SEMICOLON
-			for_update_opt RPAREN statement
+		for_loop_update RPAREN statement
+		{:
+		//TODO: close loop statement
+		:}
 	;
 	
 for_statement_no_short_if ::=
-		FOR LPAREN for_init_opt SEMICOLON expression_opt SEMICOLON
-			for_update_opt RPAREN statement_no_short_if
+		for_loop_update RPAREN statement_no_short_if
+		{:
+		//TODO: close loop statement
+		:}
 	;
 	
 for_init_opt ::=

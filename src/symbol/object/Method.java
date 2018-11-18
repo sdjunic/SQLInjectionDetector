@@ -40,6 +40,8 @@ public class Method implements Obj {
 	private List<SpecialArg> specialArguments = null; //arguments starts from 0, 'this' object is -1, return value is -2
 
 	private MethodBody body = new MethodBody();
+	private ExecutableBlock currentBlock = null;
+	
 	private boolean parsed = false;	
 	
 	public static Stack<Method> methCallStack = null;
@@ -63,6 +65,7 @@ public class Method implements Obj {
 		this.constructor = constructor;
 		this.bracksAfterParamsNum = 0;
 		this.formalParamsNum = 0;
+		this.currentBlock = this.body;
 	}
 	
 	@Override
@@ -213,12 +216,20 @@ public class Method implements Obj {
 		return body;
 	}
 
-	public void setBody(MethodBody body) {
-		this.body = body;
+	public ExecutableBlock getCurrentBlock() {
+		return currentBlock;
+	}
+
+	public void setCurrentBlock(ExecutableBlock currentBlock) {
+		this.currentBlock = currentBlock;
 	}
 
 	public void addStatement(Statement stmt) {
-		this.body.addStatement(stmt);
+		this.currentBlock.addStatement(stmt);
+	}
+	
+	public void executableBlockEnd() {
+		this.currentBlock = this.currentBlock.getParentExecutableBlock();
 	}
 	
 	public void setReturnVariable(VariableExec var) {
@@ -291,8 +302,6 @@ public class Method implements Obj {
 	public void parseMethod() throws Exception {	
 		this.parsed = true;
 		if (Main.infoPS != null) Main.infoPS.println("Parsing "+this.name+" method!");
-		
-		this.body = new MethodBody();
 		
 		Reader fr = new BufferedReader(new FileReader(this.getMethodDefFilePath()));
 		lex.Lexer l = new lex.Lexer(fr, 5);

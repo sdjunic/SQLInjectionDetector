@@ -26,6 +26,17 @@ public class Main {
 			String k = args[0];
 			String k2 = s2;
 		}
+		else
+		{
+			if (aa != 0)
+			{
+				notInit = null;
+			}
+			else
+			{
+				notInit = s;
+			}
+		}
 		
 		s = k;
 		s = notInit;

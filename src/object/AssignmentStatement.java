@@ -32,8 +32,8 @@ public class AssignmentStatement extends Statement {
 	}
 
 	@Override
-	public void print(StringBuilder sb) {
-		sb.append(left + " = " + right + "\r\n");
+	public void print(StringBuilder sb, String indention) {
+		sb.append(indention + left + " = " + right + "\r\n");
 	}
 
 }
