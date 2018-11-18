@@ -13,6 +13,7 @@ public class Main {
 			public int b = 7;
 			public String k = "safeString";
 			public Stirng notInit;
+			public int c;
 			
 			public InnerKlasa() {}
 			

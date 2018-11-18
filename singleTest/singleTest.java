@@ -6,6 +6,7 @@ public class Main {
 			
 		String s = "safe";
 		int b = 0;
+		int c;
 		String notInit;
 		
 		if (b != 0)

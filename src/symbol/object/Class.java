@@ -6,6 +6,7 @@ import java.util.*;
 import Parse.ExpressionParser;
 import object.AssignmentStatement;
 import object.ConstructorCallStatement;
+import object.MethCallStatement;
 import object.VariableExec;
 import symbol.Scope;
 import symbol.SymbolDataStructure;
@@ -134,7 +135,10 @@ public class Class implements Type {
 				for (Obj o : getLocals().symbols()) { 
 					if (o instanceof Field) { 
 						Field field = (Field)o;
-						fields.add(field);
+						if(field.getType().isRefType() && !field.getName().equals("super"))
+						{
+							fields.add(field);
+						}
 					}
 				}
 				if (!fields.isEmpty()) {
@@ -214,7 +218,7 @@ public class Class implements Type {
 	}
 	
 	
-	public Method findConstructor(List<VariableExec> args) {
+	public Method findConstructor(List<VariableExec> args) throws Exception {
 		Collection<Obj> classContent = this.getLocals().symbols();
 		Iterator<Obj> it = classContent.iterator();
 		while (it.hasNext()) {
@@ -243,11 +247,21 @@ public class Class implements Type {
 			this.myScope.addToLocals(defCon);
 			Table.setCurrentScope(currentScope);
 			
+			Method fieldInitMethod = this.getFieldsInitializerMethod();
+			if (fieldInitMethod != null)
+			{
+				List<VariableExec> emptyArgs = new LinkedList<VariableExec>();
+				MethCallStatement fieldInitMethCall = new MethCallStatement(null, fieldInitMethod, emptyArgs);
+				fieldInitMethCall.setInitFieldsMethod();
+				defCon.addStatement(fieldInitMethCall);
+			}
+			
 			if (this.superClass != null && this.superClass.type != null) {
 				Class superClass = (Class)this.superClass.type;
 				VariableExec superField = new VariableExec("super", this.findField("super"));
 				defCon.addStatement(new ConstructorCallStatement(superField, superClass.findConstructor(args), args));
 			}
+			
 			defCon.getBody().setReturnVar(new VariableExec("this", this));
 			return defCon;
 		}

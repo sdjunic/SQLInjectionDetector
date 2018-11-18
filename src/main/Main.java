@@ -152,8 +152,14 @@ public class Main {
 			            		   continue;
 			            	   }
 			            	   
-			            	   if (vulnerability.equals("true")) vulnerableTests++;
-			            	   else safeTests++;
+			            	   if (vulnerability.equals("true")) 
+			            	   {
+			            		   vulnerableTests++;
+			            	   }
+			            	   else 
+			            	   {
+			            		   safeTests++;
+			            	   }
 				            }
 				        }
 					}
