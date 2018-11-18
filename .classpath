@@ -5,6 +5,7 @@
 	<classpathentry kind="src" path="lib"/>
 	<classpathentry kind="src" path="spec"/>
 	<classpathentry kind="src" path="testData"/>
+	<classpathentry kind="src" path="singleTest"/>
 	<classpathentry kind="lib" path="C:/Users/v-sldju/eclipseWS/SQLInjectionDetector/lib/java-cup-11a.jar"/>
 	<classpathentry kind="lib" path="C:/Users/v-sldju/eclipseWS/SQLInjectionDetector/lib/symboltable.jar"/>
 	<classpathentry kind="output" path="bin"/>

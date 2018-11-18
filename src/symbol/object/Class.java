@@ -134,9 +134,7 @@ public class Class implements Type {
 				for (Obj o : getLocals().symbols()) { 
 					if (o instanceof Field) { 
 						Field field = (Field)o;
-						if (field.getInitExpression() != null) {
-							fields.add(field);
-						}
+						fields.add(field);
 					}
 				}
 				if (!fields.isEmpty()) {
@@ -157,6 +155,14 @@ public class Class implements Type {
 					Table.closeScope();
 					
 					for (Field field : fields) {
+						if (field.getInitExpression() == null)
+						{
+							List<String> varName = new LinkedList<String>();
+							varName.add("this"); varName.add(field.getName());
+							m.addStatement(new AssignmentStatement(new VariableExec(varName, field), new VariableExec(null)));
+							continue;
+						}
+						
 						Reader fr = new StringReader(field.getInitExpression());
 						lex.Lexer l = new lex.Lexer(fr, 5);
 	

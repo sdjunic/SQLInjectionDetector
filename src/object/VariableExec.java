@@ -3,6 +3,7 @@ package object;
 import java.util.*;
 
 import Parse.ParseData;
+import object.values.NullValue;
 import object.values.ObjValue;
 import symbol.object.*;
 import symbol.object.Class;
@@ -26,7 +27,14 @@ public class VariableExec {
 	}
 	
 	public VariableExec(ObjValue value) {
-		this.value = value;
+		if (value == null)
+		{
+			this.value = new NullValue();
+		}
+		else
+		{
+			this.value = value;
+		}
 	}
 	
 	public Class getObjectType() {

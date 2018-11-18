@@ -122,10 +122,15 @@ public class Main {
 			            	   }
 			            	   
 			            	   File testFolder = new File(testsFolderPath + "\\" + testName);
-			            	   if (!testFolder.exists()) {
-			            		   System.out.println("Error in test xml file " + listOfFiles[i].getName());
-			            		   continue;
+			            	   if (!testFolder.exists() && !testName.endsWith(".java")) {
+			            		   testName = testName.concat(".java");
+			            		   testFolder = new File(testsFolderPath + "\\" + testName);
+				            	   if (!testFolder.exists()) {
+				            		   System.out.println("Error in test xml file " + listOfFiles[i].getName());
+				            		   continue;
+				            	   }
 			            	   }
+			            	   
 			            	   
 			            	   try {
 			            		   testProjectForSQLInjection(testFolder, analyzeFromMain.equals("false"), initArgumentsSafe.equals("true"));

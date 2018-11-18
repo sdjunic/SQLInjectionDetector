@@ -814,7 +814,13 @@ variable_declarators ::=
 	;
 	
 variable_declarator ::=
-		variable_declarator_id:id {: RESULT = id; :}
+		variable_declarator_id:id 
+		{:
+			if (parsingClassLevel == 0) {
+		 		id.initValue = new VariableExec(new NullValue());
+				RESULT = id;
+			}
+		:}
 	|	variable_declarator_id:id EQ variable_initializer:init 
 		{: 
 			if (parsingClassLevel == 0) {

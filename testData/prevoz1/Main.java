@@ -12,6 +12,7 @@ public class Main {
 			public int a = 5;
 			public int b = 7;
 			public String k = "safeString";
+			public Stirng notInit;
 			
 			public InnerKlasa() {}
 			

@@ -1,0 +1,1 @@
+public void rek ( int a , String s ) { if ( a > 0 ) rek ( a - 1 , s + s ) ; else { Statement stmt = null ; try { stmt = con . createStatement ( ) ; stmt . executeUpdate ( "INSERT INTO rekTable VALUES ('" + s + "')" ) ; } catch ( Exception e ) { e . printStackTrace ( ) ; } finally { if ( stmt != null ) stmt . close ( ) ; } } } 
