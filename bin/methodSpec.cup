@@ -283,11 +283,12 @@ non terminal switch_statement, switch_block;
 non terminal switch_block_statement_groups;
 non terminal switch_block_statement_group;
 non terminal switch_labels, switch_label;
-non terminal while_expression;
+non terminal LoopStatement while_expression;
 non terminal while_statement, while_statement_no_short_if;
+non terminal LoopStatement do_;
 non terminal do_statement;
 non terminal foreach_statement, foreach_statement_no_short_if;
-non terminal for_loop_init, for_loop_condition, for_loop_update;
+non terminal LoopStatement for_loop_init, for_loop_condition, for_loop_update;
 non terminal for_statement, for_statement_no_short_if;
 non terminal for_init_opt, for_init;
 non terminal for_update_opt, for_update;
@@ -1330,6 +1331,7 @@ statement_expression ::=
 if_expression ::=
 		IF LPAREN expression RPAREN 
 		{:
+			// Note that expression will be a part of outer scope body
 			if (parsingClassLevel == 0) {
 				IfElseStatement ifElseStmt = new IfElseStatement(parser.parsingTopMethod.getCurrentBlock());
 				parser.parsingTopMethod.addStatement(ifElseStmt);
@@ -1411,34 +1413,47 @@ switch_label ::=
 	;
 
 while_expression ::=
-		WHILE LPAREN expression RPAREN
+		WHILE 
 		{:
-		//TODO: create loop statement
-		:}
+			// Note that expression will be a part of loop body
+			LoopStatement loopStmt = new LoopStatement(parser.parsingTopMethod.getCurrentBlock());
+			parser.parsingTopMethod.addStatement(loopStmt);
+			parser.parsingTopMethod.setCurrentBlock(loopStmt.getLoopBody());
+			RESULT = loopStmt;
+		:} 
+		LPAREN expression RPAREN
 	;
 
 while_statement ::=
-		while_expression statement
+		while_expression:loopStmt statement
 		{:
-		//TODO: close loop statement
+			parser.parsingTopMethod.executableBlockEnd();
+			assert parser.parsingTopMethod.getCurrentBlock() == loopStmt.getLoopBody().getParentExecutableBlock();
 		:}
 	;
 	
 while_statement_no_short_if ::=
 		while_expression statement_no_short_if
 		{:
-		//TODO: close loop statement
+			//TODO: close loop statement
+		:}
+	;
+	
+do_ ::= DO
+		{:
+			LoopStatement loopStmt = new LoopStatement(parser.parsingTopMethod.getCurrentBlock());
+			parser.parsingTopMethod.addStatement(loopStmt);
+			parser.parsingTopMethod.setCurrentBlock(loopStmt.getLoopBody());
+			RESULT = loopStmt;
 		:}
 	;
 	
 do_statement ::=
-		DO 
+		do_:loopStmt statement WHILE LPAREN expression RPAREN SEMICOLON
 		{:
-		//TODO: create loop statement
-		:}
-		statement WHILE LPAREN expression RPAREN SEMICOLON
-		{:
-		//TODO: close loop statement
+			// Note that expression will be a part of loop body
+			parser.parsingTopMethod.executableBlockEnd();
+			assert parser.parsingTopMethod.getCurrentBlock() == loopStmt.getLoopBody().getParentExecutableBlock();
 		:}
 	;
 	
@@ -1457,6 +1472,8 @@ foreach_statement_no_short_if ::=
 for_loop_init ::=
 		FOR LPAREN for_init_opt
 		{:
+			// Note that for_init will be a part of outer scope body
+			// TODO: check situation whit two loops which have the same variables and which are the same scope
 		//TODO: create loop statement and open loop conditional expression body
 		:}
 	;

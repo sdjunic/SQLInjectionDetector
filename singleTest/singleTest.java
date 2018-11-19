@@ -18,6 +18,12 @@ public class Main {
 			String k2 = s2;
 		}
 		
+		while(b == 0)
+		{
+			++b;
+			notInit = s;
+		}
+		
 		if (b != 0)
 		{
 			notInit = s;
