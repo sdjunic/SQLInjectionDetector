@@ -288,7 +288,7 @@ non terminal while_statement, while_statement_no_short_if;
 non terminal LoopStatement do_;
 non terminal do_statement;
 non terminal foreach_statement, foreach_statement_no_short_if;
-non terminal LoopStatement for_loop_init, for_loop_condition, for_loop_update;
+non terminal ForLoopStatement for_loop_init, for_loop_condition, for_loop_update;
 non terminal for_statement, for_statement_no_short_if;
 non terminal for_init_opt, for_init;
 non terminal for_update_opt, for_update;
@@ -1474,35 +1474,44 @@ for_loop_init ::=
 		{:
 			// Note that for_init will be a part of outer scope body
 			// TODO: check situation whit two loops which have the same variables and which are the same scope
-		//TODO: create loop statement and open loop conditional expression body
+			ForLoopStatement forLoopStmt = new ForLoopStatement(parser.parsingTopMethod.getCurrentBlock());
+			parser.parsingTopMethod.addStatement(forLoopStmt);
+			parser.parsingTopMethod.setCurrentBlock(forLoopStmt.getCondition());
+			RESULT = forLoopStmt;
 		:}
 	;
 
 for_loop_condition ::=
-		for_loop_init SEMICOLON expression_opt
+		for_loop_init:forLoopStmt SEMICOLON expression_opt
 		{:
-		//TODO: open loop update expression body
+			forLoopStmt.addUpdate();
+			parser.parsingTopMethod.setCurrentBlock(forLoopStmt.getUpdate());
+			RESULT = forLoopStmt;
 		:}
 	;
 		
 for_loop_update ::=
-		for_loop_condition SEMICOLON for_update_opt
+		for_loop_condition:forLoopStmt SEMICOLON for_update_opt
 		{:
-		//TODO: open loop body
+			forLoopStmt.addLoopBody();
+			parser.parsingTopMethod.setCurrentBlock(forLoopStmt.getLoopBody());
+			RESULT = forLoopStmt;
 		:}
 	;
 	
 for_statement ::=
-		for_loop_update RPAREN statement
+		for_loop_update:forLoopStmt RPAREN statement
 		{:
-		//TODO: close loop statement
+			parser.parsingTopMethod.executableBlockEnd();
+			assert parser.parsingTopMethod.getCurrentBlock() == forLoopStmt.getLoopBody().getParentExecutableBlock();
 		:}
 	;
 	
 for_statement_no_short_if ::=
-		for_loop_update RPAREN statement_no_short_if
+		for_loop_update:forLoopStmt RPAREN statement_no_short_if
 		{:
-		//TODO: close loop statement
+			parser.parsingTopMethod.executableBlockEnd();
+			assert parser.parsingTopMethod.getCurrentBlock() == forLoopStmt.getLoopBody().getParentExecutableBlock();
 		:}
 	;
 	
@@ -2035,7 +2044,7 @@ conditional_or_expression ::=
 	
 conditional_expression ::=
 		conditional_or_expression:res {: RESULT = res; :}
-	|	conditional_or_expression QUESTION expression 
+	|	conditional_or_expression QUESTION expression
 			COLON conditional_expression
 	;
 	
