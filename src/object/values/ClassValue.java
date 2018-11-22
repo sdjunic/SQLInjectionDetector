@@ -1,6 +1,10 @@
 package object.values;
 
 import symbol.object.Obj;
+
+import java.util.HashMap;
+import java.util.Map.Entry;
+
 import symbol.object.Class;
 import symbol.object.Field;
 
@@ -41,13 +45,25 @@ public class ClassValue extends ObjValue {
 	}
 	
 	@Override
+	public ObjValue copy()
+	{
+		ClassValue copy = new ClassValue(this.objectType, this.isSafe());
+		copy.fields.importMappings(this.fields);
+		return copy;
+	}
+	
+	@Override
 	public String toString() {
 		return (this.isSafe() ? "S " : "U ") + objectType.getName();
 	}
 	
-	@Override
-	public void print(StringBuilder sb, int tabNum) {
-		sb.append(this);
-		fields.print(sb, tabNum);
+	public void print(StringBuilder sb, String tab, HashMap<ObjValue, Integer> objHash) {
+		boolean newLine = false;
+		for (Entry<String, ObjValue> var : fields.getValues().entrySet())
+		{
+			if (newLine) sb.append("\n");
+			sb.append(tab).append(var.getKey()).append(": #").append(objHash.get(var.getValue()));
+			newLine = true;
+		}
 	}
 }

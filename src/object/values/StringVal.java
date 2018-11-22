@@ -10,15 +10,16 @@ public class StringVal extends ObjValue {
 	}
 
 	@Override
+	public ObjValue copy()
+	{
+		return new StringVal(isSafe());
+	}
+	
+	@Override
 	public String toString() {
 		return (this.isSafe() ? "S" : "U" )+ " String";
 	}
 	
-	@Override
-	public void print(StringBuilder sb, int tabNum) {
-		sb.append(this).append("\r\n");
-	}
-
 	@Override
 	public Class getObjectType() {
 		return Table.getStringClass();

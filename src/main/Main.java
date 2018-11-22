@@ -311,9 +311,9 @@ public class Main {
 						if (infoPS != null) infoPS.println(sb2);
 						
 						sb2 = new StringBuilder();
-						sb2.append("\r\n--------- METHOD REFERENCES ---------\r\n");
-						values.print(sb2, 0);
-						sb2.append("\r\n------- END METHOD REFERENCES -------\r\n\r\n");
+						sb2.append("\r\n--------- METHOD VALUES HOLDER ---------\r\n");
+						values.print(sb2);
+						sb2.append("\r\n------- END METHOD VALUES HOLDER -------\r\n\r\n");
 						if (infoPS != null) infoPS.println(sb2);
 						
 						if (infoPS != null) infoPS.println();

@@ -9,6 +9,13 @@ public class NullValue extends ObjValue {
 	}
 	
 	@Override
+	public ObjValue copy()
+	{
+		// TODO: consider returning the same object, since NullValue object shouldn't be changes
+		return new NullValue();
+	}
+	
+	@Override
 	public String toString() {
 		return "S null";
 	}
@@ -16,11 +23,6 @@ public class NullValue extends ObjValue {
 	@Override
 	public Class getObjectType() {
 		return null;
-	}
-	
-	@Override
-	public void print(StringBuilder sb, int tabNum) {
-		sb.append(this).append("\r\n");
 	}
 
 }

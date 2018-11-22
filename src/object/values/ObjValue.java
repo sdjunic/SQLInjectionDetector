@@ -25,10 +25,12 @@ public abstract class ObjValue {
 	}
 
 	public void setSafe(boolean isSafe) {
+		assert !(this instanceof NullValue);
 		this.isSafe = isSafe;
 	}
 	
 	public abstract Class getObjectType();
 	
-	public abstract void print(StringBuilder sb, int tabNum);
+	public abstract ObjValue copy();
+	
 }

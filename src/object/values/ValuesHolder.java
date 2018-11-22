@@ -24,6 +24,10 @@ public class ValuesHolder {
 		return values.isEmpty();
 	}
 	
+	public Map<String, ObjValue> getValues() {
+		return values;
+	}
+
 	public void put(String name, ObjValue value) {
 		if (name == null) return;
 		values.put(name, value);
@@ -99,21 +103,119 @@ public class ValuesHolder {
 		return null;
 	}
 
-	public void print(StringBuilder sb, int tabNum) {
-		String tab = "";
-		for(int i=0; i<tabNum; ++i) tab+="\t";
-		Set<Entry<String, ObjValue>> entrySet = values.entrySet();
-
-		Iterator<Entry<String, ObjValue>> it = entrySet.iterator();
-		boolean newLine = true;
-		while (it.hasNext()) {
-			Entry<String, ObjValue> objValue = it.next();
-			if (newLine) sb.append("\r\n");
-			sb.append(tab).append(objValue.getKey()).append(": ");
-			if (objValue.getValue() != null) objValue.getValue().print(sb, tabNum+1);
-			else sb.append("null\r\n");
-			newLine = false;
+	private void numberAllObjects(HashMap<ObjValue, Integer> objHash, IntRef num)
+	{
+		for (ObjValue obj : values.values())
+		{
+			if (!objHash.containsKey(obj))
+			{
+				objHash.put(obj, num.inc());
+				if (obj instanceof ClassValue)
+				{
+					((ClassValue)obj).getFields().numberAllObjects(objHash, num);
+				}
+			}
 		}
-		if (newLine) sb.append("\r\n");
+	}
+	
+	public void print(StringBuilder sb)
+	{
+		HashMap<ObjValue, Integer> objHash = new HashMap<>();
+		IntRef num = new IntRef();
+		numberAllObjects(objHash, num);
+		
+		for (Entry<String, ObjValue> var : values.entrySet())
+		{
+			sb.append(var.getKey()).append(": ").append("#").append(objHash.get(var.getValue())).append("\n");
+		}
+		
+		for (Entry<ObjValue, Integer> val : objHash.entrySet())
+		{
+			sb.append("#").append(val.getValue()).append(":").append(val.getKey().toString()).append("\n");
+			if (val.getKey() instanceof ClassValue)
+			{
+				((ClassValue)val.getKey()).print(sb, "    ", objHash); sb.append("\n");
+			}
+		}
+	}
+	
+	// Import all mappings from sourceMap.
+	//
+	public void importMappings(ValuesHolder sourceMap)
+	{
+		for (Entry<String, ObjValue> it : sourceMap.values.entrySet())
+		{
+			this.values.put(it.getKey(), it.getValue());
+		}
+	}
+	
+	// Copy all objects from this ValuesHolder and populate copyMap table,
+	// to map original objects into newly created ones.
+	//
+	private void copyAllObjects(HashMap<ObjValue, ObjValue> copyMap)
+	{
+		for (ObjValue obj : values.values())
+		{
+			if (!copyMap.containsKey(obj))
+			{
+				copyMap.put(obj, obj.copy());
+				if (obj instanceof ClassValue)
+				{
+					((ClassValue)obj).getFields().copyAllObjects(copyMap);
+				}
+			}
+		}
+	}
+	
+	// Based on copyMap, update all references. 
+	// This method should be called for fields of newly created ClassValue,
+	// to replace references to original fields with references to the newly created fields.
+	//
+	private void updateReferences(HashMap<ObjValue, ObjValue> copyMap)
+	{
+		for (Entry<String, ObjValue> vhEntry : this.values.entrySet())
+		{
+			ObjValue prevObj = vhEntry.getValue();
+			assert copyMap.containsKey(prevObj);
+			ObjValue nextObj = copyMap.get(prevObj);
+			vhEntry.setValue(nextObj);
+		}
+	}
+	
+	// Copy the whole values holder map recursively, and set all references 
+	// between newly created objects to get the same relations as between original objects.
+	//
+	public ValuesHolder deepCopy()
+	{
+		HashMap<ObjValue, ObjValue> copyMap = new HashMap<>();
+		ValuesHolder copyValuesHolder = new ValuesHolder(this.parentObj);
+		
+		// Copy all objects and make capyMap table, which is mapping between
+		// previous and new object. Also populate new ValuesHolder map, with
+		// references to new objects that we are creating in this method.
+		//
+		for (Entry<String, ObjValue> var : this.values.entrySet())
+		{
+			ObjValue prevObj = var.getValue();
+			ObjValue newObj = prevObj.copy();
+			copyValuesHolder.values.put(var.getKey(), newObj);
+			if (prevObj instanceof ClassValue)
+			{
+				((ClassValue)prevObj).getFields().copyAllObjects(copyMap);
+			}
+		}
+		
+		// Update field references for all new objects of type ClassValue, using the
+		// previously created mapping in copyMap.
+		//
+		for (ObjValue newValue : copyMap.values())
+		{
+			if (newValue instanceof ClassValue)
+			{
+				((ClassValue)newValue).getFields().updateReferences(copyMap);
+			}
+		}
+		
+		return copyValuesHolder;
 	}
 }
