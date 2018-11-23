@@ -11,12 +11,12 @@ import symbol.object.Field;
 public class ClassValue extends ObjValue {
 	
 	private Class objectType;
-	private ValuesHolder fields;
+	private FieldsValuesHolder fields;
 	
 	public ClassValue(Class objectType, boolean isSafe) {
 		super(false, isSafe);
 		this.objectType = objectType;
-		this.fields = new ValuesHolder(this);
+		this.fields = new FieldsValuesHolder(this);
 	}
 	
 	public Class getObjectType() {
@@ -36,11 +36,11 @@ public class ClassValue extends ObjValue {
 		return fields.get(name);
 	}
 
-	public ValuesHolder getFields() {
+	public FieldsValuesHolder getFields() {
 		return fields;
 	}
 
-	public void setFields(ValuesHolder fields) {
+	public void setFields(FieldsValuesHolder fields) {
 		this.fields = fields;
 	}
 	

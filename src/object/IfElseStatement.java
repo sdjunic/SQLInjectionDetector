@@ -1,6 +1,6 @@
 package object;
 
-import object.values.ValuesHolder;
+import object.values.MethodValuesHolder;
 
 public class IfElseStatement extends Statement {
 
@@ -29,7 +29,7 @@ public class IfElseStatement extends Statement {
 	}
 
 	@Override
-	public void execute(ValuesHolder values) throws Exception {
+	public void execute(MethodValuesHolder values) throws Exception {
 		ifThenBody.execute(values);
 		if (elseBody != null)
 		{

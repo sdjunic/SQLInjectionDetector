@@ -13,7 +13,7 @@ public class StringConcat extends Statement {
 	}
 
 	@Override
-	public void execute(ValuesHolder values) {
+	public void execute(MethodValuesHolder values) {
 		ObjValue rightVal1 = null, rightVal2 = null;
 		if (right1 != null) {
 			if (right1.value != null) {

@@ -2,7 +2,7 @@ package object;
 
 import java.util.*;
 
-import object.values.ValuesHolder;
+import object.values.MethodValuesHolder;
 import symbol.object.Obj;
 
 public class AssignmentStatement extends Statement {
@@ -17,7 +17,7 @@ public class AssignmentStatement extends Statement {
 	}
 
 	@Override
-	public void execute(ValuesHolder values) {
+	public void execute(MethodValuesHolder values) {
 		if (right.value != null) {
 			values.put(left.name, right.value);
 		} else {

@@ -3,8 +3,8 @@ package object;
 import java.util.*;
 
 import Parse.ParseData;
+import object.values.MethodValuesHolder;
 import object.values.ObjValue;
-import object.values.ValuesHolder;
 import symbol.object.*;
 import symbol.object.Class;
 
@@ -43,7 +43,7 @@ public class MethCallStatement extends CallStatement {
 	}
 	
 	@Override
-	public void execute(ValuesHolder values) throws Exception {
+	public void execute(MethodValuesHolder values) throws Exception {
 		Method methodToCall = staticMethodToCall;
 		
 		if (isInitFieldsMethod)
@@ -54,7 +54,7 @@ public class MethCallStatement extends CallStatement {
 			return;
 		}
 		
-		ValuesHolder callingMethValues = new ValuesHolder(null);
+		MethodValuesHolder callingMethValues = new MethodValuesHolder(values);
 		
 		if (methodToCall == null) {
 			ObjValue thisObjValue = values.get(thisObj.name);

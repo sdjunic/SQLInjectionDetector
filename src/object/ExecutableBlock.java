@@ -3,8 +3,8 @@ package object;
 import java.util.LinkedList;
 import java.util.List;
 
+import object.values.MethodValuesHolder;
 import object.values.ObjValue;
-import object.values.ValuesHolder;
 
 public class ExecutableBlock {
 
@@ -38,7 +38,7 @@ public class ExecutableBlock {
 		return parentExecutableBlock;
 	}
 	
-	public ObjValue execute(ValuesHolder values) throws Exception { 
+	public ObjValue execute(MethodValuesHolder values) throws Exception { 
 		for (Statement s : statements) {
 			s.execute(values);
 		}

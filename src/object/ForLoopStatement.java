@@ -1,6 +1,6 @@
 package object;
 
-import object.values.ValuesHolder;
+import object.values.MethodValuesHolder;
 
 public class ForLoopStatement extends Statement {
 
@@ -33,7 +33,7 @@ public class ForLoopStatement extends Statement {
 	}
 
 	@Override
-	public void execute(ValuesHolder values) throws Exception {
+	public void execute(MethodValuesHolder values) throws Exception {
 		condition.execute(values);
 		update.execute(values);
 		loopBody.execute(values);

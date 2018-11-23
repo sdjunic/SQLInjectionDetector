@@ -256,7 +256,7 @@ public class Method implements Obj {
 		return null;
 	}
 	
-	public ObjValue executeMethod(ValuesHolder values) throws Exception {
+	public ObjValue executeMethod(MethodValuesHolder values) throws Exception {
 		if (Main.infoPS != null) Main.infoPS.println("Exec "+ this.getName() +" method!");
 		if (isDefined) {
 			if (!parsed) {

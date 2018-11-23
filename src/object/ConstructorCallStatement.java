@@ -3,8 +3,8 @@ package object;
 import java.util.LinkedList;
 import java.util.List;
 
+import object.values.MethodValuesHolder;
 import object.values.ObjValue;
-import object.values.ValuesHolder;
 import symbol.object.Class;
 import symbol.object.Field;
 import symbol.object.Method;
@@ -24,11 +24,11 @@ public class ConstructorCallStatement extends CallStatement {
 	}
 	
 	@Override
-	public void execute(ValuesHolder values) throws Exception {
+	public void execute(MethodValuesHolder values) throws Exception {
 		if (constructor.isMethodAlreadyOnStack()) return;
 		Method.methCallStack.push(constructor);
 		
-		ValuesHolder callingMethValues = new ValuesHolder(null);
+		MethodValuesHolder callingMethValues = new MethodValuesHolder(values);
 		callingMethValues.addObject(constructor.getParentClass(), "this", true);
 		
 		if (!constructor.isParsed())

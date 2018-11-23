@@ -1,23 +1,19 @@
 package object.values;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
 
 import symbol.object.Class;
 import symbol.object.Type;
 
-public class ValuesHolder {
+public abstract class ValuesHolder {
 	
-	private Map<String, ObjValue> values;
-	private ClassValue parentObj;
-	
-	public ValuesHolder(ClassValue parentObj) {
+	protected Map<String, ObjValue> values;
+
+	public ValuesHolder() {
 		values = new HashMap<String, ObjValue>();
-		this.parentObj = parentObj;
 	}
 	
 	public boolean isEmpty() {
@@ -32,22 +28,8 @@ public class ValuesHolder {
 		if (name == null) return;
 		values.put(name, value);
 	}
-	
-	public ObjValue get(String name) {
-		if (name == null) return null;
-		ObjValue result = values.get(name);
-		if (result == null && parentObj != null && (parentObj.getObjectType().findField(name) != null || 
-		    name.equals("this") || (name.equals("super") && parentObj.getObjectType().getSuperClass() != null)))
-		{
-			Type t = null;
-			if (name.equals("this")) t = parentObj.getObjectType();
-			else if (name.equals("super")) t = parentObj.getObjectType().getSuperClass().type;
-			else t = parentObj.getObjectType().findField(name).getType().type;
-			result = makeObjValue(t, parentObj.isSafe());
-			put(name, result);
-		}
-		return result;
-	}
+
+	public abstract ObjValue get(String name);
 	
 	public void put(List<String> name, ObjValue value) {
 		if (name == null || name.isEmpty()) return;
@@ -103,7 +85,7 @@ public class ValuesHolder {
 		return null;
 	}
 
-	private void numberAllObjects(HashMap<ObjValue, Integer> objHash, IntRef num)
+	protected void numberAllObjects(HashMap<ObjValue, Integer> objHash, IntRef num)
 	{
 		for (ObjValue obj : values.values())
 		{
@@ -147,75 +129,5 @@ public class ValuesHolder {
 		{
 			this.values.put(it.getKey(), it.getValue());
 		}
-	}
-	
-	// Copy all objects from this ValuesHolder and populate copyMap table,
-	// to map original objects into newly created ones.
-	//
-	private void copyAllObjects(HashMap<ObjValue, ObjValue> copyMap)
-	{
-		for (ObjValue obj : values.values())
-		{
-			if (!copyMap.containsKey(obj))
-			{
-				copyMap.put(obj, obj.copy());
-				if (obj instanceof ClassValue)
-				{
-					((ClassValue)obj).getFields().copyAllObjects(copyMap);
-				}
-			}
-		}
-	}
-	
-	// Based on copyMap, update all references. 
-	// This method should be called for fields of newly created ClassValue,
-	// to replace references to original fields with references to the newly created fields.
-	//
-	private void updateReferences(HashMap<ObjValue, ObjValue> copyMap)
-	{
-		for (Entry<String, ObjValue> vhEntry : this.values.entrySet())
-		{
-			ObjValue prevObj = vhEntry.getValue();
-			assert copyMap.containsKey(prevObj);
-			ObjValue nextObj = copyMap.get(prevObj);
-			vhEntry.setValue(nextObj);
-		}
-	}
-	
-	// Copy the whole values holder map recursively, and set all references 
-	// between newly created objects to get the same relations as between original objects.
-	//
-	public ValuesHolder deepCopy()
-	{
-		HashMap<ObjValue, ObjValue> copyMap = new HashMap<>();
-		ValuesHolder copyValuesHolder = new ValuesHolder(this.parentObj);
-		
-		// Copy all objects and make capyMap table, which is mapping between
-		// previous and new object. Also populate new ValuesHolder map, with
-		// references to new objects that we are creating in this method.
-		//
-		for (Entry<String, ObjValue> var : this.values.entrySet())
-		{
-			ObjValue prevObj = var.getValue();
-			ObjValue newObj = prevObj.copy();
-			copyValuesHolder.values.put(var.getKey(), newObj);
-			if (prevObj instanceof ClassValue)
-			{
-				((ClassValue)prevObj).getFields().copyAllObjects(copyMap);
-			}
-		}
-		
-		// Update field references for all new objects of type ClassValue, using the
-		// previously created mapping in copyMap.
-		//
-		for (ObjValue newValue : copyMap.values())
-		{
-			if (newValue instanceof ClassValue)
-			{
-				((ClassValue)newValue).getFields().updateReferences(copyMap);
-			}
-		}
-		
-		return copyValuesHolder;
 	}
 }

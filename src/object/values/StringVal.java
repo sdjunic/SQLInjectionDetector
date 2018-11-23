@@ -17,7 +17,7 @@ public class StringVal extends ObjValue {
 	
 	@Override
 	public String toString() {
-		return (this.isSafe() ? "S" : "U" )+ " String";
+		return (this.isSafe() ? "S" : "U" ) + " String";
 	}
 	
 	@Override

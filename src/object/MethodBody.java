@@ -1,7 +1,7 @@
 package object;
 
 import object.values.ObjValue;
-import object.values.ValuesHolder;
+import object.values.MethodValuesHolder;
 
 public class MethodBody extends ExecutableBlock {
 	
@@ -20,7 +20,7 @@ public class MethodBody extends ExecutableBlock {
 	}
 	
 	@Override
-	public ObjValue execute(ValuesHolder values) throws Exception { 
+	public ObjValue execute(MethodValuesHolder values) throws Exception { 
 		for (Statement s : statements) {
 			s.execute(values);
 		}

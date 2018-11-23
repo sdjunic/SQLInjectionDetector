@@ -19,7 +19,7 @@ import symbol.object.Modifiers.Modifier;
 import symbol.object.Obj;
 import symbol.object.PrimitiveType;
 import Parse.*;
-import object.values.ValuesHolder;
+import object.values.MethodValuesHolder;
 
 import java.io.*;
 
@@ -289,7 +289,7 @@ public class Main {
 					Method.methCallStack.push(m);
 					if (infoPS != null) infoPS.println(" -name: " + m.getName() + "  -file: " + m.getMethodDefFilePath());
 					
-					ValuesHolder values = new ValuesHolder(null);
+					MethodValuesHolder values = new MethodValuesHolder(null);
 					
 					if (!m.isStatic()) {
 						Obj methodClass = m.getScope().getOuter().getParrentObj();
