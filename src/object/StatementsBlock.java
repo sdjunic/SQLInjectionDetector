@@ -6,16 +6,16 @@ import java.util.List;
 import object.values.MethodValuesHolder;
 import object.values.ObjValue;
 
-public class ExecutableBlock {
+public class StatementsBlock {
 
 	protected List<Statement> statements = null;
-	protected ExecutableBlock parentExecutableBlock = null;
+	protected StatementsBlock parentExecutableBlock = null;
 	
-	public ExecutableBlock() {
+	public StatementsBlock() {
 		statements = new LinkedList<Statement>();
 	}
 
-	public ExecutableBlock(ExecutableBlock parentExecutableBlock) {
+	public StatementsBlock(StatementsBlock parentExecutableBlock) {
 		statements = new LinkedList<Statement>();
 		this.parentExecutableBlock = parentExecutableBlock;
 	}
@@ -28,12 +28,12 @@ public class ExecutableBlock {
 		statements.add(index, stmt);
 	}
 	
-	public void setParentExecutableBlock(ExecutableBlock parentExecutableBlock)
+	public void setParentExecutableBlock(StatementsBlock parentExecutableBlock)
 	{
 		this.parentExecutableBlock = parentExecutableBlock;
 	}
 	
-	public ExecutableBlock getParentExecutableBlock()
+	public StatementsBlock getParentExecutableBlock()
 	{
 		return parentExecutableBlock;
 	}

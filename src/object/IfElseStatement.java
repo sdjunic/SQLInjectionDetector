@@ -4,28 +4,28 @@ import object.values.MethodValuesHolder;
 
 public class IfElseStatement extends Statement {
 
-	private ExecutableBlock ifThenBody = null;
-	private ExecutableBlock elseBody = null;
+	private StatementsBlock ifThenBody = null;
+	private StatementsBlock elseBody = null;
 	
-	public IfElseStatement(ExecutableBlock parentBlock) {
-		ifThenBody = new ExecutableBlock(parentBlock);
+	public IfElseStatement(StatementsBlock parentBlock) {
+		ifThenBody = new StatementsBlock(parentBlock);
 		elseBody = null;
 	}
 
-	public ExecutableBlock getIfThenBody() {
+	public StatementsBlock getIfThenBody() {
 		return ifThenBody;
 	}
 
-	public void setIfThenBody(ExecutableBlock ifThenBody) {
+	public void setIfThenBody(StatementsBlock ifThenBody) {
 		this.ifThenBody = ifThenBody;
 	}
 
-	public ExecutableBlock getElseBody() {
+	public StatementsBlock getElseBody() {
 		return elseBody;
 	}
 
 	public void addElseBody() {
-		this.elseBody = new ExecutableBlock(ifThenBody.getParentExecutableBlock());
+		this.elseBody = new StatementsBlock(ifThenBody.getParentExecutableBlock());
 	}
 
 	@Override

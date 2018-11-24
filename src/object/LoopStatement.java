@@ -4,13 +4,13 @@ import object.values.MethodValuesHolder;
 
 public class LoopStatement extends Statement {
 
-	protected ExecutableBlock loopBody = null;
+	protected StatementsBlock loopBody = null;
 	
-	public LoopStatement(ExecutableBlock parentBlock) {
-		loopBody = new ExecutableBlock(parentBlock);
+	public LoopStatement(StatementsBlock parentBlock) {
+		loopBody = new StatementsBlock(parentBlock);
 	}
 	
-	public ExecutableBlock getLoopBody() {
+	public StatementsBlock getLoopBody() {
 		return loopBody;
 	}
 

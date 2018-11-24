@@ -4,32 +4,32 @@ import object.values.MethodValuesHolder;
 
 public class ForLoopStatement extends Statement {
 
-	protected ExecutableBlock condition = null;
-	protected ExecutableBlock update = null;
-	protected ExecutableBlock loopBody = null;
+	protected StatementsBlock condition = null;
+	protected StatementsBlock update = null;
+	protected StatementsBlock loopBody = null;
 	
-	public ForLoopStatement(ExecutableBlock parentBlock) {
-		this.condition = new ExecutableBlock(parentBlock);
+	public ForLoopStatement(StatementsBlock parentBlock) {
+		this.condition = new StatementsBlock(parentBlock);
 	}
 
-	public ExecutableBlock getCondition() {
+	public StatementsBlock getCondition() {
 		return condition;
 	}
 
-	public ExecutableBlock getUpdate() {
+	public StatementsBlock getUpdate() {
 		return update;
 	}
 
-	public ExecutableBlock getLoopBody() {
+	public StatementsBlock getLoopBody() {
 		return loopBody;
 	}
 	
 	public void addUpdate() {
-		this.update = new ExecutableBlock(condition.getParentExecutableBlock());
+		this.update = new StatementsBlock(condition.getParentExecutableBlock());
 	}
 
 	public void addLoopBody() {
-		this.loopBody = new ExecutableBlock(condition.getParentExecutableBlock());
+		this.loopBody = new StatementsBlock(condition.getParentExecutableBlock());
 	}
 
 	@Override

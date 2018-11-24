@@ -3,7 +3,7 @@ package object;
 import object.values.ObjValue;
 import object.values.MethodValuesHolder;
 
-public class MethodBody extends ExecutableBlock {
+public class MethodBody extends StatementsBlock {
 	
 	private VariableExec returnVar;
 	

@@ -40,7 +40,7 @@ public class Method implements Obj {
 	private List<SpecialArg> specialArguments = null; //arguments starts from 0, 'this' object is -1, return value is -2
 
 	private MethodBody body = new MethodBody();
-	private ExecutableBlock currentBlock = null;
+	private StatementsBlock currentBlock = null;
 	
 	private boolean parsed = false;	
 	
@@ -216,11 +216,11 @@ public class Method implements Obj {
 		return body;
 	}
 
-	public ExecutableBlock getCurrentBlock() {
+	public StatementsBlock getCurrentBlock() {
 		return currentBlock;
 	}
 
-	public void setCurrentBlock(ExecutableBlock currentBlock) {
+	public void setCurrentBlock(StatementsBlock currentBlock) {
 		this.currentBlock = currentBlock;
 	}
 
