@@ -1,5 +1,9 @@
 package object;
 
+import java.util.List;
+
+import execution.ExecutionBlock;
+import execution.Task;
 import object.values.MethodValuesHolder;
 
 public class LoopStatement extends Statement {
@@ -15,15 +19,16 @@ public class LoopStatement extends Statement {
 	}
 
 	@Override
-	public void execute(MethodValuesHolder values) throws Exception {
-		loopBody.execute(values);
-	}
-
-	@Override
 	public void print(StringBuilder sb, String indention) {
 		sb.append(indention + "LOOP\r\n");
 		loopBody.print(sb, indention.concat("    "));
 		sb.append(indention + "END_LOOP\r\n");
+	}
+
+	@Override
+	public void execute(List<Task> taskGroup) throws Exception {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

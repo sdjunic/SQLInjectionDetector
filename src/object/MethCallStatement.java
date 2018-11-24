@@ -1,8 +1,12 @@
 package object;
 
 import java.util.*;
+import java.util.Map.Entry;
 
 import Parse.ParseData;
+import execution.ExecutionBlock;
+import execution.Task;
+import execution.TaskExecutor;
 import object.values.MethodValuesHolder;
 import object.values.ObjValue;
 import symbol.object.*;
@@ -43,52 +47,137 @@ public class MethCallStatement extends CallStatement {
 	}
 	
 	@Override
-	public void execute(MethodValuesHolder values) throws Exception {
-		Method methodToCall = staticMethodToCall;
+	public void execute(List<Task> taskGroup) throws Exception {
+		HashMap<Method, List<Task>> hashMethodsToCall = getMethodToCall(taskGroup);
 		
-		if (isInitFieldsMethod)
+		ExecutionBlock prevMethodExecBlock = null;
+		ExecutionBlock firstMethodExecBlock = null;
+		for (Entry<Method, List<Task>> methodToCall : hashMethodsToCall.entrySet())
 		{
-			Method.methCallStack.push(methodToCall);
-			methodToCall.executeMethod(values);
-			Method.methCallStack.pop();
-			return;
+			Method m = methodToCall.getKey();
+			List<Task> methTasks = methodToCall.getValue();
+			
+			//TODO handle special methods
+			m.parseMethod();
+			
+			// Set new execution block
+			ExecutionBlock methodExecBlock = new ExecutionBlock(m.getBody());
+			methodExecBlock.parentExecBlock = TaskExecutor.activeExecutionBlock;
+			methodExecBlock.brotherExecBlock = prevMethodExecBlock;
+			methodExecBlock.isMethodBody = true;
+			methodExecBlock.returnDestination = left;
+			
+			// Set tasks for new ExecutionBlock
+			for (Task task : methTasks)
+			{
+				MethodValuesHolder callingMethValues = new MethodValuesHolder(task.values);
+				
+				// Populate ValuesHolder for method body
+				if (staticMethodToCall == null)
+				{
+					ObjValue thisObjValue = task.values.get(thisObj.name);
+					callingMethValues.put("this", thisObjValue);
+				}
+				for (int i=0; i<arguments.size(); ++i) {
+					ObjValue argumentVal = null;
+					if (arguments.get(i) == null) continue;
+					if (arguments.get(i).value != null) argumentVal = arguments.get(i).value;
+					else argumentVal = task.values.get(arguments.get(i).name);
+					if (argumentVal == null) continue;
+					callingMethValues.put(m.getMethParamList().get(i).getName(), argumentVal);
+				}
+				
+				task.values = callingMethValues;
+				task.PC = 0;
+			}
+			// Add all tasks to new execution block
+			methodExecBlock.taskTable.addAll(methTasks);	
+			
+			prevMethodExecBlock = methodExecBlock;
+			if (firstMethodExecBlock == null)
+			{
+				firstMethodExecBlock = methodExecBlock;
+			}
 		}
 		
-		MethodValuesHolder callingMethValues = new MethodValuesHolder(values);
+		TaskExecutor.activeExecutionBlock = firstMethodExecBlock;
+	}
+	
+	public HashMap<Method, List<Task>> getMethodToCall(List<Task> taskGroup) throws Exception
+	{
+		HashMap<Method, List<Task>> res = new HashMap<>();
+		if (staticMethodToCall != null)
+		{
+			res.put(staticMethodToCall, taskGroup);
+			return res;
+		}
 		
-		if (methodToCall == null) {
-			ObjValue thisObjValue = values.get(thisObj.name);
+		for (Task task : taskGroup)
+		{
+			ObjValue thisObjValue = task.values.get(thisObj.name);
 			Class thisObjClass = thisObjValue.getObjectType();
 			if (thisObjClass != null) {
-				
-				methodToCall = thisObjClass.findMethod(this.methodToCall, this.arguments);
-
-				callingMethValues.put("this", thisObjValue);
+				Method methodToCall = thisObjClass.findMethod(this.methodToCall, this.arguments);
+				if (!res.containsKey(methodToCall))
+				{
+					res.put(methodToCall, new LinkedList<>());
+				}
+				res.get(methodToCall).add(task);
 				
 			} else {
 				throw new Exception("Metoda nije pronadjena!");
 			}
 		}
 		
-		if (methodToCall.isMethodAlreadyOnStack()) { return; }
-		Method.methCallStack.push(methodToCall);
-		
-		for (int i=0; i<arguments.size(); ++i) {
-			ObjValue argumentVal = null;
-			if (arguments.get(i) == null) continue;
-			if (arguments.get(i).value != null) argumentVal = arguments.get(i).value;
-			else argumentVal = values.get(arguments.get(i).name);
-			if (argumentVal == null) continue;
-			callingMethValues.put(methodToCall.getMethParamList().get(i).getName(), argumentVal);
-		}
-		
-		ObjValue returnVal = methodToCall.executeMethod(callingMethValues);
-		if (left != null) {
-			values.put(left.name, returnVal);
-		}
-		
-		Method.methCallStack.pop();
+		return res;
 	}
+	
+//	public void execute(MethodValuesHolder values) throws Exception {
+//		Method methodToCall = staticMethodToCall;
+//		
+//		if (isInitFieldsMethod)
+//		{
+//			Method.methCallStack.push(methodToCall);
+//			methodToCall.executeMethod(values);
+//			Method.methCallStack.pop();
+//			return;
+//		}
+//		
+//		MethodValuesHolder callingMethValues = new MethodValuesHolder(values);
+//		
+//		if (methodToCall == null) {
+//			ObjValue thisObjValue = values.get(thisObj.name);
+//			Class thisObjClass = thisObjValue.getObjectType();
+//			if (thisObjClass != null) {
+//				
+//				methodToCall = thisObjClass.findMethod(this.methodToCall, this.arguments);
+//
+//				callingMethValues.put("this", thisObjValue);
+//				
+//			} else {
+//				throw new Exception("Metoda nije pronadjena!");
+//			}
+//		}
+//		
+//		if (methodToCall.isMethodAlreadyOnStack()) { return; }
+//		Method.methCallStack.push(methodToCall);
+//		
+//		for (int i=0; i<arguments.size(); ++i) {
+//			ObjValue argumentVal = null;
+//			if (arguments.get(i) == null) continue;
+//			if (arguments.get(i).value != null) argumentVal = arguments.get(i).value;
+//			else argumentVal = values.get(arguments.get(i).name);
+//			if (argumentVal == null) continue;
+//			callingMethValues.put(methodToCall.getMethParamList().get(i).getName(), argumentVal);
+//		}
+//		
+//		ObjValue returnVal = methodToCall.executeMethod(callingMethValues);
+//		if (left != null) {
+//			values.put(left.name, returnVal);
+//		}
+//		
+//		Method.methCallStack.pop();
+//	}
 	
 	@Override
 	public void print(StringBuilder sb, String indention) {

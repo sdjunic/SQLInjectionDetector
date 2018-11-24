@@ -1,14 +1,21 @@
 package execution;
 
-import object.values.ValuesHolder;
+import object.values.MethodValuesHolder;
 
 public class Task {
 	
-	private ValuesHolder values;
-	private int PC;
+	public MethodValuesHolder values;
+	public int PC;
+	public boolean returned;
 	
-	public Task() {
-		
+	public Task(MethodValuesHolder values) {
+		this(values, 0);
 	}
-
+	
+	public Task(MethodValuesHolder values, int PC) {
+		super();
+		this.values = values;
+		this.PC = PC;
+	}
+	
 }

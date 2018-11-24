@@ -1422,10 +1422,15 @@ return_statement ::=
 		RETURN expression:ret SEMICOLON 
 		{:
 			if (parsingClassLevel == 0) {
-				parser.parsingTopMethod.setReturnVariable(ret);
+				parser.parsingTopMethod.addStatement(new ReturnStatement(ret));
 			}
 		:}
 	|   RETURN SEMICOLON
+		{:
+			if (parsingClassLevel == 0) {
+				parser.parsingTopMethod.addStatement(new ReturnStatement(null));
+			}
+		:}
 	;
 	
 throw_statement ::=

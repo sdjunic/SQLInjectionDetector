@@ -1,6 +1,10 @@
 package object;
 
-import object.values.*;
+import java.util.List;
+import execution.Task;
+import object.values.MethodValuesHolder;
+import object.values.ObjValue;
+import object.values.StringVal;
 
 public class StringConcat extends Statement {
 	
@@ -13,7 +17,14 @@ public class StringConcat extends Statement {
 	}
 
 	@Override
-	public void execute(MethodValuesHolder values) {
+	public void execute(List<Task> taskGroup) throws Exception {
+		for (Task task : taskGroup)
+		{
+			execute(task.values);
+		}
+	}
+	
+	private void execute(MethodValuesHolder values) {
 		ObjValue rightVal1 = null, rightVal2 = null;
 		if (right1 != null) {
 			if (right1.value != null) {
@@ -35,10 +46,9 @@ public class StringConcat extends Statement {
 	
 		values.put(left.name, new StringVal(rightVal1.isSafe() && rightVal2.isSafe()));
 	}
-
+	
 	@Override
 	public void print(StringBuilder sb, String indention) {
 		sb.append(indention + left + " = " + right1 + " + " + right2 + "\r\n");
 	}
-
 }

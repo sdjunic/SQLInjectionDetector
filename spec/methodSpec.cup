@@ -1551,10 +1551,15 @@ return_statement ::=
 		RETURN expression:ret SEMICOLON 
 		{:
 			if (parsingClassLevel == 0) {
-				parser.parsingTopMethod.setReturnVariable(ret);
+				parser.parsingTopMethod.addStatement(new ReturnStatement(ret));
 			}
 		:}
 	|   RETURN SEMICOLON
+		{:
+			if (parsingClassLevel == 0) {
+				parser.parsingTopMethod.addStatement(new ReturnStatement(null));
+			}
+		:}
 	;
 	
 throw_statement ::=
@@ -1674,7 +1679,7 @@ class_instance_creation_expression ::=
 					
 					Method parentClassConstr = ((Class)cl.type).findMethod(cl.getName(), args);
 					Method innerClassImplicitCon = new Method(currentClass.getName(), true);
-					innerClassImplicitCon.getBody().setReturnVar(new VariableExec("this", currentClass));
+					//innerClassImplicitCon.getBody().setReturnVar(new VariableExec("this", currentClass));
 					for (MethParam mp : parentClassConstr.getMethParamList()) {
 						innerClassImplicitCon.addFormalParam(mp);
 					}

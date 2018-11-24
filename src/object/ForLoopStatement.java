@@ -1,6 +1,8 @@
 package object;
 
-import object.values.MethodValuesHolder;
+import java.util.List;
+
+import execution.Task;
 
 public class ForLoopStatement extends Statement {
 
@@ -33,13 +35,6 @@ public class ForLoopStatement extends Statement {
 	}
 
 	@Override
-	public void execute(MethodValuesHolder values) throws Exception {
-		condition.execute(values);
-		update.execute(values);
-		loopBody.execute(values);
-	}
-
-	@Override
 	public void print(StringBuilder sb, String indention) {
 		sb.append(indention + "FOR\r\n");
 		sb.append(indention + "cond\r\n");
@@ -49,6 +44,12 @@ public class ForLoopStatement extends Statement {
 		sb.append(indention + "update\r\n");
 		update.print(sb, indention.concat("    "));
 		sb.append(indention + "END_FOR\r\n");
+	}
+	
+	@Override
+	public void execute(List<Task> taskGroup) throws Exception {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

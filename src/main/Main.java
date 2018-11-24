@@ -19,6 +19,7 @@ import symbol.object.Modifiers.Modifier;
 import symbol.object.Obj;
 import symbol.object.PrimitiveType;
 import Parse.*;
+import execution.TaskExecutor;
 import object.values.MethodValuesHolder;
 
 import java.io.*;
@@ -289,20 +290,9 @@ public class Main {
 					Method.methCallStack.push(m);
 					if (infoPS != null) infoPS.println(" -name: " + m.getName() + "  -file: " + m.getMethodDefFilePath());
 					
-					MethodValuesHolder values = new MethodValuesHolder(null);
-					
-					if (!m.isStatic()) {
-						Obj methodClass = m.getScope().getOuter().getParrentObj();
-						if (!(methodClass instanceof Class)) throw new Exception();
-						values.addObject((Class)methodClass, "this", initialArgumentsSafe);
-					}
-					List<MethParam> lmp = m.getMethParamList();
-					for (int i=0; i<lmp.size(); ++i) {
-						values.addObject(lmp.get(i).getType().type, lmp.get(i).getName(), initialArgumentsSafe);
-					}
-					
 					try {
-						m.executeMethod(values);
+//						m.executeMethod(values);
+						TaskExecutor.execute(m, initialArgumentsSafe);						
 					} finally {
 						StringBuilder sb2 = new StringBuilder();
 						sb2.append("\r\n\r\n--------- METHOD BODY ---------\r\n\r\n");
@@ -310,13 +300,13 @@ public class Main {
 						sb2.append("\r\n------- END METHOD BODY -------\r\n");
 						if (infoPS != null) infoPS.println(sb2);
 						
-						sb2 = new StringBuilder();
-						sb2.append("\r\n--------- METHOD VALUES HOLDER ---------\r\n");
-						values.print(sb2);
-						sb2.append("\r\n------- END METHOD VALUES HOLDER -------\r\n\r\n");
-						if (infoPS != null) infoPS.println(sb2);
-						
-						if (infoPS != null) infoPS.println();
+//						sb2 = new StringBuilder();
+//						sb2.append("\r\n--------- METHOD VALUES HOLDER ---------\r\n");
+//						values.print(sb2);
+//						sb2.append("\r\n------- END METHOD VALUES HOLDER -------\r\n\r\n");
+//						if (infoPS != null) infoPS.println(sb2);
+//						
+//						if (infoPS != null) infoPS.println();
 					}
 				}
 			}

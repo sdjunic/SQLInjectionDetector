@@ -39,7 +39,7 @@ public class Method implements Obj {
 	private boolean isDefined = true;
 	private List<SpecialArg> specialArguments = null; //arguments starts from 0, 'this' object is -1, return value is -2
 
-	private MethodBody body = new MethodBody();
+	private StatementsBlock body = new StatementsBlock();
 	private StatementsBlock currentBlock = null;
 	
 	private boolean parsed = false;	
@@ -212,7 +212,7 @@ public class Method implements Obj {
 		if(getLocals() != null) getLocals().print(sb, tabNum+1);
 	}
 	
-	public MethodBody getBody() {
+	public StatementsBlock getBody() {
 		return body;
 	}
 
@@ -232,29 +232,25 @@ public class Method implements Obj {
 		this.currentBlock = this.currentBlock.getParentExecutableBlock();
 	}
 	
-	public void setReturnVariable(VariableExec var) {
-		this.body.setReturnVar(var);
-	}
-	
-	public Type getReturnVariableType() {
-		VariableExec v = this.body.getReturnVar();
-		if (v != null && v.object != null) {
-			if (v.object instanceof Class) return (Class)v.object;
-			if (v.object instanceof symbol.object.Variable) {
-				symbol.object.Variable var = (symbol.object.Variable)v.object;
-				if (var.getType() != null) return var.getType().type;
-			}
-			if (v.object instanceof Field) {
-				Field var = (Field)v.object;
-				if (var.getType() != null) return var.getType().type;
-			}
-			if (v.object instanceof MethParam) {
-				MethParam var = (MethParam)v.object;
-				if (var.getType() != null) return var.getType().type;
-			}
-		}
-		return null;
-	}
+//	public Type getReturnVariableType() {
+//		VariableExec v = this.body.getReturnVar();
+//		if (v != null && v.object != null) {
+//			if (v.object instanceof Class) return (Class)v.object;
+//			if (v.object instanceof symbol.object.Variable) {
+//				symbol.object.Variable var = (symbol.object.Variable)v.object;
+//				if (var.getType() != null) return var.getType().type;
+//			}
+//			if (v.object instanceof Field) {
+//				Field var = (Field)v.object;
+//				if (var.getType() != null) return var.getType().type;
+//			}
+//			if (v.object instanceof MethParam) {
+//				MethParam var = (MethParam)v.object;
+//				if (var.getType() != null) return var.getType().type;
+//			}
+//		}
+//		return null;
+//	}
 	
 	public ObjValue executeMethod(MethodValuesHolder values) throws Exception {
 		if (Main.infoPS != null) Main.infoPS.println("Exec "+ this.getName() +" method!");
@@ -265,7 +261,7 @@ public class Method implements Obj {
 				}
 				this.parseMethod();
 			}
-			return body.execute(values);
+			return null; //body.execute(values);
 		} else {
 			ObjValue returnValue = null;
 			

@@ -38,11 +38,15 @@ public class StatementsBlock {
 		return parentExecutableBlock;
 	}
 	
-	public ObjValue execute(MethodValuesHolder values) throws Exception { 
-		for (Statement s : statements) {
-			s.execute(values);
-		}
-		return null;
+	public Statement getStatement(int n)
+	{
+		if (statements == null || statements.size() < n) return null;
+		return statements.get(n);
+	}
+	
+	public int getStmtCount()
+	{
+		return statements.size();
 	}
 	
 	public void print(StringBuilder sb, String indention) {

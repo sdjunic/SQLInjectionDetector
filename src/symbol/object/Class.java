@@ -7,6 +7,8 @@ import Parse.ExpressionParser;
 import object.AssignmentStatement;
 import object.ConstructorCallStatement;
 import object.MethCallStatement;
+import object.ReduceStatement;
+import object.ReturnStatement;
 import object.VariableExec;
 import symbol.Scope;
 import symbol.SymbolDataStructure;
@@ -262,7 +264,8 @@ public class Class implements Type {
 				defCon.addStatement(new ConstructorCallStatement(superField, superClass.findConstructor(args), args));
 			}
 			
-			defCon.getBody().setReturnVar(new VariableExec("this", this));
+			defCon.getBody().addStatement(new ReturnStatement(new VariableExec("this", this)));
+			defCon.getBody().addStatement(new ReduceStatement());
 			return defCon;
 		}
 		

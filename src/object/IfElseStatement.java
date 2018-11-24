@@ -1,6 +1,8 @@
 package object;
 
-import object.values.MethodValuesHolder;
+import java.util.List;
+
+import execution.Task;
 
 public class IfElseStatement extends Statement {
 
@@ -29,15 +31,6 @@ public class IfElseStatement extends Statement {
 	}
 
 	@Override
-	public void execute(MethodValuesHolder values) throws Exception {
-		ifThenBody.execute(values);
-		if (elseBody != null)
-		{
-			elseBody.execute(values);
-		}
-	}
-
-	@Override
 	public void print(StringBuilder sb, String indention) {
 		sb.append(indention + "IF\r\n");
 		ifThenBody.print(sb, indention.concat("    "));
@@ -48,5 +41,12 @@ public class IfElseStatement extends Statement {
 		}
 		sb.append(indention + "END_IF\r\n");
 	}
+
+	@Override
+	public void execute(List<Task> taskGroup) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 }
