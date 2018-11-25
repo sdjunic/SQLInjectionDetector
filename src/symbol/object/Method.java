@@ -295,23 +295,28 @@ public class Method implements Obj {
 		}
 	}
 	
-	public void parseMethod() throws Exception {	
-		this.parsed = true;
-		if (Main.infoPS != null) Main.infoPS.println("Parsing "+this.name+" method!");
-		
-		Reader fr = new BufferedReader(new FileReader(this.getMethodDefFilePath()));
-		lex.Lexer l = new lex.Lexer(fr, 5);
-				
-		MethodParser g = new MethodParser(l);
-		//g.setErrorPS(System.err);
-		//g.setInfoPS(System.out);
-		g.setParsingTopMethod(this);
-		
-		Scope currentScope = Table.currentScope();
-		g.parse();
-		Table.setScope(currentScope);
-		
-		fr.close();
+	public void parseMethod() throws Exception {
+		if (!this.parsed)
+		{
+			this.parsed = true;
+			if (Main.infoPS != null) Main.infoPS.println("Parsing "+this.name+" method!");
+			
+			Reader fr = new BufferedReader(new FileReader(this.getMethodDefFilePath()));
+			lex.Lexer l = new lex.Lexer(fr, 5);
+					
+			MethodParser g = new MethodParser(l);
+			//g.setErrorPS(System.err);
+			//g.setInfoPS(System.out);
+			g.setParsingTopMethod(this);
+			
+			Scope currentScope = Table.currentScope();
+			g.parse();
+			Table.setScope(currentScope);
+			
+			fr.close();
+			
+			this.body.addStatement(new EndExecBlockStatement(true /* reduce */));
+		}
 	}
 	
 	public boolean isMethodAlreadyOnStack() {

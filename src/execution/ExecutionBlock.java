@@ -44,6 +44,7 @@ public class ExecutionBlock {
 		{
 			if (task.PC == this.minPC)
 			{
+				++task.PC;
 				activeTaskGroup.add(task);
 			}
 		}
@@ -65,19 +66,20 @@ public class ExecutionBlock {
 	public void executeNextStmt() throws Exception
 	{
 		int endPC = statements.getStmtCount();
-		if (minPC > endPC)
+		if (minPC >= endPC)
 		{
 			completeEB();
 		}
 		else
 		{
 			List<Task> activeTaskGroup = getNextActiveTaskGroup();
+			assert !activeTaskGroup.isEmpty();
 			Statement stmt = statements.getStatement(minPC++);
 			stmt.execute(activeTaskGroup);
 		}
 	}
 	
-	private void updateMinPC()
+	public void updateMinPC()
 	{
 		this.minPC = maxPC;
 		for (Task task : taskTable)

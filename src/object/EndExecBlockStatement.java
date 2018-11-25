@@ -7,8 +7,14 @@ import execution.Task;
 import execution.TaskExecutor;
 import object.values.MethodValuesHolder;
 
-public class ReduceStatement extends Statement {
+public class EndExecBlockStatement extends Statement {
 
+	private boolean reduce;
+	
+	public EndExecBlockStatement(boolean reduce) {
+		this.reduce = reduce;
+	}
+	
 	@Override
 	public void execute(List<Task> taskGroup) throws Exception {
 		//TODO: actual reduce of taskGroup
@@ -18,10 +24,6 @@ public class ReduceStatement extends Statement {
 		
 		for (Task t : taskGroup)
 		{
-			if (t.returned)
-			{
-				t.returned = false;
-			}
 			MethodValuesHolder parentValues = t.values.getParentValuesHolder();
 			t.values = parentValues;
 			t.PC = eb.parentExecBlock.getNextPC();
@@ -32,7 +34,7 @@ public class ReduceStatement extends Statement {
 
 	@Override
 	public void print(StringBuilder sb, String indention) {
-		sb.append(indention).append("--reduce--");
+		sb.append(indention).append("--end exec block--");
 	}
 
 }

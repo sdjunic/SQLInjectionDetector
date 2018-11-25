@@ -1,30 +1,23 @@
 import java.sql.SQLException;
 
-public class superTest
-{
-	public String superTest = "dsad";
-};
-
-public class Test extends superTest
+public class Test
 {
 	public String fld1 = null;
-	public Test2 test2;
+	public String test2;
 	
 	public Test()
 	{
-		test2 = new Test2(this);
+		test2 = "safe";
 	}
-};
-
-public class Test2
-{
-	public String fld2 = "Slobo";
-	public Test t;
-	public Test2 t2 = this;
 	
-	public Test2(Test test)
+	public static String getSafe()
 	{
-		this.t = test;
+		return "safe";
+	}
+	
+	public String getStr()
+	{
+		return test2;
 	}
 };
 
@@ -37,8 +30,9 @@ public class singleTest {
 		String s = "safe";
 		String notInit;
 		Test t = new Test();
-		
+		String a = Test.getSafe();
+		String b = t.getStr(); // dovede sve radi, ovde puca!
 		
 	}
 
-}
+};

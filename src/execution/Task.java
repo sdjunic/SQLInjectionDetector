@@ -6,7 +6,6 @@ public class Task {
 	
 	public MethodValuesHolder values;
 	public int PC;
-	public boolean returned;
 	
 	public Task(MethodValuesHolder values) {
 		this(values, 0);

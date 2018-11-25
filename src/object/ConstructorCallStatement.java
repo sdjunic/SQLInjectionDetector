@@ -36,7 +36,11 @@ public class ConstructorCallStatement extends CallStatement {
 				if (fieldInitMethod != null)
 				{
 					List<VariableExec> args = new LinkedList<VariableExec>();
-					MethCallStatement fieldInitMethCall = new MethCallStatement(null, fieldInitMethod, args);
+					MethCallStatement fieldInitMethCall = new MethCallStatement(
+							null, 
+							constructor.getParentClass().getFieldInitializerMethodName(), 
+							new VariableExec("this", constructor.getParentClass()), 
+							args);
 					fieldInitMethCall.setInitFieldsMethod();
 					constructor.getBody().addStatement(fieldInitMethCall, 0);
 				}
@@ -59,7 +63,7 @@ public class ConstructorCallStatement extends CallStatement {
 			}
 			
 			constructor.getBody().addStatement(new ReturnStatement(new VariableExec("this", constructor.getParentClass())));
-			constructor.getBody().addStatement(new ReduceStatement());
+			constructor.getBody().addStatement(new EndExecBlockStatement(false /*reduce*/));
 		}
 	}
 	
@@ -78,6 +82,7 @@ public class ConstructorCallStatement extends CallStatement {
 		for (Task task : taskGroup)
 		{
 			MethodValuesHolder callingConstrValues = new MethodValuesHolder(task.values);
+			callingConstrValues.addObject(constructor.getParentClass(), "this", true);
 			
 			// Populate ValuesHolder for method body
 			for (int i=0; i<arguments.size(); ++i) {

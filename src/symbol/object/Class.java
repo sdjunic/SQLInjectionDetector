@@ -7,7 +7,7 @@ import Parse.ExpressionParser;
 import object.AssignmentStatement;
 import object.ConstructorCallStatement;
 import object.MethCallStatement;
-import object.ReduceStatement;
+import object.EndExecBlockStatement;
 import object.ReturnStatement;
 import object.VariableExec;
 import symbol.Scope;
@@ -129,6 +129,11 @@ public class Class implements Type {
 		return ++anonymousClassCount + "_" + name;
 	}
 	
+	public String getFieldInitializerMethodName()
+	{
+		return "_field_init_" + name;
+	}
+	
 	public Method getFieldsInitializerMethod() throws Exception {
 		if (this.fieldInitializersParsed == false) {
 			fieldInitializersParsed = true;
@@ -144,7 +149,7 @@ public class Class implements Type {
 					}
 				}
 				if (!fields.isEmpty()) {
-					Method m = new Method("_field_init_" + name, true);
+					Method m = new Method(getFieldInitializerMethodName(), true);
 					m.setParsed(true);
 					this.fieldsInitializerMethod = m;
 					m.complFormalParamAdding();
@@ -186,6 +191,7 @@ public class Class implements Type {
 						}
 						fr.close();
 					}
+					m.addStatement(new EndExecBlockStatement(true /* reduce */));
 					
 					Table.setCurrentScope(currentScope);
 				}
@@ -265,7 +271,7 @@ public class Class implements Type {
 			}
 			
 			defCon.getBody().addStatement(new ReturnStatement(new VariableExec("this", this)));
-			defCon.getBody().addStatement(new ReduceStatement());
+			defCon.getBody().addStatement(new EndExecBlockStatement(true /* reduce */));
 			return defCon;
 		}
 		

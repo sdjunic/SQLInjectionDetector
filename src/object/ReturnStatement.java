@@ -28,12 +28,20 @@ public class ReturnStatement extends Statement {
 					if (returnVariable != null && eb.returnDestination != null)
 					{
 						MethodValuesHolder parentValues = t.values.getParentValuesHolder();
-						ObjValue returnVal = t.values.get(returnVariable.name);
+						ObjValue returnVal;
+						if (returnVariable.value == null)
+						{
+							returnVal = t.values.get(returnVariable.name);
+						}
+						else
+						{
+							returnVal = returnVariable.value;
+						}
 						parentValues.put(eb.returnDestination.name, returnVal);
 					}
-					t.returned = true;
 					t.PC = eb.statements.getStmtCount() - 1; // jump to ReduceStatement
 				}
+				eb.updateMinPC();
 				break;
 			}
 			else

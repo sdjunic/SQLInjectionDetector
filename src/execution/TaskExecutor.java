@@ -33,6 +33,7 @@ public class TaskExecutor {
 		}
 		
 		activeExecutionBlock = new ExecutionBlock(m.getBody());
+		activeExecutionBlock.isMethodBody = true;
 		activeExecutionBlock.createNewTask(values);
 		
 		while (activeExecutionBlock != null)
