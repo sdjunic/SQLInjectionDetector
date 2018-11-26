@@ -91,9 +91,10 @@ public class ExecutionBlock {
 		}
 	}
 	
-	public int getNextPC()
+	public int getParentEB_PC()
 	{
-		return minPC;
+		if (parentExecBlock != null) return parentExecBlock.minPC;
+		else return -1;
 	}
 	
 	public void removeTasks(List<Task> tasksToRemove)

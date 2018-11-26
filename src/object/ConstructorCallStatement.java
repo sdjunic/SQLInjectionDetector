@@ -41,7 +41,6 @@ public class ConstructorCallStatement extends CallStatement {
 							constructor.getParentClass().getFieldInitializerMethodName(), 
 							new VariableExec("this", constructor.getParentClass()), 
 							args);
-					fieldInitMethCall.setInitFieldsMethod();
 					constructor.getBody().addStatement(fieldInitMethCall, 0);
 				}
 				

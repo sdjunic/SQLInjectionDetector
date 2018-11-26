@@ -255,24 +255,56 @@ public class Class implements Type {
 			this.myScope.addToLocals(defCon);
 			Table.setCurrentScope(currentScope);
 			
-			Method fieldInitMethod = this.getFieldsInitializerMethod();
-			if (fieldInitMethod != null)
+			if (!defCon.isContainsExplThisConstructorCall()) {				
+				Method fieldInitMethod = defCon.getParentClass().getFieldsInitializerMethod();
+				if (fieldInitMethod != null)
+				{
+					List<VariableExec> args1 = new LinkedList<VariableExec>();
+					MethCallStatement fieldInitMethCall = new MethCallStatement(
+							null, 
+							defCon.getParentClass().getFieldInitializerMethodName(), 
+							new VariableExec("this", defCon.getParentClass()), 
+							args);
+					defCon.getBody().addStatement(fieldInitMethCall, 0);
+				}
+				
+				if (!defCon.isContainsExplSuperConstructorCall()) {
+					if (defCon.getParentClass().getSuperClass() != null && defCon.getParentClass().getSuperClass().type != null) {
+						Class superClass = (Class)defCon.getParentClass().getSuperClass().type;
+						List<VariableExec> args1 = new LinkedList<VariableExec>();
+						Field superField = defCon.getParentClass().findField("super");
+						List<String> name = new LinkedList<String>();
+						name.add("this"); name.add("super");
+						ConstructorCallStatement superConstrCall = new ConstructorCallStatement(new VariableExec(name, superField), superClass.findConstructor(args), args);
+						defCon.getBody().addStatement(superConstrCall, 0);
+					}
+				}
+			}
+			else
 			{
-				List<VariableExec> emptyArgs = new LinkedList<VariableExec>();
-				MethCallStatement fieldInitMethCall = new MethCallStatement(null, fieldInitMethod, emptyArgs);
-				fieldInitMethCall.setInitFieldsMethod();
-				defCon.addStatement(fieldInitMethCall);
+				throw new Exception("Calling this() in constructor isn't supported!");
 			}
 			
-			if (this.superClass != null && this.superClass.type != null) {
-				Class superClass = (Class)this.superClass.type;
-				VariableExec superField = new VariableExec("super", this.findField("super"));
-				defCon.addStatement(new ConstructorCallStatement(superField, superClass.findConstructor(args), args));
-			}
-			
-			defCon.getBody().addStatement(new ReturnStatement(new VariableExec("this", this)));
-			defCon.getBody().addStatement(new EndExecBlockStatement(true /* reduce */));
+			defCon.getBody().addStatement(new ReturnStatement(new VariableExec("this", defCon.getParentClass())));
+			defCon.getBody().addStatement(new EndExecBlockStatement(false /*reduce*/));
 			return defCon;
+			
+//			if (fieldInitMethod != null)
+//			{
+//				List<VariableExec> emptyArgs = new LinkedList<VariableExec>();
+//				MethCallStatement fieldInitMethCall = new MethCallStatement(null, fieldInitMethod, emptyArgs);
+//				defCon.addStatement(fieldInitMethCall);
+//			}
+//			
+//			if (this.superClass != null && this.superClass.type != null) {
+//				Class superClass = (Class)this.superClass.type;
+//				VariableExec superField = new VariableExec("super", this.findField("super"));
+//				defCon.addStatement(new ConstructorCallStatement(superField, superClass.findConstructor(args), args));
+//			}
+//			
+//			defCon.getBody().addStatement(new ReturnStatement(new VariableExec("this", this)));
+//			defCon.getBody().addStatement(new EndExecBlockStatement(true /* reduce */));
+//			return defCon;
 		}
 		
 		return null;

@@ -1,38 +1,31 @@
-import java.sql.SQLException;
+package test;
 
-public class Test
-{
-	public String fld1 = null;
-	public String test2;
-	
-	public Test()
-	{
-		test2 = "safe";
-	}
-	
-	public static String getSafe()
-	{
-		return "safe";
-	}
-	
-	public String getStr()
-	{
-		return test2;
-	}
-};
+import javax.servlet.http.*;
+import java.sql.*;
 
-public class singleTest {
-
-	public 
+public class Test extends HttpServlet {
 	
-	public static void main(String[] args) throws SQLException {
-			
-		String s = "safe";
-		String notInit;
-		Test t = new Test();
-		String a = Test.getSafe();
-		String b = t.getStr(); // dovede sve radi, ovde puca!
+	private Connection con = null;
+	
+	public void getConnection(String serverName,String instanceName,String port,String databaseName,String userName,String password) {
+		String connectoinString = "jdbc:sqlserver://" + serverName + 
+	            "\\" + instanceName + 
+	            ":" + port +
+	            ";databaseName=" + databaseName +
+	            ";username=" + userName +
+	            ";password=" + password;
 		
+		con = DriverManager.getConnection(connectoinString);
 	}
-
-};
+	
+	@Override
+	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException  {
+	     String id = req.getParameter("realname");
+	     String password = req.getParameter("mypassword");
+	     
+	     Statement stmt = null;
+	     
+	     stmt = con.createStatement();
+	     ResultSet rs = stmt.executeQuery("SELECT * FROM users WHERE username LIKE '" + id + "'");
+	}
+}

@@ -7,8 +7,10 @@ import Parse.ParseData;
 import execution.ExecutionBlock;
 import execution.Task;
 import execution.TaskExecutor;
+import main.SpecialArg;
 import object.values.MethodValuesHolder;
 import object.values.ObjValue;
+import object.values.StringVal;
 import symbol.object.*;
 import symbol.object.Class;
 
@@ -16,7 +18,6 @@ public class MethCallStatement extends CallStatement {
 
 	private String methodToCall = null;
 	private VariableExec thisObj = null;
-	private boolean isInitFieldsMethod = false;
 	
 	private Method staticMethodToCall = null; // only for static methods
 	
@@ -32,12 +33,7 @@ public class MethCallStatement extends CallStatement {
 		this.staticMethodToCall = staticMethodToCall;
 		this.arguments = arguments;
 	}
-	
-	public void setInitFieldsMethod()
-	{
-		isInitFieldsMethod = true;
-	}
-	
+
 	public List<VariableExec> getArguments() {
 		return arguments;
 	}
@@ -57,7 +53,13 @@ public class MethCallStatement extends CallStatement {
 			Method m = methodToCall.getKey();
 			List<Task> methTasks = methodToCall.getValue();
 			
-			//TODO handle special methods
+			// Execute special method inline
+			if (!m.isDefined())
+			{
+				m.executeSpecialMethod(thisObj, arguments, left, methTasks);
+				continue;
+			}
+			
 			m.parseMethod();
 			
 			// Set new execution block
@@ -100,7 +102,11 @@ public class MethCallStatement extends CallStatement {
 			}
 		}
 		
-		TaskExecutor.activeExecutionBlock = firstMethodExecBlock;
+		// If all methods were special we didn't add new EB, just continue execution in the same EB.
+		if (firstMethodExecBlock != null)
+		{
+			TaskExecutor.activeExecutionBlock = firstMethodExecBlock;
+		}
 	}
 	
 	public HashMap<Method, List<Task>> getMethodToCall(List<Task> taskGroup) throws Exception
@@ -186,7 +192,7 @@ public class MethCallStatement extends CallStatement {
 			sb.append(ParseData.makeFullNameWithDots(thisObj.name)).append(".");
 		}
 
-		if (staticMethodToCall == null) sb.append(methodToCall).append(" (");
+		if (staticMethodToCall == null) sb.append(methodToCall).append("() (");
 		else sb.append(staticMethodToCall.getName()).append(" (");
 		
 		for (int i=0; i<arguments.size(); ++i) {

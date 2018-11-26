@@ -26,7 +26,7 @@ public class EndExecBlockStatement extends Statement {
 		{
 			MethodValuesHolder parentValues = t.values.getParentValuesHolder();
 			t.values = parentValues;
-			t.PC = eb.parentExecBlock.getNextPC();
+			t.PC = eb.getParentEB_PC();
 		}
 		
 		eb.taskTable.clear();
@@ -34,7 +34,7 @@ public class EndExecBlockStatement extends Statement {
 
 	@Override
 	public void print(StringBuilder sb, String indention) {
-		sb.append(indention).append("--end exec block--");
+		sb.append(indention).append("--end exec block--\r\n");
 	}
 
 }

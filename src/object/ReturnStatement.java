@@ -59,6 +59,7 @@ public class ReturnStatement extends Statement {
 		{
 			sb.append(" ").append(returnVariable);
 		}
+		sb.append("\r\n");
 	}
 
 }

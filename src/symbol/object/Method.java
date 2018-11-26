@@ -6,8 +6,10 @@ import java.io.Reader;
 import java.util.*;
 
 import Parse.MethodParser;
+import execution.Task;
 import main.Main;
 import main.SpecialArg;
+import main.exception.SQLInjection;
 import object.*;
 import object.values.*;
 import symbol.Scope;
@@ -252,53 +254,55 @@ public class Method implements Obj {
 //		return null;
 //	}
 	
-	public ObjValue executeMethod(MethodValuesHolder values) throws Exception {
-		if (Main.infoPS != null) Main.infoPS.println("Exec "+ this.getName() +" method!");
-		if (isDefined) {
-			if (!parsed) {
-				if (this.constructor) {
-					throw new Exception("Constructors need to be parsed in ConstructorCallStatement!");
-				}
-				this.parseMethod();
-			}
-			return null; //body.execute(values);
-		} else {
-			ObjValue returnValue = null;
-			
-			for (SpecialArg specArg : specialArguments) {
-				if (specArg.type == SpecialArg.TYPE_CRITICAL_OUTPUT) {
-					String argumentName;
-					if (specArg.index == SpecialArg.INDEX_RETURN_OBJ) continue;
-					else if (specArg.index == -1) { argumentName = "this"; }
-					else { argumentName = this.getMethParamList().get(specArg.index).getName(); }
-					ObjValue obj = values.get(argumentName);
-					if (obj != null && !obj.isSafe()) {
-						StringBuilder sb = new StringBuilder();
-						sb.append("SQL injection detected!\r\n\r\nCritical method call stack:\r\n");
-						printMethodCallStack(sb);
-						throw new main.exception.SQLInjection(sb.toString());
-					}
-				} else {
-					String argumentName;
-					if (specArg.index == -2) {
-						returnValue = new StringVal(specArg.type == SpecialArg.TYPE_SAFE_ARG);
-						continue;
-					}
-					else if (specArg.index == -1) { argumentName = "this"; }
-					else { argumentName = this.getMethParamList().get(specArg.index).getName(); }
-					ObjValue obj = values.get(argumentName);
-					obj.setSafe(specArg.type == SpecialArg.TYPE_SAFE_ARG);
-				}
-			}
-			
-			return returnValue;
-		}
-	}
+//	public ObjValue executeMethod(MethodValuesHolder values) throws Exception {
+//		if (Main.infoPS != null) Main.infoPS.println("Exec "+ this.getName() +" method!");
+//		if (isDefined) {
+//			if (!parsed) {
+//				if (this.constructor) {
+//					throw new Exception("Constructors need to be parsed in ConstructorCallStatement!");
+//				}
+//				this.parseMethod();
+//			}
+//			return null; //body.execute(values);
+//		} else {
+//			ObjValue returnValue = null;
+//			
+//			for (SpecialArg specArg : specialArguments) {
+//				if (specArg.type == SpecialArg.TYPE_CRITICAL_OUTPUT) {
+//					String argumentName;
+//					if (specArg.index == SpecialArg.INDEX_RETURN_OBJ) continue;
+//					else if (specArg.index == -1) { argumentName = "this"; }
+//					else { argumentName = this.getMethParamList().get(specArg.index).getName(); }
+//					ObjValue obj = values.get(argumentName);
+//					if (obj != null && !obj.isSafe()) {
+//						StringBuilder sb = new StringBuilder();
+//						sb.append("SQL injection detected!\r\n\r\nCritical method call stack:\r\n");
+//						printMethodCallStack(sb);
+//						throw new main.exception.SQLInjection(sb.toString());
+//					}
+//				} else {
+//					String argumentName;
+//					if (specArg.index == -2) {
+//						returnValue = new StringVal(specArg.type == SpecialArg.TYPE_SAFE_ARG);
+//						continue;
+//					}
+//					else if (specArg.index == -1) { argumentName = "this"; }
+//					else { argumentName = this.getMethParamList().get(specArg.index).getName(); }
+//					ObjValue obj = values.get(argumentName);
+//					obj.setSafe(specArg.type == SpecialArg.TYPE_SAFE_ARG);
+//				}
+//			}
+//			
+//			return returnValue;
+//		}
+//	}
 	
 	public void parseMethod() throws Exception {
+		assert this.isDefined;
 		if (!this.parsed)
 		{
-			this.parsed = true;
+			this.parsed = true;			
+			
 			if (Main.infoPS != null) Main.infoPS.println("Parsing "+this.name+" method!");
 			
 			Reader fr = new BufferedReader(new FileReader(this.getMethodDefFilePath()));
@@ -315,7 +319,63 @@ public class Method implements Obj {
 			
 			fr.close();
 			
-			this.body.addStatement(new EndExecBlockStatement(true /* reduce */));
+			if (!this.constructor)
+			{
+				this.body.addStatement(new EndExecBlockStatement(true /* reduce */));
+			}
+		}
+	}
+	
+	public void executeSpecialMethod(VariableExec thisObj, List<VariableExec> actualArgs, VariableExec returnDest, List<Task> tasks) throws SQLInjection
+	{
+		assert !this.isDefined;
+		assert specialArguments.size() >= actualArgs.size();
+		for (Task t : tasks)
+		{
+			ValuesHolder values = t.values;
+			
+			for (SpecialArg specArg : specialArguments) {
+				if (specArg.type == SpecialArg.TYPE_CRITICAL_OUTPUT) {
+					VariableExec actualArg = null;
+					assert (specArg.index != SpecialArg.INDEX_RETURN_OBJ);
+					if (specArg.index == -1) { actualArg = thisObj; }
+					else { actualArg = actualArgs.get(specArg.index); }
+					ObjValue obj;
+					if (actualArg.value != null)
+					{
+						obj = actualArg.value;
+					}
+					else
+					{
+						obj = values.get(actualArg.name);
+					}
+					if (obj != null && !obj.isSafe()) {
+						StringBuilder sb = new StringBuilder();
+						sb.append("SQL injection detected!\r\n\r\nCritical method call stack:\r\n");
+						printMethodCallStack(sb);
+						throw new main.exception.SQLInjection(sb.toString());
+					}
+				} else {
+					VariableExec actualArg = null;
+					if (specArg.index == -2 && returnDest != null) {
+						assert (returnDest.name != null);
+						values.put(returnDest.name, new StringVal(specArg.type == SpecialArg.TYPE_SAFE_ARG));
+						continue;
+					}
+					else if (specArg.index == -1) { actualArg = thisObj; }
+					else { actualArg = actualArgs.get(specArg.index); }
+					ObjValue obj;
+					if (actualArg.value != null)
+					{
+						obj = actualArg.value;
+					}
+					else
+					{
+						obj = values.get(actualArg.name);
+					}
+					obj.setSafe(specArg.type == SpecialArg.TYPE_SAFE_ARG);
+				}
+			}
 		}
 	}
 	

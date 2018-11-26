@@ -1,0 +1,6 @@
+<test-metadata>
+   <testName>simpleTest.java</testName>
+   <vulnerability>false</vulnerability>
+   <analyzeFromMain>true</analyzeFromMain>
+   <initArgumentsSafe>true</initArgumentsSafe>
+</test-metadata>
