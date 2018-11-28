@@ -1,0 +1,6 @@
+<test-metadata>
+   <testName>rekurzija.java</testName>
+   <vulnerability>false</vulnerability>
+   <analyzeFromMain>false</analyzeFromMain>
+   <initArgumentsSafe>true</initArgumentsSafe>
+</test-metadata>
