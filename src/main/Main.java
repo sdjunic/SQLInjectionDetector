@@ -252,6 +252,8 @@ public class Main {
 		if (infoPS != null) {
 			infoPS.println("\r\n----------------------------------------------------------------------------------------");
 			infoPS.println("------------------------------- NEW SQLI TESTING STARTED -------------------------------");
+			infoPS.println("----------------------------------------------------------------------------------------");
+ 			infoPS.println("---------------- Project root: " + projectRoot + " ----------------");
 			infoPS.println("----------------------------------------------------------------------------------------\r\n");
 			infoPS.println(Paths.get(".").toAbsolutePath().normalize().toString());
 		}
@@ -288,7 +290,11 @@ public class Main {
 				while (it.hasNext()) {
 					Method m = it.next();
 					Method.methCallStack.push(m);
-					if (infoPS != null) infoPS.println(" -name: " + m.getName() + "  -file: " + m.getMethodDefFilePath());
+					if (infoPS != null) 
+					{
+						infoPS.println("\r\n----------------------------------------------------------------------------------------");
+						infoPS.println(" -START METHOD NAME: " + m.getName() + "  -file: " + m.getMethodDefFilePath());
+					}
 					
 					try {
 //						m.executeMethod(values);

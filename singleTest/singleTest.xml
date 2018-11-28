@@ -1,6 +1,6 @@
 <test-metadata>
-   <testName>singleTest</testName>
-   <vulnerability>true</vulnerability>
-   <analyzeFromMain>false</analyzeFromMain>
+   <testName>prevoz1</testName>
+   <vulnerability>false</vulnerability>
+   <analyzeFromMain>true</analyzeFromMain>
    <initArgumentsSafe>false</initArgumentsSafe>
 </test-metadata>
