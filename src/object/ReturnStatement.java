@@ -19,6 +19,7 @@ public class ReturnStatement extends Statement {
 	@Override
 	public void execute(List<Task> taskGroup) throws Exception {
 		ExecutionBlock eb = TaskExecutor.activeExecutionBlock;
+		boolean firstIteration = true;
 		while(eb != null)
 		{
 			if (eb.isMethodBody)
@@ -41,14 +42,31 @@ public class ReturnStatement extends Statement {
 					}
 					t.PC = eb.statements.getStmtCount() - 1; // jump to ReduceStatement
 				}
-				eb.updateMinPC();
+				if (eb != TaskExecutor.activeExecutionBlock)
+				{
+					assert !firstIteration;
+					eb.taskTable.addAll(taskGroup);
+				}
 				break;
 			}
 			else
 			{
-				eb.removeTasks(taskGroup);
+				// Tasks should be already deleted in all EB, except in active one
+				if (firstIteration)
+				{
+					assert eb.taskTable.containsAll(taskGroup);
+					eb.taskTable.removeAll(taskGroup);
+				}
+				else
+				{
+					for (Task t : taskGroup)
+					{
+						assert !eb.taskTable.contains(t);
+					}
+				}
 			}
 			eb = eb.parentExecBlock;
+			firstIteration = false;
 		}
 	}
 

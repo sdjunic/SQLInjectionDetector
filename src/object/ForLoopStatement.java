@@ -27,11 +27,11 @@ public class ForLoopStatement extends Statement {
 	}
 	
 	public void addUpdate() {
-		this.update = new StatementsBlock(condition.getParentExecutableBlock());
+		this.update = new StatementsBlock(condition.getParentStatementsBlock());
 	}
 
 	public void addLoopBody() {
-		this.loopBody = new StatementsBlock(condition.getParentExecutableBlock());
+		this.loopBody = new StatementsBlock(condition.getParentStatementsBlock());
 	}
 
 	@Override

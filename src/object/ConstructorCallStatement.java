@@ -97,7 +97,10 @@ public class ConstructorCallStatement extends CallStatement {
 			task.PC = 0;
 		}
 		// Add all tasks to new execution block
-		constrExecBlock.taskTable.addAll(taskGroup);	
+		constrExecBlock.taskTable.addAll(taskGroup);
+		// and remove them from current execution block
+		TaskExecutor.activeExecutionBlock.taskTable.removeAll(taskGroup);
+		
 		TaskExecutor.activeExecutionBlock = constrExecBlock;
 	}
 	

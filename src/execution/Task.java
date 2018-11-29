@@ -17,4 +17,10 @@ public class Task {
 		this.PC = PC;
 	}
 	
+	public Task clone()
+	{
+		Task clone = new Task(this.values.deepCopy(), this.PC);
+		return clone;
+	}
+	
 }

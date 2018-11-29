@@ -231,7 +231,7 @@ public class Method implements Obj {
 	}
 	
 	public void executableBlockEnd() {
-		this.currentBlock = this.currentBlock.getParentExecutableBlock();
+		this.currentBlock = this.currentBlock.getParentStatementsBlock();
 	}
 	
 //	public Type getReturnVariableType() {

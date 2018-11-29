@@ -3,6 +3,7 @@ package execution;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.swing.text.html.HTMLDocument.Iterator;
 import javax.swing.text.html.MinimalHTMLWriter;
 
 import object.Statement;
@@ -48,10 +49,22 @@ public class ExecutionBlock {
 				activeTaskGroup.add(task);
 			}
 		}
+		if (activeTaskGroup.isEmpty())
+		{
+			updateMinPC();
+			for (Task task : taskTable)
+			{
+				if (task.PC == this.minPC)
+				{
+					++task.PC;
+					activeTaskGroup.add(task);
+				}
+			}
+		}
 		return activeTaskGroup;
 	}
 	
-	private void completeEB()
+	public void complete()
 	{
 		if (brotherExecBlock != null)
 		{
@@ -65,21 +78,22 @@ public class ExecutionBlock {
 	
 	public void executeNextStmt() throws Exception
 	{
+		if (taskTable.isEmpty())
+		{
+			this.complete();
+			return;
+		}
+		
 		int endPC = statements.getStmtCount();
-		if (minPC >= endPC)
-		{
-			completeEB();
-		}
-		else
-		{
-			List<Task> activeTaskGroup = getNextActiveTaskGroup();
-			assert !activeTaskGroup.isEmpty();
-			Statement stmt = statements.getStatement(minPC++);
-			stmt.execute(activeTaskGroup);
-		}
+		assert (minPC < endPC);
+		
+		List<Task> activeTaskGroup = getNextActiveTaskGroup();
+		assert !activeTaskGroup.isEmpty();
+		Statement stmt = statements.getStatement(minPC++);
+		stmt.execute(activeTaskGroup);
 	}
 	
-	public void updateMinPC()
+	private void updateMinPC()
 	{
 		this.minPC = maxPC;
 		for (Task task : taskTable)
@@ -95,12 +109,6 @@ public class ExecutionBlock {
 	{
 		if (parentExecBlock != null) return parentExecBlock.minPC;
 		else return -1;
-	}
-	
-	public void removeTasks(List<Task> tasksToRemove)
-	{
-		for (Task t : tasksToRemove) taskTable.remove(t);
-		updateMinPC();
 	}
 
 }

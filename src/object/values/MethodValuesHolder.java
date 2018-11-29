@@ -34,26 +34,29 @@ public class MethodValuesHolder extends ValuesHolder {
 
 	// Deep copy this and all parent MethodValuesHolder maps, with all objects
 	// and its references. 
-	// NOTE: Result list is ordered starting from this, to parent MVH maps.
 	//
-	public List<MethodValuesHolder> deepCopy()
+	public MethodValuesHolder deepCopy()
 	{
 		HashMap<ObjValue, ObjValue> copyMap = new HashMap<>();
-		List<MethodValuesHolder> copyValuesHolderList = new LinkedList<MethodValuesHolder>();
 		
 		// Copy all objects and make capyMap table, which is mapping between
 		// previous and new object. Also populate new ValuesHolder map, with
 		// references to new objects that we are creating in this method.
 		//
 		MethodValuesHolder currentMethVHMap = this;
+		MethodValuesHolder resultCopyVHMap = null;
+		MethodValuesHolder prevCopyMethVHMap = null;
 		while(currentMethVHMap != null)
 		{
 			MethodValuesHolder currentCopyMethVHMap = new MethodValuesHolder(null);
-			if (!copyValuesHolderList.isEmpty())
+			if (prevCopyMethVHMap != null)
 			{
-				copyValuesHolderList.get(copyValuesHolderList.size() - 1).setParentValuesHolder(currentCopyMethVHMap);
+				prevCopyMethVHMap.setParentValuesHolder(currentCopyMethVHMap);
 			}
-			copyValuesHolderList.add(currentCopyMethVHMap);
+			else
+			{
+				resultCopyVHMap = currentCopyMethVHMap;
+			}
 			
 			for (Entry<String, ObjValue> var : currentMethVHMap.values.entrySet())
 			{
@@ -65,7 +68,12 @@ public class MethodValuesHolder extends ValuesHolder {
 					((ClassValue)prevObj).getFields().copyAllObjects(copyMap);
 				}
 			}
+			
+			prevCopyMethVHMap = currentCopyMethVHMap;
+			currentMethVHMap = currentMethVHMap.parentValuesHolder;
 		}
+		
+		assert (resultCopyVHMap != null);
 		
 		// Update field references for all new objects of type ClassValue, using the
 		// previously created mapping in copyMap.
@@ -78,7 +86,7 @@ public class MethodValuesHolder extends ValuesHolder {
 			}
 		}
 		
-		return copyValuesHolderList;
+		return resultCopyVHMap;
 	}
 
 }

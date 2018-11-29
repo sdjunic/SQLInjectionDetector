@@ -9,7 +9,7 @@ import object.values.ObjValue;
 public class StatementsBlock {
 
 	protected List<Statement> statements = null;
-	protected StatementsBlock parentExecutableBlock = null;
+	protected StatementsBlock parentStatementsBlock = null;
 	
 	public StatementsBlock() {
 		statements = new LinkedList<Statement>();
@@ -17,7 +17,7 @@ public class StatementsBlock {
 
 	public StatementsBlock(StatementsBlock parentExecutableBlock) {
 		statements = new LinkedList<Statement>();
-		this.parentExecutableBlock = parentExecutableBlock;
+		this.parentStatementsBlock = parentExecutableBlock;
 	}
 	
 	public void addStatement(Statement stmt) {
@@ -28,14 +28,14 @@ public class StatementsBlock {
 		statements.add(index, stmt);
 	}
 	
-	public void setParentExecutableBlock(StatementsBlock parentExecutableBlock)
+	public void setParentStatementsBlock(StatementsBlock parentStatementsBlock)
 	{
-		this.parentExecutableBlock = parentExecutableBlock;
+		this.parentStatementsBlock = parentStatementsBlock;
 	}
 	
-	public StatementsBlock getParentExecutableBlock()
+	public StatementsBlock getParentStatementsBlock()
 	{
-		return parentExecutableBlock;
+		return parentStatementsBlock;
 	}
 	
 	public Statement getStatement(int n)

@@ -20,16 +20,26 @@ public class EndExecBlockStatement extends Statement {
 		//TODO: actual reduce of taskGroup
 		
 		ExecutionBlock eb = TaskExecutor.activeExecutionBlock;
-		assert eb.isMethodBody;
+		assert (taskGroup.size() == eb.taskTable.size());
+		
+		ExecutionBlock parentEb = TaskExecutor.activeExecutionBlock.parentExecBlock;
+		
+		if (parentEb != null)
+		{
+			parentEb.taskTable.addAll(taskGroup);
+		}
 		
 		for (Task t : taskGroup)
 		{
-			MethodValuesHolder parentValues = t.values.getParentValuesHolder();
-			t.values = parentValues;
+			if (eb.isMethodBody)
+			{
+				t.values = t.values.getParentValuesHolder();
+			}
 			t.PC = eb.getParentEB_PC();
 		}
 		
 		eb.taskTable.clear();
+		eb.complete();
 	}
 
 	@Override

@@ -47,7 +47,6 @@ public class MethCallStatement extends CallStatement {
 		HashMap<Method, List<Task>> hashMethodsToCall = getMethodToCall(taskGroup);
 		
 		ExecutionBlock prevMethodExecBlock = null;
-		ExecutionBlock firstMethodExecBlock = null;
 		for (Entry<Method, List<Task>> methodToCall : hashMethodsToCall.entrySet())
 		{
 			Method m = methodToCall.getKey();
@@ -93,19 +92,17 @@ public class MethCallStatement extends CallStatement {
 				task.PC = 0;
 			}
 			// Add all tasks to new execution block
-			methodExecBlock.taskTable.addAll(methTasks);	
+			methodExecBlock.taskTable.addAll(methTasks);
+			// and remove them from current execution block
+			TaskExecutor.activeExecutionBlock.taskTable.removeAll(methTasks);
 			
 			prevMethodExecBlock = methodExecBlock;
-			if (firstMethodExecBlock == null)
-			{
-				firstMethodExecBlock = methodExecBlock;
-			}
 		}
 		
 		// If all methods were special we didn't add new EB, just continue execution in the same EB.
-		if (firstMethodExecBlock != null)
+		if (prevMethodExecBlock != null)
 		{
-			TaskExecutor.activeExecutionBlock = firstMethodExecBlock;
+			TaskExecutor.activeExecutionBlock = prevMethodExecBlock;
 		}
 	}
 	

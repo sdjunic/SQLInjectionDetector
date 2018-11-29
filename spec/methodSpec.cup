@@ -1346,7 +1346,8 @@ if_then_statement ::=
 		{:
 			if (parsingClassLevel == 0) {
 				parser.parsingTopMethod.executableBlockEnd();
-				assert parser.parsingTopMethod.getCurrentBlock() == ifElseStmt.getIfThenBody().getParentExecutableBlock();
+				assert parser.parsingTopMethod.getCurrentBlock() == ifElseStmt.getParentStatementsBlock();
+				ifElseStmt.parsingDone();
 			}
 		:}
 	;
@@ -1367,7 +1368,8 @@ if_then_else_statement ::=
 		{:
 			if (parsingClassLevel == 0) {
 				parser.parsingTopMethod.executableBlockEnd();
-				assert parser.parsingTopMethod.getCurrentBlock() == ifElseStmt.getElseBody().getParentExecutableBlock();
+				assert parser.parsingTopMethod.getCurrentBlock() == ifElseStmt.getParentStatementsBlock();
+				ifElseStmt.parsingDone();
 			}
 		:}
 	;
@@ -1377,7 +1379,8 @@ if_then_else_statement_no_short_if ::=
 		{:
 			if (parsingClassLevel == 0) {
 				parser.parsingTopMethod.executableBlockEnd();
-				assert parser.parsingTopMethod.getCurrentBlock() == ifElseStmt.getElseBody().getParentExecutableBlock();
+				assert parser.parsingTopMethod.getCurrentBlock() == ifElseStmt.getParentStatementsBlock();
+				ifElseStmt.parsingDone();
 			}
 		:}
 	;
@@ -1428,7 +1431,7 @@ while_statement ::=
 		while_expression:loopStmt statement
 		{:
 			parser.parsingTopMethod.executableBlockEnd();
-			assert parser.parsingTopMethod.getCurrentBlock() == loopStmt.getLoopBody().getParentExecutableBlock();
+			assert parser.parsingTopMethod.getCurrentBlock() == loopStmt.getLoopBody().getParentStatementsBlock();
 		:}
 	;
 	
@@ -1453,7 +1456,7 @@ do_statement ::=
 		{:
 			// Note that expression will be a part of loop body
 			parser.parsingTopMethod.executableBlockEnd();
-			assert parser.parsingTopMethod.getCurrentBlock() == loopStmt.getLoopBody().getParentExecutableBlock();
+			assert parser.parsingTopMethod.getCurrentBlock() == loopStmt.getLoopBody().getParentStatementsBlock();
 		:}
 	;
 	
@@ -1503,7 +1506,7 @@ for_statement ::=
 		for_loop_update:forLoopStmt RPAREN statement
 		{:
 			parser.parsingTopMethod.executableBlockEnd();
-			assert parser.parsingTopMethod.getCurrentBlock() == forLoopStmt.getLoopBody().getParentExecutableBlock();
+			assert parser.parsingTopMethod.getCurrentBlock() == forLoopStmt.getLoopBody().getParentStatementsBlock();
 		:}
 	;
 	
@@ -1511,7 +1514,7 @@ for_statement_no_short_if ::=
 		for_loop_update:forLoopStmt RPAREN statement_no_short_if
 		{:
 			parser.parsingTopMethod.executableBlockEnd();
-			assert parser.parsingTopMethod.getCurrentBlock() == forLoopStmt.getLoopBody().getParentExecutableBlock();
+			assert parser.parsingTopMethod.getCurrentBlock() == forLoopStmt.getLoopBody().getParentStatementsBlock();
 		:}
 	;
 	
