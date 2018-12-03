@@ -31,6 +31,7 @@ public class singleTest {
 		String a = Test.getSafe();
 		String b = t.getStr();
 		String c = a + b;
+		__check_1();
 	}
 
 };

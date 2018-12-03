@@ -1814,44 +1814,52 @@ method_invocation ::=
 		name:n LPAREN argument_list_opt:args RPAREN
 		{:
 			if (parsingClassLevel == 0) {
-				VariableExec thisObj = null;
-				Method m = null;
-				if (n.size() > 1) {
-					Obj obj = ParseData.findName(n.subList(0, n.size()-1), parser.parsingTopMethod.getImportedObjects(), parser.parsingTopMethod.getImportedScopes(), Table.currentScope());  
-					if (obj != null) {
-						if (obj instanceof Class) { //STATIC method
-							m = ((Class)obj).findMethod(n.get(n.size()-1), args);
-						} else {
-							if (obj instanceof symbol.object.Variable || obj instanceof Field || obj instanceof MethParam) {
-								thisObj = new VariableExec(n.subList(0, n.size()-1), obj);
-								Type t = null;
-								if (obj instanceof symbol.object.Variable) t = ((symbol.object.Variable)obj).getType().type;
-								else if (obj instanceof Field) t = ((Field)obj).getType().type;
-								else if (obj instanceof MethParam) t = ((MethParam)obj).getType().type;
-								
-								if (t instanceof Class) m = ((Class)t).findMethod(n.get(n.size()-1), args);
+				if (main.Main.useCheck && Parse.ParseData.isCheckStmt(n)) // only for debugging 
+				{
+					int expectedTaskNum = Parse.ParseData.getCheckThreadNum(n);
+					parser.parsingTopMethod.addStatement(new DbgCheckStatement(expectedTaskNum));
+				}
+				else
+				{
+					VariableExec thisObj = null;
+					Method m = null;
+					if (n.size() > 1) {
+						Obj obj = ParseData.findName(n.subList(0, n.size()-1), parser.parsingTopMethod.getImportedObjects(), parser.parsingTopMethod.getImportedScopes(), Table.currentScope());  
+						if (obj != null) {
+							if (obj instanceof Class) { //STATIC method
+								m = ((Class)obj).findMethod(n.get(n.size()-1), args);
+							} else {
+								if (obj instanceof symbol.object.Variable || obj instanceof Field || obj instanceof MethParam) {
+									thisObj = new VariableExec(n.subList(0, n.size()-1), obj);
+									Type t = null;
+									if (obj instanceof symbol.object.Variable) t = ((symbol.object.Variable)obj).getType().type;
+									else if (obj instanceof Field) t = ((Field)obj).getType().type;
+									else if (obj instanceof MethParam) t = ((MethParam)obj).getType().type;
+									
+									if (t instanceof Class) m = ((Class)t).findMethod(n.get(n.size()-1), args);
+								}
 							}
 						}
-					}
-				} else {
-					m = parser.parsingTopMethod.getParentClass().findMethod(n.get(n.size()-1), args);
-					if (m != null && !m.isStatic()) thisObj = new VariableExec("this", parser.parsingTopMethod.getParentClass());
-				}
-				if (m != null) {
-					VariableExec var = null; /* VOID method */
-					if (m.getRetType() != null && m.getRetType().type != null) var = AssignmentStatement.getNewTempVariable(m.getRetType().type);
-				
-					MethCallStatement methCall = null;
-					if (m.isStatic() || !m.isDefined()) {
-						methCall = new MethCallStatement(var, m, args);
 					} else {
-						methCall = new MethCallStatement(var, n.get(n.size()-1), thisObj, args);
+						m = parser.parsingTopMethod.getParentClass().findMethod(n.get(n.size()-1), args);
+						if (m != null && !m.isStatic()) thisObj = new VariableExec("this", parser.parsingTopMethod.getParentClass());
 					}
+					if (m != null) {
+						VariableExec var = null; /* VOID method */
+						if (m.getRetType() != null && m.getRetType().type != null) var = AssignmentStatement.getNewTempVariable(m.getRetType().type);
 					
-					parser.parsingTopMethod.addStatement(methCall);
-					RESULT = var;
-				} else {
-					RESULT = null;	
+						MethCallStatement methCall = null;
+						if (m.isStatic() || !m.isDefined()) {
+							methCall = new MethCallStatement(var, m, args);
+						} else {
+							methCall = new MethCallStatement(var, n.get(n.size()-1), thisObj, args);
+						}
+						
+						parser.parsingTopMethod.addStatement(methCall);
+						RESULT = var;
+					} else {
+						RESULT = null;	
+					}
 				}
 			}
 		:}

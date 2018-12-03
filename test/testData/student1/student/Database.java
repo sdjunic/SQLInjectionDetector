@@ -14,6 +14,9 @@ public class Database {
 	}
 	
 	public User getUser(String username) {
+		
+		__check_1();
+		
 		Statement stmt = null;
 		User u = null;
 		try {
@@ -22,16 +25,24 @@ public class Database {
 			if (rs.next()) {
 				u = new User(rs.getInt("id"), username);
 			}
+			
+			__check_2();
+			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			if (stmt != null) stmt.close();
 		}
+		
 		return u;
+		__check_100();
 	}
 	
 	public boolean checkIfUserExists(User user) {
+		
+		__check_100();
+		
 		Statement stmt = null;
 		try {
 			stmt = con.createStatement();

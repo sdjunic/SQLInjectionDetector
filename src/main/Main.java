@@ -29,6 +29,7 @@ public class Main {
 	private static List<LibraryMethodDecl> libraryMethList; 
 
 	public static PrintStream infoPS = System.out; /* null; */
+	public static boolean useCheck = true; /* false */
 	
 	public static void main(String args[]) throws Exception {
 		

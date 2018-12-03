@@ -30,6 +30,10 @@ public class Field implements Obj {
 
 	@Override
 	public SymbolDataStructure getLocals() {
+		if (type.isRefType() && type.type instanceof Class)
+		{
+			return ((Class)type.type).getLocals();
+		}
 		return null;
 	}
 

@@ -15,6 +15,8 @@ public class ParseData {
 	
 	public static Package currentPackage = null;
 	public static Method currentMethod = null;
+	
+	public static final String checkStmtString = "__check_";
 
 	public static String makeFullNameWithDots(List<String> name) {
 		if (name == null || name.isEmpty()) return null;
@@ -265,6 +267,20 @@ public class ParseData {
 		}
 		
 		return null;	
+	}
+	
+	public static boolean isCheckStmt(List<String> methName)
+	{
+		String fullMethName = makeFullNameWithDots(methName);
+		return fullMethName.startsWith(checkStmtString);
+	}
+	
+	public static int getCheckThreadNum(List<String> methName)
+	{
+		assert isCheckStmt(methName);
+		String fullMethName = makeFullNameWithDots(methName);
+		String num = fullMethName.substring(checkStmtString.length());
+		return Integer.parseInt(num);
 	}
 	
 }

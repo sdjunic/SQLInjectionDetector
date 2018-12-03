@@ -32,11 +32,17 @@ public class Test extends HttpServlet {
 	    	 if (rs.next()) {
 	             request.getSession().setAttribute("username", rs.getString("username"));
 	             response.sendRedirect("home");
+				 
+				 __check_1();
 	         }
 	         else {
 	             request.setAttribute("error", "Unknown user, please try again");
 	             request.getRequestDispatcher("/login.jsp").forward(request, response);
+				 
+				 __check_1();
 	         }
+			 
+			 __check_2();
 
 	     } catch (Exception e) {
 	    	// TODO Auto-generated catch block
@@ -61,11 +67,17 @@ public class Test extends HttpServlet {
 	    	 if (rs.next()) {
 	             request.getSession().setAttribute("username", rs.getString("username"));
 	             response.sendRedirect("home");
+				 
+				 __check_1();
 	         }
 	         else {
 	             request.setAttribute("error", "Unknown user, please try again");
 	             request.getRequestDispatcher("/login.jsp").forward(request, response);
+				 
+				 __check_1();
 	         }
+			 
+			 __check_2();
 
 	     } catch (Exception e) {
 	    	// TODO Auto-generated catch block

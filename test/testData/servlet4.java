@@ -20,7 +20,7 @@ public class Test extends HttpServlet {
 	
 	@Override
 	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException  {
-	     String id = req.getParameter("realname");
+	     String id = Statement.escapeSQL(req.getParameter("realname"));
 	     String password = req.getParameter("mypassword");
 	     
 	     Statement stmt = null;
@@ -29,14 +29,20 @@ public class Test extends HttpServlet {
 	    	 stmt = con.createStatement();
 	    	 ResultSet rs = stmt.executeQuery("SELECT * FROM users WHERE username LIKE '" + id + "'");
 	     
+			__check_1();
+		 
 	    	 if (rs.next()) {
 	             request.getSession().setAttribute("username", rs.getString("username"));
 	             response.sendRedirect("home");
+				 __check_1();
 	         }
 	         else {
 	             request.setAttribute("error", "Unknown user, please try again");
 	             request.getRequestDispatcher("/login.jsp").forward(request, response);
+				 __check_1();
 	         }
+			 
+			 __check_2();
 
 	     } catch (Exception e) {
 	    	// TODO Auto-generated catch block
@@ -49,7 +55,7 @@ public class Test extends HttpServlet {
 	
 	@Override
 	public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException  {
-	     String id = req.getParameter("realname");
+	     String id = Statement.escapeSQL(req.getParameter("realname"));
 	     String password = req.getParameter("mypassword");
 	     
 	     Statement stmt = null;
@@ -58,15 +64,23 @@ public class Test extends HttpServlet {
 	    	 stmt = con.createStatement();
 	    	 ResultSet rs = stmt.executeQuery("SELECT * FROM users WHERE username LIKE '" + id + "'");
 	     
+			__check_1();
+		 
 	    	 if (rs.next()) {
 	             request.getSession().setAttribute("username", rs.getString("username"));
 	             response.sendRedirect("home");
+				 
+				 __check_1();
 	         }
 	         else {
 	             request.setAttribute("error", "Unknown user, please try again");
 	             request.getRequestDispatcher("/login.jsp").forward(request, response);
+				 
+				 __check_1();
 	         }
 
+			 __check_2();
+			 
 	     } catch (Exception e) {
 	    	// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -1,6 +1,6 @@
 import java.sql.SQLException;
 
-public class SimpleIfTest3 {
+public class SimpleIfTest2 {
 
 	public static void main(String[] args) throws SQLException {
 			
@@ -8,15 +8,22 @@ public class SimpleIfTest3 {
 		String a = null;
 		String b = "safeStr";
 		
+		__check_1();
+		
 		if (random == true)
 		{
-			return;
+			__check_1();
+			a = null;
 		}
 		else
 		{
-			a = "safeStr";
+			__check_1();
 			return;
+			__check_100();
+			a = "safeStr";
 		}
+		
+		__check_1();
 		
 		b = a;
 	}
