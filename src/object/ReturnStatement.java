@@ -51,6 +51,15 @@ public class ReturnStatement extends Statement {
 			}
 			else
 			{
+				List<String> localVarToRemove = eb.statements.getBlockLocalVariables();
+				for(Task task : taskGroup)
+				{
+					for (String var : localVarToRemove)
+					{
+						task.values.remove(var);
+					}
+				}
+				
 				// Tasks should be already deleted in all EB, except in active one
 				if (firstIteration)
 				{

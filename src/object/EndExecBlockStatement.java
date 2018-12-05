@@ -17,6 +17,15 @@ public class EndExecBlockStatement extends Statement {
 	
 	@Override
 	public void execute(List<Task> taskGroup) throws Exception {
+		List<String> localVarToRemove = TaskExecutor.activeExecutionBlock.statements.getBlockLocalVariables();
+		for(Task task : taskGroup)
+		{
+			for (String var : localVarToRemove)
+			{
+				task.values.remove(var);
+			}
+		}
+		
 		//TODO: actual reduce of taskGroup
 		
 		ExecutionBlock eb = TaskExecutor.activeExecutionBlock;

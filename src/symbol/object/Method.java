@@ -229,6 +229,10 @@ public class Method implements Obj {
 	public void addStatement(Statement stmt) {
 		this.currentBlock.addStatement(stmt);
 	}
+
+	public void addStatement(Statement stmt, boolean isLocalVariableDeclaration) {
+		this.currentBlock.addStatement(stmt, isLocalVariableDeclaration);
+	}
 	
 	public void executableBlockEnd() {
 		this.currentBlock = this.currentBlock.getParentStatementsBlock();

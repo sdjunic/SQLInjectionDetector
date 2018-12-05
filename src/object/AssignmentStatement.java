@@ -17,6 +17,10 @@ public class AssignmentStatement extends Statement {
 		this.right = right;
 	}
 	
+	public VariableExec getLeft() {
+		return left;
+	}
+
 	public static VariableExec getNewTempVariable(Obj type) {
 		List<String> name = new LinkedList<String>();
 		name.add(++genericNameCount + "_temp");

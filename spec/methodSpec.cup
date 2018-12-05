@@ -1241,7 +1241,7 @@ local_variable_declaration ::=
 					if (t.isRefType()) {
 						if (v.initValue != null) {
 							VariableExec left = new VariableExec(v.name, varObject);
-							parser.parsingTopMethod.addStatement(new AssignmentStatement(left, v.initValue));
+							parser.parsingTopMethod.addStatement(new AssignmentStatement(left, v.initValue), true /* is local variable declaration */);
 						}
 					}
 				}
@@ -1261,7 +1261,7 @@ local_variable_declaration ::=
 					if (t.isRefType()) {
 						if (v.initValue != null) {
 							VariableExec left = new VariableExec(v.name, varObject);
-							parser.parsingTopMethod.addStatement(new AssignmentStatement(left, v.initValue));
+							parser.parsingTopMethod.addStatement(new AssignmentStatement(left, v.initValue), true /* is local variable declaration */);
 						}
 					}
 				}

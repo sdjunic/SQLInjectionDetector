@@ -8,11 +8,16 @@ import object.values.ObjValue;
 
 public class StatementsBlock {
 
-	protected List<Statement> statements = null;
-	protected StatementsBlock parentStatementsBlock = null;
+	private List<Statement> statements = null;
+	private StatementsBlock parentStatementsBlock = null;
+	
+	// Local variables declared in this block.
+	// Used to delete variables from VH map when stmt block is executed.
+	private List<String> blockLocalVariables = null;
 	
 	public StatementsBlock() {
 		statements = new LinkedList<Statement>();
+		blockLocalVariables = new LinkedList<>();
 	}
 
 	public StatementsBlock(StatementsBlock parentExecutableBlock) {
@@ -22,6 +27,19 @@ public class StatementsBlock {
 	
 	public void addStatement(Statement stmt) {
 		statements.add(stmt);
+	}
+
+	public void addStatement(Statement stmt, boolean isLocalVariableDeclaration) {
+		statements.add(stmt);
+		if (isLocalVariableDeclaration)
+		{
+			assert (stmt instanceof AssignmentStatement);
+			AssignmentStatement assignmentStmt = (AssignmentStatement)stmt;
+			VariableExec var = assignmentStmt.getLeft();
+			assert var.name != null;
+			assert var.name.size() == 1;
+			blockLocalVariables.add(var.name.get(0));
+		}
 	}
 	
 	public void addStatement(Statement stmt, int index) {
@@ -49,6 +67,10 @@ public class StatementsBlock {
 		return statements.size();
 	}
 	
+	public List<String> getBlockLocalVariables() {
+		return blockLocalVariables;
+	}
+
 	public void print(StringBuilder sb, String indention) {
 		for (Statement stmt : statements) {
 			if (stmt != null) stmt.print(sb, indention);

@@ -31,6 +31,11 @@ public abstract class ValuesHolder {
 
 	public abstract ObjValue get(String name);
 	
+	public void remove(String var)
+	{
+		values.remove(var);
+	}
+	
 	public void put(List<String> name, ObjValue value) {
 		if (name == null || name.isEmpty()) return;
 		if (name.size() == 1) {
