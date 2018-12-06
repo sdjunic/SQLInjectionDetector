@@ -1,19 +1,30 @@
 package object.values;
 
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import symbol.object.Class;
 import symbol.object.Type;
 
+class LexicographicComparator implements Comparator<String> {
+	@Override
+	public int compare(String o1, String o2) {
+		return o1.compareTo(o2);
+	}
+}
+
 public abstract class ValuesHolder {
 	
-	protected Map<String, ObjValue> values;
+	protected SortedMap<String, ObjValue> values;
 
 	public ValuesHolder() {
-		values = new HashMap<String, ObjValue>();
+		values = new TreeMap<String, ObjValue>(new LexicographicComparator());
 	}
 	
 	public boolean isEmpty() {
@@ -25,6 +36,7 @@ public abstract class ValuesHolder {
 	}
 
 	public void put(String name, ObjValue value) {
+		assert name != null && value != null;
 		if (name == null) return;
 		values.put(name, value);
 	}
@@ -37,6 +49,7 @@ public abstract class ValuesHolder {
 	}
 	
 	public void put(List<String> name, ObjValue value) {
+		assert name != null && !name.isEmpty() && value != null;
 		if (name == null || name.isEmpty()) return;
 		if (name.size() == 1) {
 			values.put(name.get(0), value);
@@ -90,38 +103,51 @@ public abstract class ValuesHolder {
 		return null;
 	}
 
-	protected void numberAllObjects(HashMap<ObjValue, Integer> objHash, IntRef num)
+	private boolean isTempVariable(String s)
 	{
-		for (ObjValue obj : values.values())
+		assert s != null && s.length() > 0;
+		return Character.isDigit(s.charAt(0)) && s.endsWith("_temp");
+	}
+	
+	protected void numerateAllObjects(HashMap<ObjValue, Integer> objHash, List<ObjValue> sortedObjects, boolean skipTempVariables)
+	{		
+		for (Entry<String, ObjValue> var : values.entrySet())
 		{
+			if (skipTempVariables && isTempVariable(var.getKey())) continue;
+			
+			ObjValue obj = var.getValue();
 			if (!objHash.containsKey(obj))
 			{
-				objHash.put(obj, num.inc());
+				objHash.put(obj, sortedObjects.size());
+				sortedObjects.add(obj);
 				if (obj instanceof ClassValue)
 				{
-					((ClassValue)obj).getFields().numberAllObjects(objHash, num);
+					((ClassValue)obj).getFields().numerateAllObjects(objHash, sortedObjects, skipTempVariables);
 				}
 			}
 		}
 	}
 	
-	public void print(StringBuilder sb)
+	public void print(StringBuilder sb, boolean skipTempVariables)
 	{
 		HashMap<ObjValue, Integer> objHash = new HashMap<>();
-		IntRef num = new IntRef();
-		numberAllObjects(objHash, num);
+		List<ObjValue> sortedObjects = new LinkedList<>();
+		numerateAllObjects(objHash, sortedObjects, skipTempVariables);
 		
 		for (Entry<String, ObjValue> var : values.entrySet())
 		{
+			if (skipTempVariables && isTempVariable(var.getKey())) continue;
+			
 			sb.append(var.getKey()).append(": ").append("#").append(objHash.get(var.getValue())).append("\n");
 		}
 		
-		for (Entry<ObjValue, Integer> val : objHash.entrySet())
+		int order = 0;
+		for (ObjValue obj : sortedObjects)
 		{
-			sb.append("#").append(val.getValue()).append(":").append(val.getKey().toString()).append("\n");
-			if (val.getKey() instanceof ClassValue)
+			sb.append("#").append(order++).append(": ").append(obj.toString()).append("\n");
+			if (obj instanceof ClassValue)
 			{
-				((ClassValue)val.getKey()).print(sb, "    ", objHash); sb.append("\n");
+				((ClassValue)obj).print(sb, "    ", objHash); sb.append("\n");
 			}
 		}
 	}

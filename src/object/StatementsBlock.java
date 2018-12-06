@@ -21,7 +21,7 @@ public class StatementsBlock {
 	}
 
 	public StatementsBlock(StatementsBlock parentExecutableBlock) {
-		statements = new LinkedList<Statement>();
+		this();
 		this.parentStatementsBlock = parentExecutableBlock;
 	}
 	

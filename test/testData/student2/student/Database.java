@@ -25,9 +25,8 @@ public class Database {
 			ResultSet rs = stmt.executeQuery("SELECT * FROM " + table + " WHERE username LIKE '" + username + "'");
 			if (rs.next()) {
 				u = new User(rs.getInt("id"), username);
-				
-			__check_2();
 			}
+			__check_2();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -61,7 +60,7 @@ public class Database {
 	}
 	
 	public String makeSafeSQL(String str) {
-		return Sratement.escapeSQL(str);
+		return Statement.escapeSQL(str);
 	}
 	
 }

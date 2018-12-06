@@ -1,5 +1,7 @@
 package object;
 
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import execution.ExecutionBlock;
@@ -18,15 +20,37 @@ public class EndExecBlockStatement extends Statement {
 	@Override
 	public void execute(List<Task> taskGroup) throws Exception {
 		List<String> localVarToRemove = TaskExecutor.activeExecutionBlock.statements.getBlockLocalVariables();
-		for(Task task : taskGroup)
+		for (String var : localVarToRemove)
 		{
-			for (String var : localVarToRemove)
+			for(Task task : taskGroup)
 			{
 				task.values.remove(var);
 			}
 		}
 		
-		//TODO: actual reduce of taskGroup
+		if (reduce)
+		{
+			List<byte[]> taskValuesHash = new LinkedList<>();
+			for(Task task : taskGroup)
+			{
+				taskValuesHash.add(task.hash());
+			}
+			
+			for (int i = 0; i < taskValuesHash.size(); ++i)
+			{
+				byte i_Hash[] = taskValuesHash.get(i);
+				for (int j = i + 1; j < taskValuesHash.size(); ++j)
+				{
+					byte j_Hash[] = taskValuesHash.get(j);
+					if (Arrays.equals(i_Hash, j_Hash))
+					{
+						TaskExecutor.activeExecutionBlock.taskTable.remove(taskGroup.get(j));
+						taskGroup.remove(j);
+						taskValuesHash.remove(j);
+					}
+				}
+			}
+		}
 		
 		ExecutionBlock eb = TaskExecutor.activeExecutionBlock;
 		assert (taskGroup.size() == eb.taskTable.size());

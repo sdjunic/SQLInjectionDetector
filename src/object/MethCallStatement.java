@@ -7,8 +7,10 @@ import Parse.ParseData;
 import execution.ExecutionBlock;
 import execution.Task;
 import execution.TaskExecutor;
+import main.Main;
 import main.SpecialArg;
 import object.values.MethodValuesHolder;
+import object.values.NullValue;
 import object.values.ObjValue;
 import object.values.StringVal;
 import symbol.object.*;
@@ -44,6 +46,8 @@ public class MethCallStatement extends CallStatement {
 	
 	@Override
 	public void execute(List<Task> taskGroup) throws Exception {
+		if (Main.infoPS != null) Main.infoPS.println("Calling " + (methodToCall != null ? methodToCall : staticMethodToCall.getName()));
+		
 		HashMap<Method, List<Task>> hashMethodsToCall = getMethodToCall(taskGroup);
 		
 		ExecutionBlock prevMethodExecBlock = null;
@@ -115,9 +119,22 @@ public class MethCallStatement extends CallStatement {
 			return res;
 		}
 		
-		for (Task task : taskGroup)
+		Iterator<Task> taskIter = taskGroup.iterator();
+		while (taskIter.hasNext())
 		{
+			Task task = taskIter.next();
 			ObjValue thisObjValue = task.values.get(thisObj.name);
+			
+			if(thisObjValue instanceof NullValue)
+			{
+				// Remove this task due to null pointer exception.
+				//
+				if (Main.infoPS != null) Main.infoPS.println("Killing the task due to null pointer exception.");
+				TaskExecutor.activeExecutionBlock.taskTable.remove(task);
+				taskIter.remove();
+				continue;
+			}
+			
 			Class thisObjClass = thisObjValue.getObjectType();
 			if (thisObjClass != null) {
 				Method methodToCall = thisObjClass.findMethod(this.methodToCall, this.arguments);

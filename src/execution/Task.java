@@ -1,5 +1,7 @@
 package execution;
 
+import java.security.NoSuchAlgorithmException;
+
 import object.values.MethodValuesHolder;
 
 public class Task {
@@ -21,6 +23,11 @@ public class Task {
 	{
 		Task clone = new Task(this.values.deepCopy(), this.PC);
 		return clone;
+	}
+	
+	public byte[] hash() throws NoSuchAlgorithmException
+	{
+		return this.values.hash();
 	}
 	
 }

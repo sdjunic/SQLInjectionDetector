@@ -1,0 +1,2 @@
+1) Add one global ValuesHolder map, for static fields
+2) Add handling for null pointer exception in dereferencing object field  { A a = null; read(a.b); }

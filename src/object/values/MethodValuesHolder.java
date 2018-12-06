@@ -1,8 +1,9 @@
 package object.values;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map.Entry;
 
 public class MethodValuesHolder extends ValuesHolder {
@@ -32,6 +33,15 @@ public class MethodValuesHolder extends ValuesHolder {
 		this.parentValuesHolder = parentValuesHolder;
 	}
 
+	public byte[] hash() throws NoSuchAlgorithmException
+	{
+		StringBuilder sb = new StringBuilder();
+		this.print(sb, true);
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		byte[] hash = digest.digest(sb.toString().getBytes(StandardCharsets.UTF_8));
+		return hash;
+	}
+	
 	// Deep copy this and all parent MethodValuesHolder maps, with all objects
 	// and its references. 
 	//

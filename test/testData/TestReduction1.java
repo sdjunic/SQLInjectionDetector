@@ -10,6 +10,7 @@ public class TestReduction1 {
 		{
 			String b = null;
 		}
+		else
 		{
 			String c = "slobo";
 		}

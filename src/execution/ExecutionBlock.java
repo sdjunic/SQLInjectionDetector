@@ -3,9 +3,6 @@ package execution;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.swing.text.html.HTMLDocument.Iterator;
-import javax.swing.text.html.MinimalHTMLWriter;
-
 import object.Statement;
 import object.StatementsBlock;
 import object.VariableExec;
