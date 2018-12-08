@@ -283,9 +283,9 @@ non terminal switch_statement, switch_block;
 non terminal switch_block_statement_groups;
 non terminal switch_block_statement_group;
 non terminal switch_labels, switch_label;
-non terminal LoopStatement while_expression;
+non terminal WhileLoopStatement while_do_WHILE, while_expression;
 non terminal while_statement, while_statement_no_short_if;
-non terminal LoopStatement do_;
+non terminal WhileLoopStatement do_, do_body;
 non terminal do_statement;
 non terminal foreach_statement, foreach_statement_no_short_if;
 non terminal ForLoopStatement for_loop_init, for_loop_condition, for_loop_update;
@@ -1345,7 +1345,7 @@ if_then_statement ::=
 		if_expression:ifElseStmt statement
 		{:
 			if (parsingClassLevel == 0) {
-				parser.parsingTopMethod.executableBlockEnd();
+				parser.parsingTopMethod.currentBlockEnd();
 				assert parser.parsingTopMethod.getCurrentBlock() == ifElseStmt.getParentStatementsBlock();
 				ifElseStmt.parsingDone();
 			}
@@ -1367,7 +1367,7 @@ if_then_else_statement ::=
 		if_expression_else:ifElseStmt statement
 		{:
 			if (parsingClassLevel == 0) {
-				parser.parsingTopMethod.executableBlockEnd();
+				parser.parsingTopMethod.currentBlockEnd();
 				assert parser.parsingTopMethod.getCurrentBlock() == ifElseStmt.getParentStatementsBlock();
 				ifElseStmt.parsingDone();
 			}
@@ -1378,7 +1378,7 @@ if_then_else_statement_no_short_if ::=
 		if_expression_else:ifElseStmt statement_no_short_if
 		{:
 			if (parsingClassLevel == 0) {
-				parser.parsingTopMethod.executableBlockEnd();
+				parser.parsingTopMethod.currentBlockEnd();
 				assert parser.parsingTopMethod.getCurrentBlock() == ifElseStmt.getParentStatementsBlock();
 				ifElseStmt.parsingDone();
 			}
@@ -1415,47 +1415,71 @@ switch_label ::=
 	|	DEFAULT COLON
 	;
 
-while_expression ::=
+while_do_WHILE ::=
 		WHILE 
 		{:
-			// Note that expression will be a part of loop body
-			LoopStatement loopStmt = new LoopStatement(parser.parsingTopMethod.getCurrentBlock());
+			WhileLoopStatement loopStmt = new WhileLoopStatement(parser.parsingTopMethod.getCurrentBlock(), false /* is do-while */);
 			parser.parsingTopMethod.addStatement(loopStmt);
+			parser.parsingTopMethod.setCurrentBlock(loopStmt.getCondition());
+			RESULT = loopStmt;
+		:}
+	;
+		
+while_expression ::=
+		while_do_WHILE:loopStmt LPAREN expression RPAREN
+		{:
+			assert parser.parsingTopMethod.getCurrentBlock() == loopStmt.getCondition();
 			parser.parsingTopMethod.setCurrentBlock(loopStmt.getLoopBody());
 			RESULT = loopStmt;
-		:} 
-		LPAREN expression RPAREN
+		:}
 	;
 
 while_statement ::=
 		while_expression:loopStmt statement
 		{:
-			parser.parsingTopMethod.executableBlockEnd();
+			loopStmt.parsingDone();
+			assert parser.parsingTopMethod.getCurrentBlock() == loopStmt.getLoopBody();
+			parser.parsingTopMethod.currentBlockEnd();
+			assert parser.parsingTopMethod.getCurrentBlock() == loopStmt.getCondition().getParentStatementsBlock();
 			assert parser.parsingTopMethod.getCurrentBlock() == loopStmt.getLoopBody().getParentStatementsBlock();
 		:}
 	;
 	
 while_statement_no_short_if ::=
-		while_expression statement_no_short_if
+		while_expression:loopStmt statement_no_short_if
 		{:
-			//TODO: close loop statement
+			loopStmt.parsingDone();
+			parser.parsingTopMethod.currentBlockEnd();
+			assert parser.parsingTopMethod.getCurrentBlock() == loopStmt.getCondition().getParentStatementsBlock();
+			assert parser.parsingTopMethod.getCurrentBlock() == loopStmt.getLoopBody().getParentStatementsBlock();
 		:}
 	;
 	
 do_ ::= DO
 		{:
-			LoopStatement loopStmt = new LoopStatement(parser.parsingTopMethod.getCurrentBlock());
+			WhileLoopStatement loopStmt = new WhileLoopStatement(parser.parsingTopMethod.getCurrentBlock(), true /* is do-while */);
 			parser.parsingTopMethod.addStatement(loopStmt);
 			parser.parsingTopMethod.setCurrentBlock(loopStmt.getLoopBody());
 			RESULT = loopStmt;
 		:}
 	;
+
+do_body ::=
+		do_:loopStmt statement WHILE 
+		{:
+			assert parser.parsingTopMethod.getCurrentBlock() == loopStmt.getLoopBody();
+			parser.parsingTopMethod.setCurrentBlock(loopStmt.getCondition());
+			RESULT = loopStmt;
+		:}
+	;
 	
 do_statement ::=
-		do_:loopStmt statement WHILE LPAREN expression RPAREN SEMICOLON
+		do_body:loopStmt LPAREN expression RPAREN SEMICOLON
 		{:
-			// Note that expression will be a part of loop body
-			parser.parsingTopMethod.executableBlockEnd();
+			loopStmt.parsingDone();
+			assert parser.parsingTopMethod.getCurrentBlock() == loopStmt.getCondition();
+			parser.parsingTopMethod.currentBlockEnd();
+			assert parser.parsingTopMethod.getCurrentBlock() == loopStmt.getCondition().getParentStatementsBlock();
 			assert parser.parsingTopMethod.getCurrentBlock() == loopStmt.getLoopBody().getParentStatementsBlock();
 		:}
 	;
@@ -1505,7 +1529,7 @@ for_loop_update ::=
 for_statement ::=
 		for_loop_update:forLoopStmt RPAREN statement
 		{:
-			parser.parsingTopMethod.executableBlockEnd();
+			parser.parsingTopMethod.currentBlockEnd();
 			assert parser.parsingTopMethod.getCurrentBlock() == forLoopStmt.getLoopBody().getParentStatementsBlock();
 		:}
 	;
@@ -1513,7 +1537,7 @@ for_statement ::=
 for_statement_no_short_if ::=
 		for_loop_update:forLoopStmt RPAREN statement_no_short_if
 		{:
-			parser.parsingTopMethod.executableBlockEnd();
+			parser.parsingTopMethod.currentBlockEnd();
 			assert parser.parsingTopMethod.getCurrentBlock() == forLoopStmt.getLoopBody().getParentStatementsBlock();
 		:}
 	;
@@ -1700,6 +1724,9 @@ class_instance_creation_expression ::=
 					VariableExec superField = new VariableExec(superName, currentClass.findField("super"));
 					ConstructorCallStatement superConstCall = new ConstructorCallStatement(superField, parentClassConstr, args);
 					innerClassImplicitCon.addStatement(superConstCall);
+					
+					innerClassImplicitCon.addStatement(new ReturnStatement(new VariableExec("this", currentClass)));
+					innerClassImplicitCon.addStatement(new EndExecBlockStatement(false /*reduce*/));
 					
 					Table.insert(innerClassImplicitCon);
 					

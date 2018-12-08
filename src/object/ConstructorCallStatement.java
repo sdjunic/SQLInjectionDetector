@@ -6,6 +6,7 @@ import java.util.List;
 import execution.ExecutionBlock;
 import execution.Task;
 import execution.TaskExecutor;
+import main.Main;
 import object.values.MethodValuesHolder;
 import object.values.ObjValue;
 import symbol.object.Method;
@@ -67,7 +68,8 @@ public class ConstructorCallStatement extends CallStatement {
 	}
 	
 	@Override
-	public void execute(List<Task> taskGroup) throws Exception {		
+	public void execute(List<Task> taskGroup) throws Exception {
+		if (Main.infoPS != null) Main.infoPS.println("Calling constructor " + constructor.getName());
 		parse();
 		
 		// Set new execution block

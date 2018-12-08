@@ -82,7 +82,7 @@ public class EndExecBlockStatement extends Statement {
 
 	@Override
 	public void print(StringBuilder sb, String indention) {
-		sb.append(indention).append("--end exec block--\r\n");
+		sb.append(indention).append("--end exec block" + (reduce ? " + reduce" : "") + "--\r\n");
 	}
 
 }

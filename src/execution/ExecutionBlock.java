@@ -10,6 +10,9 @@ import object.values.MethodValuesHolder;
 
 public class ExecutionBlock {
 
+	// TODO(delete) currently used only for assertion
+	public boolean isLoopExecBlock = false;
+	
 	public ExecutionBlock parentExecBlock;
 	public ExecutionBlock brotherExecBlock;
 	public StatementsBlock statements;
@@ -90,7 +93,7 @@ public class ExecutionBlock {
 		stmt.execute(activeTaskGroup);
 	}
 	
-	private void updateMinPC()
+	public void updateMinPC()
 	{
 		this.minPC = maxPC;
 		for (Task task : taskTable)

@@ -92,9 +92,6 @@ public class IfElseStatement extends Statement {
 		// Set tasks for new ExecutionBlock
 		for (Task task : taskGroup)
 		{
-			// TODO: Should we add another ValuesHolder, to resolve
-			// 		 problem of having if-scope variable live after if stmt?
-			// task.values = ???;
 			task.PC = 0;
 			
 			Task elseBranchTask = task.clone();

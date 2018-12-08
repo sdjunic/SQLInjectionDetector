@@ -46,6 +46,22 @@ public class StatementsBlock {
 		statements.add(index, stmt);
 	}
 	
+	public void appendStmtBlock(StatementsBlock stmtBlock)
+	{
+		assert (this.parentStatementsBlock == stmtBlock.parentStatementsBlock);
+		
+		this.statements.addAll(stmtBlock.statements);
+		this.blockLocalVariables.addAll(stmtBlock.blockLocalVariables);
+	}
+	
+	public void prependStmtBlock(StatementsBlock stmtBlock)
+	{
+		assert (this.parentStatementsBlock == stmtBlock.parentStatementsBlock);
+		
+		this.statements.addAll(0, stmtBlock.statements);
+		this.blockLocalVariables.addAll(stmtBlock.blockLocalVariables);
+	}
+	
 	public void setParentStatementsBlock(StatementsBlock parentStatementsBlock)
 	{
 		this.parentStatementsBlock = parentStatementsBlock;

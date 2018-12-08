@@ -48,8 +48,8 @@ public class ForLoopStatement extends Statement {
 	
 	@Override
 	public void execute(List<Task> taskGroup) throws Exception {
-		// TODO Auto-generated method stub
-		
+		boolean b = true;
+		boolean a = b;
 	}
 
 }

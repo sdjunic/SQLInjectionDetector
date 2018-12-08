@@ -234,7 +234,7 @@ public class Method implements Obj {
 		this.currentBlock.addStatement(stmt, isLocalVariableDeclaration);
 	}
 	
-	public void executableBlockEnd() {
+	public void currentBlockEnd() {
 		this.currentBlock = this.currentBlock.getParentStatementsBlock();
 	}
 	
