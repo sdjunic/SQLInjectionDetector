@@ -9,7 +9,7 @@ public class NullValue extends ObjValue {
 	}
 	
 	@Override
-	public ObjValue copy()
+	public ObjValue shallowCopy()
 	{
 		// TODO: consider returning the same object, since NullValue object shouldn't be changes
 		return new NullValue();

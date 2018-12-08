@@ -31,6 +31,6 @@ public abstract class ObjValue {
 	
 	public abstract Class getObjectType();
 	
-	public abstract ObjValue copy();
+	public abstract ObjValue shallowCopy();
 	
 }

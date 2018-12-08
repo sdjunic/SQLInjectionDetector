@@ -128,7 +128,7 @@ public abstract class ValuesHolder {
 		}
 	}
 	
-	public void print(StringBuilder sb, boolean skipTempVariables)
+	public void print(StringBuilder sb, String tab, boolean skipTempVariables)
 	{
 		HashMap<ObjValue, Integer> objHash = new HashMap<>();
 		List<ObjValue> sortedObjects = new LinkedList<>();
@@ -138,16 +138,16 @@ public abstract class ValuesHolder {
 		{
 			if (skipTempVariables && isTempVariable(var.getKey())) continue;
 			
-			sb.append(var.getKey()).append(": ").append("#").append(objHash.get(var.getValue())).append("\n");
+			sb.append(tab).append(var.getKey()).append(": ").append("#").append(objHash.get(var.getValue())).append("\n");
 		}
 		
 		int order = 0;
 		for (ObjValue obj : sortedObjects)
 		{
-			sb.append("#").append(order++).append(": ").append(obj.toString()).append("\n");
+			sb.append(tab).append("#").append(order++).append(": ").append(obj.toString()).append("\n");
 			if (obj instanceof ClassValue)
 			{
-				((ClassValue)obj).print(sb, "    ", objHash); sb.append("\n");
+				((ClassValue)obj).print(sb, "   ", objHash); sb.append("\n");
 			}
 		}
 	}

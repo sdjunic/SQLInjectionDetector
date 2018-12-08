@@ -17,10 +17,12 @@ public class DbgCheckStatement extends Statement {
 	public void execute(List<Task> taskGroup) throws Exception {
 		if (main.Main.infoPS != null)
 		{
+			int taskId = 1;
+			main.Main.infoPS.println("Task num: " + taskGroup.size() + "(" + taskNum + ")");
 			for (Task task : taskGroup)
 			{
-				StringBuilder sb = new StringBuilder("Taks values:\n");
-				task.values.print(sb, true);
+				StringBuilder sb = new StringBuilder("Taks("+ taskId++ +") values:\n");
+				task.values.print(sb, "   ",  true);
 				main.Main.infoPS.println(sb);
 			}
 		}

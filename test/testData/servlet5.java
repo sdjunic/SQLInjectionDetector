@@ -36,12 +36,12 @@ public class Test extends HttpServlet {
 	    	 ResultSet rs = stmt.executeQuery("SELECT * FROM users WHERE username LIKE '" + id + "'");
 	     
 	    	 if (rs.next()) {
-	             request.getSession().setAttribute("username", rs.getString("username"));
-	             response.sendRedirect("home");
+	             req.getSession().setAttribute("username", rs.getString("username"));
+	             res.sendRedirect("home");
 	         }
 	         else {
-	             request.setAttribute("error", "Unknown user, please try again");
-	             request.getRequestDispatcher("/login.jsp").forward(request, response);
+	             req.setAttribute("error", "Unknown user, please try again");
+	             req.getreqDispatcher("/login.jsp").forward(req, res);
 	         }
 
 	     } catch (Exception e) {
@@ -68,12 +68,12 @@ public class Test extends HttpServlet {
 	    	 ResultSet rs = stmt.executeQuery("SELECT * FROM users WHERE username LIKE '" + id + "'");
 	     
 	    	 if (rs.next()) {
-	             request.getSession().setAttribute("username", rs.getString("username"));
-	             response.sendRedirect("home");
+	             req.getSession().setAttribute("username", rs.getString("username"));
+	             res.sendRedirect("home");
 	         }
 	         else {
-	             request.setAttribute("error", "Unknown user, please try again");
-	             request.getRequestDispatcher("/login.jsp").forward(request, response);
+	             req.setAttribute("error", "Unknown user, please try again");
+	             req.getreqDispatcher("/login.jsp").forward(req, res);
 	         }
 
 	     } catch (Exception e) {

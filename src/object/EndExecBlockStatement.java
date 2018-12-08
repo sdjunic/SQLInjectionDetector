@@ -19,6 +19,8 @@ public class EndExecBlockStatement extends Statement {
 	
 	@Override
 	public void execute(List<Task> taskGroup) throws Exception {
+		
+		// Delete local variables
 		List<String> localVarToRemove = TaskExecutor.activeExecutionBlock.statements.getBlockLocalVariables();
 		for (String var : localVarToRemove)
 		{
@@ -28,7 +30,8 @@ public class EndExecBlockStatement extends Statement {
 			}
 		}
 		
-		if (reduce)
+		// Reduce if needed
+		if (reduce && taskGroup.size() > 1)
 		{
 			List<byte[]> taskValuesHash = new LinkedList<>();
 			for(Task task : taskGroup)
@@ -47,11 +50,13 @@ public class EndExecBlockStatement extends Statement {
 						TaskExecutor.activeExecutionBlock.taskTable.remove(taskGroup.get(j));
 						taskGroup.remove(j);
 						taskValuesHash.remove(j);
+						--j;
 					}
 				}
 			}
 		}
 		
+		// Return task to parent EB
 		ExecutionBlock eb = TaskExecutor.activeExecutionBlock;
 		assert (taskGroup.size() == eb.taskTable.size());
 		

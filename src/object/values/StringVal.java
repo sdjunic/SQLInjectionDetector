@@ -10,7 +10,7 @@ public class StringVal extends ObjValue {
 	}
 
 	@Override
-	public ObjValue copy()
+	public ObjValue shallowCopy()
 	{
 		return new StringVal(isSafe());
 	}

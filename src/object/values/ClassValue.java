@@ -3,6 +3,7 @@ package object.values;
 import symbol.object.Obj;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import symbol.object.Class;
@@ -45,11 +46,35 @@ public class ClassValue extends ObjValue {
 	}
 	
 	@Override
-	public ObjValue copy()
+	public ObjValue shallowCopy()
 	{
 		ClassValue copy = new ClassValue(this.objectType, this.isSafe());
 		copy.fields.importMappings(this.fields);
 		return copy;
+	}
+	
+	public void deepCopyFields(HashMap<ObjValue, ObjValue> copyMap)
+	{
+		assert (copyMap != null);
+		
+		for (Entry<String, ObjValue> var : this.fields.values.entrySet())
+		{
+			ObjValue originalField = var.getValue();
+			ObjValue copyField = copyMap.get(originalField); 
+			if (copyField == null)
+			{
+				copyField = originalField.shallowCopy();
+				copyMap.put(originalField, copyField); 
+				
+				if (originalField instanceof ClassValue)
+				{
+					assert (copyField instanceof ClassValue);
+					((ClassValue)copyField).deepCopyFields(copyMap);
+				}
+			}
+			assert copyField != null;
+			var.setValue(copyField);
+		}
 	}
 	
 	@Override

@@ -35,8 +35,16 @@ public class MethodValuesHolder extends ValuesHolder {
 
 	public byte[] hash() throws NoSuchAlgorithmException
 	{
+		// Get string representation of this and all parent Method VH maps
 		StringBuilder sb = new StringBuilder();
-		this.print(sb, true);
+		MethodValuesHolder mvh = this;
+		while(mvh != null)
+		{
+			mvh.print(sb, "", true);
+			sb.append("\n");
+			mvh = mvh.parentValuesHolder;
+		}
+		
 		MessageDigest digest = MessageDigest.getInstance("SHA-256");
 		byte[] hash = digest.digest(sb.toString().getBytes(StandardCharsets.UTF_8));
 		return hash;
@@ -70,13 +78,21 @@ public class MethodValuesHolder extends ValuesHolder {
 			
 			for (Entry<String, ObjValue> var : currentMethVHMap.values.entrySet())
 			{
-				ObjValue prevObj = var.getValue();
-				ObjValue newObj = prevObj.copy();
-				currentCopyMethVHMap.values.put(var.getKey(), newObj);
-				if (prevObj instanceof ClassValue)
+				ObjValue originalObj = var.getValue();
+				ObjValue copyObj = copyMap.get(originalObj); 
+				if (copyObj == null)
 				{
-					((ClassValue)prevObj).getFields().copyAllObjects(copyMap);
+					copyObj = originalObj.shallowCopy();
+					copyMap.put(originalObj, copyObj); 
+					
+					if (originalObj instanceof ClassValue)
+					{
+						assert (copyObj instanceof ClassValue);
+						((ClassValue)copyObj).deepCopyFields(copyMap);
+					}
 				}
+				assert copyObj != null;
+				currentCopyMethVHMap.values.put(var.getKey(), copyObj);
 			}
 			
 			prevCopyMethVHMap = currentCopyMethVHMap;
@@ -85,16 +101,16 @@ public class MethodValuesHolder extends ValuesHolder {
 		
 		assert (resultCopyVHMap != null);
 		
-		// Update field references for all new objects of type ClassValue, using the
-		// previously created mapping in copyMap.
-		//
-		for (ObjValue newValue : copyMap.values())
-		{
-			if (newValue instanceof ClassValue)
-			{
-				((ClassValue)newValue).getFields().updateReferences(copyMap);
-			}
-		}
+//		// Update field references for all new objects of type ClassValue, using the
+//		// previously created mapping in copyMap.
+//		//
+//		for (ObjValue newValue : copyMap.values())
+//		{
+//			if (newValue instanceof ClassValue)
+//			{
+//				((ClassValue)newValue).getFields().updateReferences(copyMap);
+//			}
+//		}
 		
 		return resultCopyVHMap;
 	}

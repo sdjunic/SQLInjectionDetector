@@ -32,17 +32,17 @@ public class Test extends HttpServlet {
 			__check_1();
 		 
 	    	 if (rs.next()) {
-	             request.getSession().setAttribute("username", rs.getString("username"));
-	             response.sendRedirect("home");
+	             req.getSession().setAttribute("username", rs.getString("username"));
+	             res.sendRedirect("home");
 				 __check_1();
 	         }
 	         else {
-	             request.setAttribute("error", "Unknown user, please try again");
-	             request.getRequestDispatcher("/login.jsp").forward(request, response);
+	             req.setAttribute("error", "Unknown user, please try again");
+	             req.getreqDispatcher("/login.jsp").forward(req, res);
 				 __check_1();
 	         }
 			 
-			 __check_2();
+			 __check_1();
 
 	     } catch (Exception e) {
 	    	// TODO Auto-generated catch block
@@ -67,19 +67,19 @@ public class Test extends HttpServlet {
 			__check_1();
 		 
 	    	 if (rs.next()) {
-	             request.getSession().setAttribute("username", rs.getString("username"));
-	             response.sendRedirect("home");
+	             req.getSession().setAttribute("username", rs.getString("username"));
+	             res.sendRedirect("home");
 				 
 				 __check_1();
 	         }
 	         else {
-	             request.setAttribute("error", "Unknown user, please try again");
-	             request.getRequestDispatcher("/login.jsp").forward(request, response);
+	             req.setAttribute("error", "Unknown user, please try again");
+	             req.getreqDispatcher("/login.jsp").forward(req, res);
 				 
 				 __check_1();
 	         }
 
-			 __check_2();
+			 __check_1();
 			 
 	     } catch (Exception e) {
 	    	// TODO Auto-generated catch block
