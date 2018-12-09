@@ -1,3 +1,4 @@
-1) Add one global ValuesHolder map, for static fields
-2) Add handling for null pointer exception in dereferencing object field  { A a = null; read(a.b); }
-3) Make NullObj singleton, to ensure equality between VH maps after: { a = null; b = null; } and { a = null; b = a; }
+1) 	- Add one global ValuesHolder map, for static fields
+2) 	- Add handling for null pointer exception in dereferencing object field  { A a = null; read(a.b); }
+3) DONE	- Make NullObj singleton, to ensure equality between VH maps after: { a = null; b = null; } and { a = null; b = a; } (also make only two static StringVal instances (safe and unsafe))
+4)	- update GUI, to allow special methods safety change only for return type (consider allowing it for other arguments of type ClassValue)

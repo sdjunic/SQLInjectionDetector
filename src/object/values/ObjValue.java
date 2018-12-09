@@ -4,20 +4,10 @@ import symbol.object.Class;
 
 public abstract class ObjValue {
 	
-	private boolean isString;
 	private boolean isSafe;
 	
-	public ObjValue(boolean isString, boolean isSafe) {
-		this.isString = isString;
+	public ObjValue(boolean isSafe) {
 		this.isSafe = isSafe;
-	}
-	
-	public boolean isStringValue() {
-		return isString;
-	}
-	
-	public boolean isClassValue() {
-		return !isString;
 	}
 	
 	public boolean isSafe() {
@@ -26,6 +16,7 @@ public abstract class ObjValue {
 
 	public void setSafe(boolean isSafe) {
 		assert !(this instanceof NullValue);
+		assert !(this instanceof StringVal);
 		this.isSafe = isSafe;
 	}
 	

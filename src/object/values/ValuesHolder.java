@@ -95,7 +95,7 @@ public abstract class ValuesHolder {
 		if (objectType instanceof Class) {
 			Class cl = ((Class)objectType);
 			if ("String".equals(cl.getName())) {
-				return new StringVal(isSafe);
+				return StringVal.getString(isSafe);
 			} else {
 				return new ClassValue(cl, isSafe);
 			}
@@ -116,14 +116,11 @@ public abstract class ValuesHolder {
 			if (skipTempVariables && isTempVariable(var.getKey())) continue;
 			
 			ObjValue obj = var.getValue();
-			if (!objHash.containsKey(obj))
+			if (obj instanceof ClassValue && !objHash.containsKey(obj))
 			{
 				objHash.put(obj, sortedObjects.size());
 				sortedObjects.add(obj);
-				if (obj instanceof ClassValue)
-				{
-					((ClassValue)obj).getFields().numerateAllObjects(objHash, sortedObjects, skipTempVariables);
-				}
+				((ClassValue)obj).getFields().numerateAllObjects(objHash, sortedObjects, skipTempVariables);
 			}
 		}
 	}
@@ -138,7 +135,14 @@ public abstract class ValuesHolder {
 		{
 			if (skipTempVariables && isTempVariable(var.getKey())) continue;
 			
-			sb.append(tab).append(var.getKey()).append(": ").append("#").append(objHash.get(var.getValue())).append("\n");
+			if (var.getValue() instanceof ClassValue)
+			{
+				sb.append(tab).append(var.getKey()).append(": ").append("#").append(objHash.get(var.getValue())).append("\n");
+			}
+			else
+			{
+				sb.append(tab).append(var.getKey()).append(": ").append(var.getValue()).append("\n");
+			}
 		}
 		
 		int order = 0;

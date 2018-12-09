@@ -379,8 +379,8 @@ literal ::=	INTEGER_LITERAL {: RESULT = null; :}
 	|	FLOATING_POINT_LITERAL {: RESULT = null; :}
 	|	BOOLEAN_LITERAL {: RESULT = null; :}
 	|	CHARACTER_LITERAL {: RESULT = null; :}
-	|	STRING_LITERAL {: if (parsingClassLevel == 0) { RESULT = new VariableExec(new StringVal(true)); } :}
-	|	NULL_LITERAL {: if (parsingClassLevel == 0) { RESULT = new VariableExec(new NullValue()); } :}
+	|	STRING_LITERAL {: if (parsingClassLevel == 0) { RESULT = new VariableExec(StringVal.getString(true)); } :}
+	|	NULL_LITERAL {: if (parsingClassLevel == 0) { RESULT = new VariableExec(NullValue.getNullValue()); } :}
 	;
 
 // 19.4) Types, Values, and Variables
@@ -813,7 +813,7 @@ variable_declarator ::=
 		variable_declarator_id:id
 		{:
 		 	if (parsingClassLevel == 0) {
-		 		id.initValue = new VariableExec(new NullValue());
+		 		id.initValue = new VariableExec(NullValue.getNullValue());
 				RESULT = id;
 			}
 		:}

@@ -1,6 +1,6 @@
 import java.sql.SQLException;
 
-public class SimpleWhileLoopTest1 {
+public class SimpleWhileLoopTest3 {
 	
 	public static void main(String[] args) throws SQLException {
 			

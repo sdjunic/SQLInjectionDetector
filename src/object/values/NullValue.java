@@ -4,20 +4,26 @@ import symbol.object.Class;
 
 public class NullValue extends ObjValue {
 
-	public NullValue() {
-		super(false, true);
+	private static NullValue nullValue = new NullValue();
+	
+	private NullValue() {
+		super(true);
+	}
+	
+	public static NullValue getNullValue()
+	{
+		return nullValue;
 	}
 	
 	@Override
 	public ObjValue shallowCopy()
 	{
-		// TODO: consider returning the same object, since NullValue object shouldn't be changes
-		return new NullValue();
+		return this;
 	}
 	
 	@Override
 	public String toString() {
-		return "S null";
+		return "NULL";
 	}
 	
 	@Override

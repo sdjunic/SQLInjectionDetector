@@ -5,14 +5,22 @@ import symbol.object.Class;
 
 public class StringVal extends ObjValue {
 	
-	public StringVal(boolean isSafe) {
-		super(true, isSafe);
+	private static StringVal safeStr = new StringVal(true);
+	private static StringVal unsafeStr = new StringVal(false);
+	
+	private StringVal(boolean isSafe) {
+		super(isSafe);
+	}
+	
+	public static StringVal getString(boolean isSafe)
+	{
+		return (isSafe ? safeStr : unsafeStr);
 	}
 
 	@Override
 	public ObjValue shallowCopy()
 	{
-		return new StringVal(isSafe());
+		return this;
 	}
 	
 	@Override

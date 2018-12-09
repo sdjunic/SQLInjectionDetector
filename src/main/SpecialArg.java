@@ -12,7 +12,8 @@ public class SpecialArg {
 	public int index;
 	public int type;
 	
-	public SpecialArg(int index, int type) {
+	public SpecialArg(int index, int type) {	
+		assert ((type == TYPE_SAFE_ARG || type == TYPE_UNSAFE_ARG) ? (index == INDEX_RETURN_OBJ) : true);
 		this.index = index;
 		this.type = type;
 	}

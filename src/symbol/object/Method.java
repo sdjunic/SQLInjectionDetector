@@ -12,6 +12,7 @@ import main.SpecialArg;
 import main.exception.SQLInjection;
 import object.*;
 import object.values.*;
+import object.values.ClassValue;
 import symbol.Scope;
 import symbol.SymbolDataStructure;
 import symbol.Table;
@@ -360,24 +361,30 @@ public class Method implements Obj {
 						throw new main.exception.SQLInjection(sb.toString());
 					}
 				} else {
+					//TODO: consider adding safety change not only for return obj, but for all arguments of ClassType
+					//
 					VariableExec actualArg = null;
-					if (specArg.index == -2 && returnDest != null) {
+					assert (specArg.index == SpecialArg.INDEX_RETURN_OBJ);
+					assert (retType.type == Table.getStringClass());
+					
+					if (specArg.index == SpecialArg.INDEX_RETURN_OBJ && returnDest != null) {
 						assert (returnDest.name != null);
-						values.put(returnDest.name, new StringVal(specArg.type == SpecialArg.TYPE_SAFE_ARG));
+						values.put(returnDest.name, StringVal.getString(specArg.type == SpecialArg.TYPE_SAFE_ARG));
 						continue;
 					}
-					else if (specArg.index == -1) { actualArg = thisObj; }
-					else { actualArg = actualArgs.get(specArg.index); }
-					ObjValue obj;
-					if (actualArg.value != null)
-					{
-						obj = actualArg.value;
-					}
-					else
-					{
-						obj = values.get(actualArg.name);
-					}
-					obj.setSafe(specArg.type == SpecialArg.TYPE_SAFE_ARG);
+//					else if (specArg.index == -1) { actualArg = thisObj; }
+//					else { actualArg = actualArgs.get(specArg.index); }
+//					ObjValue obj;
+//					if (actualArg.value != null)
+//					{
+//						obj = actualArg.value;
+//					}
+//					else
+//					{
+//						obj = values.get(actualArg.name);
+//					}
+//					assert (obj instanceof ClassValue);
+//					obj.setSafe(specArg.type == SpecialArg.TYPE_SAFE_ARG);
 				}
 			}
 		}

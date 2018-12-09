@@ -29,7 +29,8 @@ public class VariableExec {
 	public VariableExec(ObjValue value) {
 		if (value == null)
 		{
-			this.value = new NullValue();
+			// TODO: is this ok?
+			this.value = NullValue.getNullValue();
 		}
 		else
 		{

@@ -15,7 +15,7 @@ public class ClassValue extends ObjValue {
 	private FieldsValuesHolder fields;
 	
 	public ClassValue(Class objectType, boolean isSafe) {
-		super(false, isSafe);
+		super(isSafe);
 		this.objectType = objectType;
 		this.fields = new FieldsValuesHolder(this);
 	}
@@ -87,7 +87,14 @@ public class ClassValue extends ObjValue {
 		for (Entry<String, ObjValue> var : fields.getValues().entrySet())
 		{
 			if (newLine) sb.append("\n");
-			sb.append(tab).append(var.getKey()).append(": #").append(objHash.get(var.getValue()));
+			if (var.getValue() instanceof ClassValue)
+			{
+				sb.append(tab).append(var.getKey()).append(": #").append(objHash.get(var.getValue()));
+			}
+			else
+			{
+				sb.append(tab).append(var.getKey()).append(": ").append(var.getValue());
+			}
 			newLine = true;
 		}
 	}
