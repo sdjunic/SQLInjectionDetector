@@ -1,5 +1,5 @@
 <test-metadata>
-   <testName>TestReduction2.java</testName>
+   <testName>SimpleWhileLoopTest4.java</testName>
    <vulnerability>false</vulnerability>
    <analyzeFromMain>true</analyzeFromMain>
    <initArgumentsSafe>false</initArgumentsSafe>

@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 public class Database {
 	
-	private Connection con = program.callMeth(new SQLConnection());
+	private Connection con = null;
 	private String table = "tabela";
 	
 	public Database(Connection con, String table) {
