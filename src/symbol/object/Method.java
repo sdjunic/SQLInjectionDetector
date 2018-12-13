@@ -230,6 +230,10 @@ public class Method implements Obj {
 	public void addStatement(Statement stmt) {
 		this.currentBlock.addStatement(stmt);
 	}
+	
+	public void addAllStatements(StatementsBlock stmtBlock) {
+		this.currentBlock.addAllStatementsFromBlock(stmtBlock);
+	}
 
 	public void addStatement(Statement stmt, boolean isLocalVariableDeclaration) {
 		this.currentBlock.addStatement(stmt, isLocalVariableDeclaration);

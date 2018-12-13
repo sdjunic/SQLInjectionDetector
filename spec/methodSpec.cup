@@ -287,7 +287,8 @@ non terminal WhileLoopStatement while_do_WHILE, while_expression;
 non terminal while_statement, while_statement_no_short_if;
 non terminal WhileLoopStatement do_, do_body;
 non terminal do_statement;
-non terminal foreach_statement, foreach_statement_no_short_if;
+non terminal ForLoopStatement for_lparen;
+non terminal foreach_statement, foreach_statement_no_short_if, foreach_rparen;
 non terminal ForLoopStatement for_loop_init, for_loop_condition, for_loop_update;
 non terminal for_statement, for_statement_no_short_if;
 non terminal for_init_opt, for_init;
@@ -1484,25 +1485,47 @@ do_statement ::=
 		:}
 	;
 	
+for_lparen ::=
+		FOR LPAREN 
+		{:
+			ForLoopStatement forLoopStmt = new ForLoopStatement(parser.parsingTopMethod.getCurrentBlock());
+			parser.parsingTopMethod.setCurrentBlock(forLoopStmt.getInit());
+			RESULT = forLoopStmt;
+		:}
+	;
+	
+foreach_rparen ::=
+		RPAREN 
+		{:
+			// TODO: check this 
+			parser.parsingTopMethod.currentBlockEnd();
+		:}
+	;
+	
 //TODO: consider adding foreach loop
 foreach_statement ::=
-		FOR LPAREN type variable_declarator_id COLON expression RPAREN 
+		for_lparen type variable_declarator_id COLON expression foreach_rparen
 			statement
 	;
 
 //TODO: consider adding foreach loop	
 foreach_statement_no_short_if ::=
-		FOR LPAREN type variable_declarator_id COLON expression RPAREN
+		for_lparen type variable_declarator_id COLON expression foreach_rparen
 			statement_no_short_if
 	;
 	
 for_loop_init ::=
-		FOR LPAREN for_init_opt
+		for_lparen:forLoopStmt for_init_opt
 		{:
-			// Note that for_init will be a part of outer scope body
-			// TODO: check situation whit two loops which have the same variables and which are the same scope
-			ForLoopStatement forLoopStmt = new ForLoopStatement(parser.parsingTopMethod.getCurrentBlock());
+			assert parser.parsingTopMethod.getCurrentBlock() == forLoopStmt.getInit();
+			parser.parsingTopMethod.currentBlockEnd();
+			
+			// Add statements from init and ForLoopStatement to parent block
+			// Note: local variables from init, will be deleted at for loop end
+			//
+			parser.parsingTopMethod.addAllStatements(forLoopStmt.getInit());
 			parser.parsingTopMethod.addStatement(forLoopStmt);
+
 			parser.parsingTopMethod.setCurrentBlock(forLoopStmt.getCondition());
 			RESULT = forLoopStmt;
 		:}
@@ -1511,7 +1534,7 @@ for_loop_init ::=
 for_loop_condition ::=
 		for_loop_init:forLoopStmt SEMICOLON expression_opt
 		{:
-			forLoopStmt.addUpdate();
+			assert parser.parsingTopMethod.getCurrentBlock() == forLoopStmt.getCondition();		
 			parser.parsingTopMethod.setCurrentBlock(forLoopStmt.getUpdate());
 			RESULT = forLoopStmt;
 		:}
@@ -1520,7 +1543,7 @@ for_loop_condition ::=
 for_loop_update ::=
 		for_loop_condition:forLoopStmt SEMICOLON for_update_opt
 		{:
-			forLoopStmt.addLoopBody();
+			assert parser.parsingTopMethod.getCurrentBlock() == forLoopStmt.getUpdate();
 			parser.parsingTopMethod.setCurrentBlock(forLoopStmt.getLoopBody());
 			RESULT = forLoopStmt;
 		:}
@@ -1528,7 +1551,9 @@ for_loop_update ::=
 	
 for_statement ::=
 		for_loop_update:forLoopStmt RPAREN statement
-		{:
+		{:			
+			forLoopStmt.parsingDone();
+			assert parser.parsingTopMethod.getCurrentBlock() == forLoopStmt.getLoopBody();
 			parser.parsingTopMethod.currentBlockEnd();
 			assert parser.parsingTopMethod.getCurrentBlock() == forLoopStmt.getLoopBody().getParentStatementsBlock();
 		:}
@@ -1537,6 +1562,8 @@ for_statement ::=
 for_statement_no_short_if ::=
 		for_loop_update:forLoopStmt RPAREN statement_no_short_if
 		{:
+			forLoopStmt.parsingDone();
+			assert parser.parsingTopMethod.getCurrentBlock() == forLoopStmt.getLoopBody();
 			parser.parsingTopMethod.currentBlockEnd();
 			assert parser.parsingTopMethod.getCurrentBlock() == forLoopStmt.getLoopBody().getParentStatementsBlock();
 		:}

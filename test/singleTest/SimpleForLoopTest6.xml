@@ -1,6 +1,6 @@
 <test-metadata>
-   <testName>student1</testName>
-   <vulnerability>true</vulnerability>
+   <testName>SimpleForLoopTest6.java</testName>
+   <vulnerability>false</vulnerability>
    <analyzeFromMain>true</analyzeFromMain>
    <initArgumentsSafe>false</initArgumentsSafe>
 </test-metadata>

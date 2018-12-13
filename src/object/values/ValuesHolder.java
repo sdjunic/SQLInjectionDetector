@@ -49,8 +49,9 @@ public abstract class ValuesHolder {
 	}
 	
 	public void put(List<String> name, ObjValue value) {
-		assert name != null && !name.isEmpty() && value != null;
-		if (name == null || name.isEmpty()) return;
+		// It's OK to have value==null, because of unknown types, static fields, executing from risky methods...
+		assert name != null && !name.isEmpty();
+		if (name == null || name.isEmpty() || value == null) return;
 		if (name.size() == 1) {
 			values.put(name.get(0), value);
 			return;
