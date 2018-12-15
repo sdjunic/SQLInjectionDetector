@@ -1,5 +1,5 @@
 <test-metadata>
-   <testName>SimpleForLoopTest6.java</testName>
+   <testName>SimpleRecursionTest1.java</testName>
    <vulnerability>false</vulnerability>
    <analyzeFromMain>true</analyzeFromMain>
    <initArgumentsSafe>false</initArgumentsSafe>

@@ -20,7 +20,7 @@ public class TaskExecutor {
 	{
 		m.parseMethod();
 		
-		MethodValuesHolder values = new MethodValuesHolder(null);
+		MethodValuesHolder values = new MethodValuesHolder(null, m);
 		
 		if (!m.isStatic()) {
 			Obj methodClass = m.getScope().getOuter().getParrentObj();
@@ -31,6 +31,9 @@ public class TaskExecutor {
 		for (int i=0; i<lmp.size(); ++i) {
 			values.addObject(lmp.get(i).getType().type, lmp.get(i).getName(), initialArgumentsSafe);
 		}
+		
+		// Hash method input values, in case of recursion.
+		values.saveInputMVH_hash();
 		
 		activeExecutionBlock = new ExecutionBlock(m.getBody());
 		activeExecutionBlock.isMethodBody = true;

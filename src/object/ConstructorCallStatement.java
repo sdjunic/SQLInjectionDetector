@@ -72,6 +72,8 @@ public class ConstructorCallStatement extends CallStatement {
 		if (Main.infoPS != null) Main.infoPS.println("Calling constructor " + constructor.getName());
 		parse();
 		
+		List<Task> terminatedCallDueRecursionCycle = new LinkedList<>();
+		
 		// Set new execution block
 		ExecutionBlock constrExecBlock = new ExecutionBlock(constructor.getBody());
 		constrExecBlock.parentExecBlock = TaskExecutor.activeExecutionBlock;
@@ -82,7 +84,7 @@ public class ConstructorCallStatement extends CallStatement {
 		// Set tasks for new ExecutionBlock
 		for (Task task : taskGroup)
 		{
-			MethodValuesHolder callingConstrValues = new MethodValuesHolder(task.values);
+			MethodValuesHolder callingConstrValues = new MethodValuesHolder(task.values, constructor);
 			callingConstrValues.addObject(constructor.getParentClass(), "this", true);
 			
 			// Populate ValuesHolder for method body
@@ -95,15 +97,33 @@ public class ConstructorCallStatement extends CallStatement {
 				callingConstrValues.put(constructor.getMethParamList().get(i).getName(), argumentVal);
 			}
 			
+			// Hash method input values, in case of recursion.
+			callingConstrValues.saveInputMVH_hash();
+			if(callingConstrValues.checkForRecursionCycle())
+			{
+				terminatedCallDueRecursionCycle.add(task);
+				continue;
+			}
+			
 			task.values = callingConstrValues;
 			task.PC = 0;
 		}
-		// Add all tasks to new execution block
+		// Add all tasks to new execution block, except tasks in terminatedCallDueRecursionCycle,
 		constrExecBlock.taskTable.addAll(taskGroup);
+		constrExecBlock.taskTable.removeAll(terminatedCallDueRecursionCycle);
+		
 		// and remove them from current execution block
 		TaskExecutor.activeExecutionBlock.taskTable.removeAll(taskGroup);
+		TaskExecutor.activeExecutionBlock.taskTable.addAll(terminatedCallDueRecursionCycle);
 		
-		TaskExecutor.activeExecutionBlock = constrExecBlock;
+		if (!constrExecBlock.taskTable.isEmpty())
+		{
+			TaskExecutor.activeExecutionBlock = constrExecBlock;
+		}
+		else
+		{
+			if (Main.infoPS != null) Main.infoPS.println("    - skipped due to recursion cycle");
+		}
 	}
 	
 //	@Override

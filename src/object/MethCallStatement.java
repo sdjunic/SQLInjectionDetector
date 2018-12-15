@@ -49,6 +49,7 @@ public class MethCallStatement extends CallStatement {
 		if (Main.infoPS != null) Main.infoPS.println("Calling " + (methodToCall != null ? methodToCall : staticMethodToCall.getName()));
 		
 		HashMap<Method, List<Task>> hashMethodsToCall = getMethodToCall(taskGroup);
+		List<Task> terminatedCallDueRecursionCycle = new LinkedList<>();
 		
 		ExecutionBlock prevMethodExecBlock = null;
 		for (Entry<Method, List<Task>> methodToCall : hashMethodsToCall.entrySet())
@@ -75,7 +76,7 @@ public class MethCallStatement extends CallStatement {
 			// Set tasks for new ExecutionBlock
 			for (Task task : methTasks)
 			{
-				MethodValuesHolder callingMethValues = new MethodValuesHolder(task.values);
+				MethodValuesHolder callingMethValues = new MethodValuesHolder(task.values, m);
 				
 				// Populate ValuesHolder for method body
 				if (staticMethodToCall == null)
@@ -92,18 +93,38 @@ public class MethCallStatement extends CallStatement {
 					callingMethValues.put(m.getMethParamList().get(i).getName(), argumentVal);
 				}
 				
+				// Hash method input values, in case of recursion.
+				callingMethValues.saveInputMVH_hash();
+				if(callingMethValues.checkForRecursionCycle())
+				{
+					terminatedCallDueRecursionCycle.add(task);
+					continue;
+				}
+				
+				
 				task.values = callingMethValues;
 				task.PC = 0;
 			}
-			// Add all tasks to new execution block
+			// Add all tasks to new execution block, except tasks in terminatedCallDueRecursionCycle,
 			methodExecBlock.taskTable.addAll(methTasks);
+			methodExecBlock.taskTable.removeAll(terminatedCallDueRecursionCycle);
+			
 			// and remove them from current execution block
 			TaskExecutor.activeExecutionBlock.taskTable.removeAll(methTasks);
+			TaskExecutor.activeExecutionBlock.taskTable.addAll(terminatedCallDueRecursionCycle);
 			
-			prevMethodExecBlock = methodExecBlock;
+			if (!methodExecBlock.taskTable.isEmpty())
+			{
+				prevMethodExecBlock = methodExecBlock;
+			}
+			else
+			{
+				if (Main.infoPS != null) Main.infoPS.println("    - skipped due to recursion cycle");
+			}
 		}
 		
 		// If all methods were special we didn't add new EB, just continue execution in the same EB.
+		// If all tasks completes recursion cycle we didn't add new EB, just continue execution in the same EB.
 		if (prevMethodExecBlock != null)
 		{
 			TaskExecutor.activeExecutionBlock = prevMethodExecBlock;

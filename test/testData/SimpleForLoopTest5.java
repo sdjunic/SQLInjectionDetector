@@ -38,6 +38,8 @@ public class SimpleForLoopTest5 {
 			str = "safe";
 		}
 		
+		__check_2();
+		
 		for (String forLoopStr = str; a.condition(); a.update())
 		{
 			a.body();

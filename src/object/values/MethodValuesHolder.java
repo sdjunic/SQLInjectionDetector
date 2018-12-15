@@ -3,16 +3,32 @@ package object.values;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
+
+import symbol.object.Method;
 
 public class MethodValuesHolder extends ValuesHolder {
 
 	private MethodValuesHolder parentValuesHolder = null;
 	
-	public MethodValuesHolder(MethodValuesHolder parentValuesHolder) {
+	// Used to detect identical method call on stack.
+	// Used to determine and terminate recursion cycle. 
+	//
+	private Method method = null;
+	private byte[] methodInputMVH_hash = null;
+	
+	public MethodValuesHolder(MethodValuesHolder parentValuesHolder, Method method) {
+		this(parentValuesHolder, method, null);
+	}
+	
+	public MethodValuesHolder(MethodValuesHolder parentValuesHolder, Method method, byte[] methodInputMVH_hash) {
 		super();
 		this.parentValuesHolder = parentValuesHolder;
+		
+		this.method = method;
+		this.methodInputMVH_hash = methodInputMVH_hash;
 	}
 
 	@Override
@@ -32,12 +48,49 @@ public class MethodValuesHolder extends ValuesHolder {
 	public void setParentValuesHolder(MethodValuesHolder parentValuesHolder) {
 		this.parentValuesHolder = parentValuesHolder;
 	}
+	
+	// Should be called only once, after adding all actual arguments to this MVH map,
+	// to hash input values.
+	public void saveInputMVH_hash() throws NoSuchAlgorithmException
+	{
+		assert (this.methodInputMVH_hash == null);
+		// Get string representation of this MVH map
+		StringBuilder sb = new StringBuilder();
+		this.print(sb, "", true);
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		byte[] hash = digest.digest(sb.toString().getBytes(StandardCharsets.UTF_8));
+		this.methodInputMVH_hash = hash;
+	}
 
+	// Used to check does this MVH completes the recursion cycle.
+	// If returns true, we shouldn't execute this method.
+	public boolean checkForRecursionCycle()
+	{
+		MethodValuesHolder prevCallMVH = this.parentValuesHolder;
+		while(prevCallMVH != null)
+		{
+			if (this.method == prevCallMVH.method 
+					&& Arrays.equals(this.methodInputMVH_hash, prevCallMVH.methodInputMVH_hash))
+			{
+				return true;
+			}
+			prevCallMVH = prevCallMVH.parentValuesHolder;
+		}
+		return false;
+	}
+	
 	public byte[] hash() throws NoSuchAlgorithmException
 	{
 		// Get string representation of this and all parent Method VH maps
 		StringBuilder sb = new StringBuilder();
 		MethodValuesHolder mvh = this;
+		
+		// We must check all parent MVH maps, because two tasks with different maps
+		// can call the method which don't see the difference between these
+		// tasks (for example static method, with no arguments). 
+		// In that case, if we hash only current MVH maps at the end of such method
+		// we will got the same values and we will reduce non-equal tasks.
+		// 
 		while(mvh != null)
 		{
 			mvh.print(sb, "", true);
@@ -66,7 +119,10 @@ public class MethodValuesHolder extends ValuesHolder {
 		MethodValuesHolder prevCopyMethVHMap = null;
 		while(currentMethVHMap != null)
 		{
-			MethodValuesHolder currentCopyMethVHMap = new MethodValuesHolder(null);
+			MethodValuesHolder currentCopyMethVHMap = new MethodValuesHolder(
+															null, 
+															currentMethVHMap.method, 
+															currentMethVHMap.methodInputMVH_hash);
 			if (prevCopyMethVHMap != null)
 			{
 				prevCopyMethVHMap.setParentValuesHolder(currentCopyMethVHMap);
