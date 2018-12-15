@@ -1,5 +1,6 @@
 package object;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -69,10 +70,12 @@ public class ConstructorCallStatement extends CallStatement {
 	
 	@Override
 	public void execute(List<Task> taskGroup) throws Exception {
-		if (Main.infoPS != null) Main.infoPS.println("Calling constructor " + constructor.getName());
-		parse();
+		if (Main.infoPS != null) 
+		{
+			Main.infoPS.println("Calling constructor " + constructor.getName() + " (" + taskGroup.size() + ")");
+		}
 		
-		List<Task> terminatedCallDueRecursionCycle = new LinkedList<>();
+		parse();
 		
 		// Set new execution block
 		ExecutionBlock constrExecBlock = new ExecutionBlock(constructor.getBody());
@@ -82,8 +85,10 @@ public class ConstructorCallStatement extends CallStatement {
 		constrExecBlock.returnDestination = left;
 		
 		// Set tasks for new ExecutionBlock
-		for (Task task : taskGroup)
+		Iterator<Task> taskIter = taskGroup.iterator();
+		while(taskIter.hasNext())
 		{
+			Task task = taskIter.next();
 			MethodValuesHolder callingConstrValues = new MethodValuesHolder(task.values, constructor);
 			callingConstrValues.addObject(constructor.getParentClass(), "this", true);
 			
@@ -101,28 +106,27 @@ public class ConstructorCallStatement extends CallStatement {
 			callingConstrValues.saveInputMVH_hash();
 			if(callingConstrValues.checkForRecursionCycle())
 			{
-				terminatedCallDueRecursionCycle.add(task);
+				// Remove this task due to completed recursion cycle.
+				//
+				if (Main.infoPS != null) Main.infoPS.println("Killing the task due to completed recursion cycle.");
+				TaskExecutor.activeExecutionBlock.taskTable.remove(task);
+				taskIter.remove();
 				continue;
 			}
 			
 			task.values = callingConstrValues;
 			task.PC = 0;
 		}
-		// Add all tasks to new execution block, except tasks in terminatedCallDueRecursionCycle,
-		constrExecBlock.taskTable.addAll(taskGroup);
-		constrExecBlock.taskTable.removeAll(terminatedCallDueRecursionCycle);
 		
-		// and remove them from current execution block
-		TaskExecutor.activeExecutionBlock.taskTable.removeAll(taskGroup);
-		TaskExecutor.activeExecutionBlock.taskTable.addAll(terminatedCallDueRecursionCycle);
-		
-		if (!constrExecBlock.taskTable.isEmpty())
+		if (!taskGroup.isEmpty())
 		{
+			// Add all tasks to new execution block
+			constrExecBlock.taskTable.addAll(taskGroup);
+		
+			// and remove them from current execution block
+			TaskExecutor.activeExecutionBlock.taskTable.removeAll(taskGroup);
+
 			TaskExecutor.activeExecutionBlock = constrExecBlock;
-		}
-		else
-		{
-			if (Main.infoPS != null) Main.infoPS.println("    - skipped due to recursion cycle");
 		}
 	}
 	

@@ -58,7 +58,7 @@ public abstract class ValuesHolder {
 		}
 		ObjValue obj = get(name.get(0));
 		if (obj == null || !(obj instanceof ClassValue)) {
-			System.err.println("GRESKA U METODI put KLASE ValueHolder!");
+			assert false;
 			return;
 		}
 	

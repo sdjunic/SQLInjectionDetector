@@ -79,8 +79,16 @@ public class StatementsBlock {
 	
 	public Statement getStatement(int n)
 	{
+		assert (statements != null);
 		if (statements == null || statements.size() < n) return null;
 		return statements.get(n);
+	}
+	
+	public Statement getLastStatement()
+	{
+		assert (statements != null);
+		if (statements == null) return null;
+		return statements.get(statements.size() - 1);
 	}
 	
 	public int getStmtCount()

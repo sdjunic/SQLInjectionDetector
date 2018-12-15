@@ -298,22 +298,22 @@ public class Main {
 					}
 					
 					try {
-//						m.executeMethod(values);
-						TaskExecutor.execute(m, initialArgumentsSafe);						
+						TaskExecutor.execute(m, initialArgumentsSafe);
+						
+						// For testing purposes:
+						// Good test shouldn't have problem with null pointers or with infinite recursion.
+						// It's OK to kill some tasks because of that, but we should always have at least one task,
+						// which executes to the end. We can't throw exception here, since in realistic usage, 
+						// execution from risky methods can hit null pointer exception on all tasks.
+						//
+						assert (TaskExecutor.finalTaskCount > 0);
+						
 					} finally {
 						StringBuilder sb2 = new StringBuilder();
 						sb2.append("\r\n\r\n--------- METHOD BODY ---------\r\n\r\n");
 						m.getBody().print(sb2, "");
 						sb2.append("\r\n------- END METHOD BODY -------\r\n");
 						if (infoPS != null) infoPS.println(sb2);
-						
-//						sb2 = new StringBuilder();
-//						sb2.append("\r\n--------- METHOD VALUES HOLDER ---------\r\n");
-//						values.print(sb2);
-//						sb2.append("\r\n------- END METHOD VALUES HOLDER -------\r\n\r\n");
-//						if (infoPS != null) infoPS.println(sb2);
-//						
-//						if (infoPS != null) infoPS.println();
 					}
 				}
 			}

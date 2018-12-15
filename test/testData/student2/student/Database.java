@@ -40,7 +40,8 @@ public class Database {
 		Statement stmt = null;
 		try {
 			stmt = con.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT * FROM " +table+ " WHERE username LIKE '" + makeSafeSQL(user.getName()) + "'");
+			__check_2();
+			ResultSet rs = stmt.executeQuery("SELECT * FROM " + table + " WHERE username LIKE '" + makeSafeSQL(user.getName()) + "'");
 			if (rs.next()) {
 				return true;
 			}

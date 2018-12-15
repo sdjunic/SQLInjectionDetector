@@ -1242,7 +1242,26 @@ local_variable_declaration ::=
 					if (t.isRefType()) {
 						if (v.initValue != null) {
 							VariableExec left = new VariableExec(v.name, varObject);
-							parser.parsingTopMethod.addStatement(new AssignmentStatement(left, v.initValue), true /* is local variable declaration */);
+							boolean prevStmtUpdated = false;
+							
+							if (v.initValue.isTempVariable())
+							{
+								Statement prevStmt = parser.parsingTopMethod.getLastStatement();
+								if (prevStmt != null && prevStmt instanceof CallStatement)
+								{
+									CallStatement prevCallStmt = (CallStatement)prevStmt;
+									if(prevCallStmt.getLeft().haveSameVariableName(v.initValue.name))
+									{
+										prevCallStmt.setLeft(left);
+										prevStmtUpdated = true;
+									}
+								}
+							}
+							
+							if (!prevStmtUpdated)
+							{
+								parser.parsingTopMethod.addStatement(new AssignmentStatement(left, v.initValue), true /* is local variable declaration */);
+							}
 						}
 					}
 				}
@@ -1262,7 +1281,26 @@ local_variable_declaration ::=
 					if (t.isRefType()) {
 						if (v.initValue != null) {
 							VariableExec left = new VariableExec(v.name, varObject);
-							parser.parsingTopMethod.addStatement(new AssignmentStatement(left, v.initValue), true /* is local variable declaration */);
+							boolean prevStmtUpdated = false;
+							
+							if (v.initValue.isTempVariable())
+							{
+								Statement prevStmt = parser.parsingTopMethod.getLastStatement();
+								if (prevStmt != null && prevStmt instanceof CallStatement)
+								{
+									CallStatement prevCallStmt = (CallStatement)prevStmt;
+									if(prevCallStmt.getLeft().haveSameVariableName(v.initValue.name))
+									{
+										prevCallStmt.setLeft(left);
+										prevStmtUpdated = true;
+									}
+								}
+							}
+							
+							if (!prevStmtUpdated)
+							{
+								parser.parsingTopMethod.addStatement(new AssignmentStatement(left, v.initValue), true /* is local variable declaration */);
+							}
 						}
 					}
 				}
@@ -2127,9 +2165,31 @@ assignment ::=	postfix_expression:left assignment_operator:op assignment_express
 				{:
 					if (parsingClassLevel == 0) {
 						if (op.equals(Sym.EQ) && left != null && right != null) {
-							AssignmentStatement assignment = new AssignmentStatement(left, right);
-							parser.parsingTopMethod.addStatement(assignment);
+							boolean prevStmtUpdated = false;
+							
+							if (right.isTempVariable())
+							{
+								Statement prevStmt = parser.parsingTopMethod.getLastStatement();
+								if (prevStmt != null && prevStmt instanceof CallStatement)
+								{
+									CallStatement prevCallStmt = (CallStatement)prevStmt;
+									if(prevCallStmt.getLeft().haveSameVariableName(right.name))
+									{
+										prevCallStmt.setLeft(left);
+										prevStmtUpdated = true;
+									}
+								}
+							}
+							
+							if (!prevStmtUpdated)
+							{
+								AssignmentStatement assignment = new AssignmentStatement(left, right);
+								parser.parsingTopMethod.addStatement(assignment);
+							}
 						}
+						// TODO: check if this can be problem with new idea of returning method/constructor
+						// 		 result directly to caller's MVH non-temp variable 
+						// 
 						RESULT = right;
 					}
 				:}

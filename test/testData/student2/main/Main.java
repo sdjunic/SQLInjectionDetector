@@ -11,6 +11,9 @@ public class Main {
 		__check_1();
 		
 		User u = database.getUser(sc.nextLine());
+		
+		__check_2();
+		
 		database.checkIfUserExists(u);
 	}
 

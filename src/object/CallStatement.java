@@ -17,4 +17,12 @@ public abstract class CallStatement extends Statement {
 		this.arguments = arguments;
 	}
 
+	public VariableExec getLeft() {
+		return left;
+	}
+
+	public void setLeft(VariableExec left) {
+		this.left = left;
+	}
+
 }

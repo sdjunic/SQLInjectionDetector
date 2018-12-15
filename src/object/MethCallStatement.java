@@ -46,10 +46,14 @@ public class MethCallStatement extends CallStatement {
 	
 	@Override
 	public void execute(List<Task> taskGroup) throws Exception {
-		if (Main.infoPS != null) Main.infoPS.println("Calling " + (methodToCall != null ? methodToCall : staticMethodToCall.getName()));
+		if (Main.infoPS != null)
+		{
+			Main.infoPS.println("Calling " 
+								+ (methodToCall != null ? methodToCall : staticMethodToCall.getName())
+								+ " (" + taskGroup.size() + ")");
+		}
 		
 		HashMap<Method, List<Task>> hashMethodsToCall = getMethodToCall(taskGroup);
-		List<Task> terminatedCallDueRecursionCycle = new LinkedList<>();
 		
 		ExecutionBlock prevMethodExecBlock = null;
 		for (Entry<Method, List<Task>> methodToCall : hashMethodsToCall.entrySet())
@@ -74,8 +78,11 @@ public class MethCallStatement extends CallStatement {
 			methodExecBlock.returnDestination = left;
 			
 			// Set tasks for new ExecutionBlock
-			for (Task task : methTasks)
+			Iterator<Task> taskIter = methTasks.iterator();
+			while (taskIter.hasNext())
 			{
+				Task task = taskIter.next();
+				
 				MethodValuesHolder callingMethValues = new MethodValuesHolder(task.values, m);
 				
 				// Populate ValuesHolder for method body
@@ -97,29 +104,27 @@ public class MethCallStatement extends CallStatement {
 				callingMethValues.saveInputMVH_hash();
 				if(callingMethValues.checkForRecursionCycle())
 				{
-					terminatedCallDueRecursionCycle.add(task);
+					// Remove this task due to completed recursion cycle.
+					//
+					if (Main.infoPS != null) Main.infoPS.println("Killing the task due to completed recursion cycle.");
+					TaskExecutor.activeExecutionBlock.taskTable.remove(task);
+					taskIter.remove();
 					continue;
 				}
-				
 				
 				task.values = callingMethValues;
 				task.PC = 0;
 			}
-			// Add all tasks to new execution block, except tasks in terminatedCallDueRecursionCycle,
-			methodExecBlock.taskTable.addAll(methTasks);
-			methodExecBlock.taskTable.removeAll(terminatedCallDueRecursionCycle);
 			
-			// and remove them from current execution block
-			TaskExecutor.activeExecutionBlock.taskTable.removeAll(methTasks);
-			TaskExecutor.activeExecutionBlock.taskTable.addAll(terminatedCallDueRecursionCycle);
-			
-			if (!methodExecBlock.taskTable.isEmpty())
+			if (!methTasks.isEmpty())
 			{
+				// Add all tasks to new execution block,
+				methodExecBlock.taskTable.addAll(methTasks);
+			
+				// and remove them from current execution block
+				TaskExecutor.activeExecutionBlock.taskTable.removeAll(methTasks);
+
 				prevMethodExecBlock = methodExecBlock;
-			}
-			else
-			{
-				if (Main.infoPS != null) Main.infoPS.println("    - skipped due to recursion cycle");
 			}
 		}
 		

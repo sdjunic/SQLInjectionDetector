@@ -227,6 +227,11 @@ public class Method implements Obj {
 		this.currentBlock = currentBlock;
 	}
 
+	public Statement getLastStatement()
+	{
+		return this.currentBlock.getLastStatement();
+	}
+	
 	public void addStatement(Statement stmt) {
 		this.currentBlock.addStatement(stmt);
 	}

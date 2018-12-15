@@ -38,6 +38,26 @@ public class VariableExec {
 		}
 	}
 	
+	public boolean isTempVariable()
+	{
+		return this.name != null && this.name.size() == 1 && this.name.get(0) != null && this.name.get(0).endsWith("_temp");
+	}
+	
+	public boolean haveSameVariableName(List<String> tempVariable)
+	{
+		if (tempVariable != null && tempVariable.size() == 1 && this.name != null && this.name.size() == 1)
+		{
+			if (tempVariable.get(0) != null && tempVariable.get(0).equals(this.name.get(0)))
+			{
+				if (tempVariable.get(0).endsWith("_temp"))
+				{
+					return true;
+				}
+			}
+		}	
+		return false;
+	}
+	
 	public Class getObjectType() {
 		if (object == null) return null;
 		if (object instanceof Class) return (Class)object;

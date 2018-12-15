@@ -11,6 +11,7 @@ import symbol.object.Obj;
 public class TaskExecutor {
 
 	public static ExecutionBlock activeExecutionBlock;
+	public static int finalTaskCount;
 	
 	public TaskExecutor() {
 		// TODO Auto-generated constructor stub
@@ -18,6 +19,8 @@ public class TaskExecutor {
 
 	public static void execute(Method m, boolean initialArgumentsSafe) throws Exception
 	{
+		finalTaskCount = 0;
+		
 		m.parseMethod();
 		
 		MethodValuesHolder values = new MethodValuesHolder(null, m);

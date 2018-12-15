@@ -66,6 +66,11 @@ public class EndExecBlockStatement extends Statement {
 		{
 			parentEb.taskTable.addAll(taskGroup);
 		}
+		else
+		{
+			// End of execution
+			TaskExecutor.finalTaskCount = taskGroup.size(); 
+		}
 		
 		for (Task t : taskGroup)
 		{
