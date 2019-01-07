@@ -1654,8 +1654,12 @@ method_invocation ::=
 					if (m.getRetType() != null && m.getRetType().type != null) var = AssignmentStatement.getNewTempVariable(m.getRetType().type);
 				
 					MethCallStatement methCall = null;
-					if (m.isStatic()) methCall = new MethCallStatement(var, m, args);
-					else methCall = new MethCallStatement(var, n.get(n.size()-1), thisObj, args);
+					if (m.isStatic()) {
+						methCall = new MethCallStatement(var, m, args);
+					}
+					else {
+						methCall = new MethCallStatement(var, m, thisObj, args);
+					}
 					
 					parser.parsingTopMethod.addStatement(methCall);
 					RESULT = var;
@@ -1674,7 +1678,7 @@ method_invocation ::=
 						VariableExec var = null; /* VOID method */
 						if (m.getRetType() != null && m.getRetType().type != null) var = AssignmentStatement.getNewTempVariable(m.getRetType().type);
 					
-						MethCallStatement methCall = new MethCallStatement(var, id, thisObj, args);
+						MethCallStatement methCall = new MethCallStatement(var, m, thisObj, args);
 						parser.parsingTopMethod.addStatement(methCall);
 						RESULT = var;
 					}

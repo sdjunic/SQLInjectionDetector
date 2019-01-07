@@ -17,7 +17,12 @@ public class Table {
 		currentTable = new Table();
 		currentTable.currentLevel = -1;
 		currentTable.universe = currentTable.currentScope = new Scope(null, currentTable.currentLevel, null);
+		
 		currentTable.stringClass = new Class("String", null);
+		openScope(currentTable.stringClass);
+		currentTable.stringClass.setScope(currentTable.currentScope);
+		closeScope();
+		
 		insert(new PrimitiveType("boolean"));
 		insert(new PrimitiveType("byte"));
 		insert(new PrimitiveType("short"));

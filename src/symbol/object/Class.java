@@ -262,7 +262,8 @@ public class Class implements Type {
 					List<VariableExec> args1 = new LinkedList<VariableExec>();
 					MethCallStatement fieldInitMethCall = new MethCallStatement(
 							null, 
-							defCon.getParentClass().getFieldInitializerMethodName(), 
+							//defCon.getParentClass().getFieldInitializerMethodName(), 
+							fieldInitMethod,
 							new VariableExec("this", defCon.getParentClass()), 
 							args);
 					defCon.getBody().addStatement(fieldInitMethCall, 0);

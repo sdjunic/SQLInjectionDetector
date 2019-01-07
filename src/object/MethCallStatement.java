@@ -8,11 +8,9 @@ import execution.ExecutionBlock;
 import execution.Task;
 import execution.TaskExecutor;
 import main.Main;
-import main.SpecialArg;
 import object.values.MethodValuesHolder;
 import object.values.NullValue;
 import object.values.ObjValue;
-import object.values.StringVal;
 import symbol.object.*;
 import symbol.object.Class;
 
@@ -21,11 +19,28 @@ public class MethCallStatement extends CallStatement {
 	private String methodToCall = null;
 	private VariableExec thisObj = null;
 	
-	private Method staticMethodToCall = null; // only for static methods
+	private Method staticMethodToCall = null; // for static methods
 	
-	public MethCallStatement(VariableExec left, String methodToCall, VariableExec thisObj, List<VariableExec> arguments) {
+	private Method libraryMethodToCall = null; // for non-static library methods when this object is null
+	private boolean isLibraryMethod = false;
+	
+	public MethCallStatement(VariableExec left, Method method, VariableExec thisObj, List<VariableExec> arguments) {
+		this.isLibraryMethod = !method.isDefined();
 		this.left = left;
-		this.methodToCall = methodToCall;
+		if (thisObj != null)
+		{
+			String methodNameWithArguments = method.getName();
+			this.methodToCall = methodNameWithArguments.substring(0, methodNameWithArguments.indexOf("("));
+			
+			if (this.isLibraryMethod)
+			{
+				libraryMethodToCall = method;
+			}
+		}
+		else
+		{
+			this.staticMethodToCall = method;
+		}
 		this.thisObj = thisObj;
 		this.arguments = arguments;
 	}
@@ -34,6 +49,7 @@ public class MethCallStatement extends CallStatement {
 		this.left = left;
 		this.staticMethodToCall = staticMethodToCall;
 		this.arguments = arguments;
+		this.isLibraryMethod = !staticMethodToCall.isDefined();
 	}
 
 	public List<VariableExec> getArguments() {
@@ -150,6 +166,22 @@ public class MethCallStatement extends CallStatement {
 		{
 			Task task = taskIter.next();
 			ObjValue thisObjValue = task.values.get(thisObj.name);
+			
+			// Library method is often call for non-defined class which is obtained by another
+			// library method. Since we can't define all library classes/methods, try to execute
+			// method as it is static. If method don't use THIS argument the execution will be successful.
+			//
+			if (thisObjValue == null)
+			{
+				assert this.isLibraryMethod;
+				
+				if (!res.containsKey(libraryMethodToCall))
+				{
+					res.put(libraryMethodToCall, new LinkedList<>());
+				}
+				res.get(libraryMethodToCall).add(task);
+				continue;
+			}
 			
 			if(thisObjValue instanceof NullValue)
 			{

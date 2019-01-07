@@ -7,8 +7,8 @@ import java.util.*;
 
 import Parse.MethodParser;
 import execution.Task;
+import libraryMethod.SpecialAction;
 import main.Main;
-import main.SpecialArg;
 import main.exception.SQLInjection;
 import object.*;
 import object.values.*;
@@ -40,8 +40,8 @@ public class Method implements Obj {
 	private List<List<String>> importedScopes = null;
 
 	private boolean isDefined = true;
-	private List<SpecialArg> specialArguments = null; //arguments starts from 0, 'this' object is -1, return value is -2
-
+	private List<SpecialAction> specialActions = null;
+	
 	private StatementsBlock body = new StatementsBlock();
 	private StatementsBlock currentBlock = null;
 	
@@ -196,12 +196,12 @@ public class Method implements Obj {
 		this.isDefined = isDefined;
 	}
 
-	public List<SpecialArg> getSpecialArguments() {
-		return specialArguments;
+	public List<SpecialAction> getSpecialActions() {
+		return specialActions;
 	}
 
-	public void setSpecialArguments(List<SpecialArg> specialArguments) {
-		this.specialArguments = specialArguments;
+	public void setSpecialActions(List<SpecialAction> specialActions) {
+		this.specialActions = specialActions;
 	}
 
 	@Override
@@ -268,49 +268,6 @@ public class Method implements Obj {
 //		return null;
 //	}
 	
-//	public ObjValue executeMethod(MethodValuesHolder values) throws Exception {
-//		if (Main.infoPS != null) Main.infoPS.println("Exec "+ this.getName() +" method!");
-//		if (isDefined) {
-//			if (!parsed) {
-//				if (this.constructor) {
-//					throw new Exception("Constructors need to be parsed in ConstructorCallStatement!");
-//				}
-//				this.parseMethod();
-//			}
-//			return null; //body.execute(values);
-//		} else {
-//			ObjValue returnValue = null;
-//			
-//			for (SpecialArg specArg : specialArguments) {
-//				if (specArg.type == SpecialArg.TYPE_CRITICAL_OUTPUT) {
-//					String argumentName;
-//					if (specArg.index == SpecialArg.INDEX_RETURN_OBJ) continue;
-//					else if (specArg.index == -1) { argumentName = "this"; }
-//					else { argumentName = this.getMethParamList().get(specArg.index).getName(); }
-//					ObjValue obj = values.get(argumentName);
-//					if (obj != null && !obj.isSafe()) {
-//						StringBuilder sb = new StringBuilder();
-//						sb.append("SQL injection detected!\r\n\r\nCritical method call stack:\r\n");
-//						printMethodCallStack(sb);
-//						throw new main.exception.SQLInjection(sb.toString());
-//					}
-//				} else {
-//					String argumentName;
-//					if (specArg.index == -2) {
-//						returnValue = new StringVal(specArg.type == SpecialArg.TYPE_SAFE_ARG);
-//						continue;
-//					}
-//					else if (specArg.index == -1) { argumentName = "this"; }
-//					else { argumentName = this.getMethParamList().get(specArg.index).getName(); }
-//					ObjValue obj = values.get(argumentName);
-//					obj.setSafe(specArg.type == SpecialArg.TYPE_SAFE_ARG);
-//				}
-//			}
-//			
-//			return returnValue;
-//		}
-//	}
-	
 	public void parseMethod() throws Exception {
 		assert this.isDefined;
 		if (!this.parsed)
@@ -343,45 +300,19 @@ public class Method implements Obj {
 	public void executeSpecialMethod(VariableExec thisObj, List<VariableExec> actualArgs, VariableExec returnDest, List<Task> tasks) throws SQLInjection
 	{
 		assert !this.isDefined;
-		assert specialArguments.size() >= actualArgs.size();
+		assert !specialActions.isEmpty();
 		for (Task t : tasks)
 		{
 			ValuesHolder values = t.values;
 			
-			for (SpecialArg specArg : specialArguments) {
-				if (specArg.type == SpecialArg.TYPE_CRITICAL_OUTPUT) {
-					VariableExec actualArg = null;
-					assert (specArg.index != SpecialArg.INDEX_RETURN_OBJ);
-					if (specArg.index == -1) { actualArg = thisObj; }
-					else { actualArg = actualArgs.get(specArg.index); }
-					ObjValue obj;
-					if (actualArg.value != null)
-					{
-						obj = actualArg.value;
-					}
-					else
-					{
-						obj = values.get(actualArg.name);
-					}
-					if (obj != null && !obj.isSafe()) {
-						StringBuilder sb = new StringBuilder();
-						sb.append("SQL injection detected!\r\n\r\nCritical method call stack:\r\n");
-						printMethodCallStack(sb);
-						throw new main.exception.SQLInjection(sb.toString());
-					}
-				} else {
-					//TODO: consider adding safety change not only for return obj, but for all arguments of ClassType
-					//
-					VariableExec actualArg = null;
-					assert (specArg.index == SpecialArg.INDEX_RETURN_OBJ);
-					assert (retType.type == Table.getStringClass());
-					
-					if (specArg.index == SpecialArg.INDEX_RETURN_OBJ && returnDest != null) {
-						assert (returnDest.name != null);
-						values.put(returnDest.name, StringVal.getString(specArg.type == SpecialArg.TYPE_SAFE_ARG));
-						continue;
-					}
-//					else if (specArg.index == -1) { actualArg = thisObj; }
+			for (SpecialAction specAct : specialActions) {
+				specAct.execute(thisObj, actualArgs, returnDest, t);
+			}
+				
+//				if (specArg.type == SpecialArg.TYPE_CRITICAL_OUTPUT) {
+//					VariableExec actualArg = null;
+//					assert (specArg.index != SpecialArg.INDEX_RETURN_OBJ);
+//					if (specArg.index == -1) { actualArg = thisObj; }
 //					else { actualArg = actualArgs.get(specArg.index); }
 //					ObjValue obj;
 //					if (actualArg.value != null)
@@ -392,10 +323,38 @@ public class Method implements Obj {
 //					{
 //						obj = values.get(actualArg.name);
 //					}
-//					assert (obj instanceof ClassValue);
-//					obj.setSafe(specArg.type == SpecialArg.TYPE_SAFE_ARG);
-				}
-			}
+//					if (obj != null && !obj.isSafe()) {
+//						StringBuilder sb = new StringBuilder();
+//						sb.append("SQL injection detected!\r\n\r\nCritical method call stack:\r\n");
+//						printMethodCallStack(sb);
+//						throw new main.exception.SQLInjection(sb.toString());
+//					}
+//				} else {
+//					//TODO: consider adding safety change not only for return obj, but for all arguments of ClassType
+//					//
+//					VariableExec actualArg = null;
+//					assert (specArg.index == SpecialArg.INDEX_RETURN_OBJ);
+//					assert (retType.type == Table.getStringClass());
+//					
+//					if (specArg.index == SpecialArg.INDEX_RETURN_OBJ && returnDest != null) {
+//						assert (returnDest.name != null);
+//						values.put(returnDest.name, StringVal.getString(specArg.type == SpecialArg.TYPE_SAFE_ARG));
+//						continue;
+//					}
+////					else if (specArg.index == -1) { actualArg = thisObj; }
+////					else { actualArg = actualArgs.get(specArg.index); }
+////					ObjValue obj;
+////					if (actualArg.value != null)
+////					{
+////						obj = actualArg.value;
+////					}
+////					else
+////					{
+////						obj = values.get(actualArg.name);
+////					}
+////					assert (obj instanceof ClassValue);
+////					obj.setSafe(specArg.type == SpecialArg.TYPE_SAFE_ARG);
+//				}
 		}
 	}
 	

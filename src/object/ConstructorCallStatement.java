@@ -40,7 +40,7 @@ public class ConstructorCallStatement extends CallStatement {
 					List<VariableExec> args = new LinkedList<VariableExec>();
 					MethCallStatement fieldInitMethCall = new MethCallStatement(
 							null, 
-							constructor.getParentClass().getFieldInitializerMethodName(), 
+							fieldInitMethod,
 							new VariableExec("this", constructor.getParentClass()), 
 							args);
 					constructor.getBody().addStatement(fieldInitMethCall, 0);

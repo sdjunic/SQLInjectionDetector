@@ -2,6 +2,10 @@ package main;
 
 import java.util.*;
 
+import javax.swing.SpinnerDateModel;
+
+import libraryMethod.SpecialAction;
+
 public class LibraryMethodDecl {
 	
 	public String packageName;
@@ -11,7 +15,7 @@ public class LibraryMethodDecl {
 	public boolean isStatic;
 	public List<String> methodArgs;
 	
-	public List<SpecialArg> specialArguments;
+	private List<SpecialAction> specialActions;
 	
 	public LibraryMethodDecl() {
 		this.packageName = null;
@@ -20,28 +24,39 @@ public class LibraryMethodDecl {
 		this.retType = null;
 		this.isStatic = false;
 		this.methodArgs = new LinkedList<String>();
-		this.specialArguments = new LinkedList<SpecialArg>();;
+		this.specialActions = new LinkedList<SpecialAction>();;
 	}
 	
-	public LibraryMethodDecl(String packageName, String className, String methodName, String retType, boolean isStatic, List<String> methodArgs,  List<SpecialArg> specialArguments) {
+	public LibraryMethodDecl(String packageName, String className, String methodName, String retType, boolean isStatic, List<String> methodArgs,  List<SpecialAction> specialActions) {
 		this.packageName = packageName;
 		this.className = className;
 		this.methodName = methodName;
 		this.retType = retType;
 		this.isStatic = isStatic;
 		this.methodArgs = methodArgs;
-		this.specialArguments = specialArguments;
+		this.specialActions = specialActions;
 	}
 
 	public LibraryMethodDecl(String packageName, String methodName, String className) {
-		this(packageName, methodName, className, null, false, new LinkedList<String>(), new LinkedList<SpecialArg>());
+		this(packageName, methodName, className, null, false, new LinkedList<String>(), new LinkedList<SpecialAction>());
 	}
 	
 	public boolean isCriticalOutput() {
-		for (SpecialArg arg : specialArguments) {
-			if (arg.type == SpecialArg.TYPE_CRITICAL_OUTPUT) return true;
+		for (SpecialAction action : specialActions) {
+			if (action.isCriticalOutput()) return true;
 		}
 		return false;
+	}
+	
+	public void addSpecialAction(String left, String expression)
+	{		
+		SpecialAction specAction = new SpecialAction(left, expression, this);
+		this.specialActions.add(specAction);
+	}
+	
+	public List<SpecialAction> getSpecialActions()
+	{
+		return this.specialActions;
 	}
 	
 	public String getMethSign() {
@@ -59,7 +74,4 @@ public class LibraryMethodDecl {
 		methSign += ")";
 		return methSign;
 	}
-	
-	
-	
 }

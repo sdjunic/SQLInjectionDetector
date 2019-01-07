@@ -1941,10 +1941,10 @@ method_invocation ::=
 						if (m.getRetType() != null && m.getRetType().type != null) var = AssignmentStatement.getNewTempVariable(m.getRetType().type);
 					
 						MethCallStatement methCall = null;
-						if (m.isStatic() || !m.isDefined()) {
+						if (m.isStatic()) {
 							methCall = new MethCallStatement(var, m, args);
 						} else {
-							methCall = new MethCallStatement(var, n.get(n.size()-1), thisObj, args);
+							methCall = new MethCallStatement(var, m, thisObj, args);
 						}
 						
 						parser.parsingTopMethod.addStatement(methCall);
@@ -1969,7 +1969,7 @@ method_invocation ::=
 						if (m.isStatic() || !m.isDefined()) {
 							methCall = new MethCallStatement(var, m, args);
 						} else {
-							methCall = new MethCallStatement(var, id, thisObj, args);
+							methCall = new MethCallStatement(var, m, thisObj, args);
 						}
 						
 						parser.parsingTopMethod.addStatement(methCall);

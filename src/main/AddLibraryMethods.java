@@ -133,27 +133,27 @@ public class AddLibraryMethods extends JFrame {
 				method.methodName = methName;
 				
 				String retType = tbRetType.getText().trim();
-				if (retType.isEmpty() || retType.toLowerCase().equals("void")){
-					retType = null;
-				} else {
-					if (rdbtnRetSafe.isSelected()) {
-						method.specialArguments.add(new SpecialArg(SpecialArg.INDEX_RETURN_OBJ, SpecialArg.TYPE_SAFE_ARG));
-					} else if (rdbtnRetUnsafe.isSelected()) {
-						method.specialArguments.add(new SpecialArg(SpecialArg.INDEX_RETURN_OBJ, SpecialArg.TYPE_UNSAFE_ARG));
-					}
-				}
-				method.retType = retType;
-				
-				method.isStatic = chckbxIsStatic.isSelected();
-				if (!method.isStatic) {
-					if (rdbtnThisCritical.isSelected()) {
-						method.specialArguments.add(new SpecialArg(SpecialArg.INDEX_THIS_OBJ, SpecialArg.TYPE_CRITICAL_OUTPUT));
-					} else if (rdbtnThisSafe.isSelected()) {
-						method.specialArguments.add(new SpecialArg(SpecialArg.INDEX_THIS_OBJ, SpecialArg.TYPE_SAFE_ARG));
-					} else if (rdbtnThisUnsafe.isSelected()) {
-						method.specialArguments.add(new SpecialArg(SpecialArg.INDEX_THIS_OBJ, SpecialArg.TYPE_UNSAFE_ARG));
-					}
-				}
+//				if (retType.isEmpty() || retType.toLowerCase().equals("void")){
+//					retType = null;
+//				} else {
+//					if (rdbtnRetSafe.isSelected()) {
+//						method.specialActions.add(new SpecialAction(SpecialArg.INDEX_RETURN_OBJ, SpecialArg.TYPE_SAFE_ARG));
+//					} else if (rdbtnRetUnsafe.isSelected()) {
+//						method.specialActions.add(new SpecialAction(SpecialArg.INDEX_RETURN_OBJ, SpecialArg.TYPE_UNSAFE_ARG));
+//					}
+//				}
+//				method.retType = retType;
+//				
+//				method.isStatic = chckbxIsStatic.isSelected();
+//				if (!method.isStatic) {
+//					if (rdbtnThisCritical.isSelected()) {
+//						method.specialActions.add(new SpecialAction(SpecialArg.INDEX_THIS_OBJ, SpecialArg.TYPE_CRITICAL_OUTPUT));
+//					} else if (rdbtnThisSafe.isSelected()) {
+//						method.specialActions.add(new SpecialAction(SpecialArg.INDEX_THIS_OBJ, SpecialArg.TYPE_SAFE_ARG));
+//					} else if (rdbtnThisUnsafe.isSelected()) {
+//						method.specialActions.add(new SpecialAction(SpecialArg.INDEX_THIS_OBJ, SpecialArg.TYPE_UNSAFE_ARG));
+//					}
+//				}
 				
 				if (libraryMethList != null) libraryMethList.add(method);
 				
@@ -376,19 +376,19 @@ public class AddLibraryMethods extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				String argType = tbArgumentType.getText().trim();
 				
-				if (!argType.isEmpty()) {
-					if (rdbtnArgCritical.isSelected()){
-						method.specialArguments.add(new SpecialArg(method.methodArgs.size(), SpecialArg.TYPE_CRITICAL_OUTPUT));
-					} else if (rdbtnArgSafe.isSelected()) {
-						method.specialArguments.add(new SpecialArg(method.methodArgs.size(), SpecialArg.TYPE_SAFE_ARG));
-					} else if (rdbtnArgUnsafe.isSelected()) {
-						method.specialArguments.add(new SpecialArg(method.methodArgs.size(), SpecialArg.TYPE_UNSAFE_ARG));
-					}
-					method.methodArgs.add(argType);
-				} else {
-					lblError.setText("Enter argument type!");
-					return;
-				}
+//				if (!argType.isEmpty()) {
+//					if (rdbtnArgCritical.isSelected()){
+//						method.specialArguments.add(new SpecialArg(method.methodArgs.size(), SpecialArg.TYPE_CRITICAL_OUTPUT));
+//					} else if (rdbtnArgSafe.isSelected()) {
+//						method.specialArguments.add(new SpecialArg(method.methodArgs.size(), SpecialArg.TYPE_SAFE_ARG));
+//					} else if (rdbtnArgUnsafe.isSelected()) {
+//						method.specialArguments.add(new SpecialArg(method.methodArgs.size(), SpecialArg.TYPE_UNSAFE_ARG));
+//					}
+//					method.methodArgs.add(argType);
+//				} else {
+//					lblError.setText("Enter argument type!");
+//					return;
+//				}
 				
 				rdbtnArgUnknown.setSelected(true);
 				tbArgumentType.setText("");
