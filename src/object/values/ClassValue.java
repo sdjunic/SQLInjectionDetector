@@ -3,7 +3,6 @@ package object.values;
 import symbol.object.Obj;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import symbol.object.Class;

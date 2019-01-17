@@ -254,7 +254,7 @@ public class AddLibraryMethods extends JFrame {
 					rdbtnRetUnsafe.setEnabled(true);
 					rdbtnRetUnknown.setEnabled(true);
 				}
-				method.retType = tbRetType.getText().trim();
+				method.retTypeName = tbRetType.getText().trim();
 				lblMethodsign.setText(method.getMethSign());
 			}
 		});

@@ -1,64 +1,78 @@
-/**
-* OWASP Benchmark v1.2
-*
-* This file is part of the Open Web Application Security Project (OWASP)
-* Benchmark Project. For details, please see
-* <a href="https://www.owasp.org/index.php/Benchmark">https://www.owasp.org/index.php/Benchmark</a>.
-*
-* The OWASP Benchmark is free software: you can redistribute it and/or modify it under the terms
-* of the GNU General Public License as published by the Free Software Foundation, version 2.
-*
-* The OWASP Benchmark is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
-* even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* @author Dave Wichers <a href="https://www.aspectsecurity.com">Aspect Security</a>
-* @created 2015
-*/
+package test;
 
-package org.owasp.benchmark.testcode;
+import javax.servlet.http.*;
+import java.sql.*;
 
-import java.io.IOException;
-import java.sql.ResultSet;
-
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-@WebServlet(value="/sqli-00/BenchmarkTest00008")
-public class BenchmarkTest00008 extends HttpServlet {
-
-	@Override
-	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-		String param = "";
+public class Test extends HttpServlet {
+	
+	private Connection con = null;
+	
+	public void getConnection(String serverName,String instanceName,String port,String databaseName,String userName,String password) {
+		String connectoinString = "jdbc:sqlserver://" + serverName + 
+	            "\\" + instanceName + 
+	            ":" + port +
+	            ";databaseName=" + databaseName +
+	            ";username=" + userName +
+	            ";password=" + password;
 		
-		param = java.net.URLDecoder.decode(param, "UTF-8");
-
-		
-		String sql = "{call " + param + "}";
-		String sql2 = sql.concat("safe");
-			
-		stmt = con.createStatement();
-		java.sql.Statement stmt = getStmt();
-   	 	ResultSet rs = stmt.executeQuery(sql);
-		
-		try {
-			java.sql.Connection connection = org.owasp.benchmark.helpers.DatabaseHelper.getSqlConnection();
-			java.sql.CallableStatement statement = connection.prepareCall( sql );
-		    java.sql.ResultSet rs = statement.executeQuery();
-
-		} catch (java.sql.SQLException e) {
-			if (org.owasp.benchmark.helpers.DatabaseHelper.hideSQLErrors) {
-        		response.getWriter().println(
-"Error processing request."
-);
-        		return;
-        	}
-			else throw new ServletException(e);
-		}
+		con = DriverManager.getConnection(connectoinString);
 	}
 	
+	@Override
+	public void doGet(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException  {
+	     String id = req.getParameter("realname");
+	     String password = req.getParameter("mypassword");
+	     
+	     Statement stmt = null;
+	     
+	     try {
+	    	 stmt = con.createStatement();
+	    	 ResultSet rs = stmt.executeQuery("SELECT * FROM users WHERE username LIKE '" + id + "'");
+	     
+	    	 if (rs.next()) {
+	             req.getSession().setAttribute("username", rs.getString("username"));
+	             res.sendRedirect("home");
+	         }
+	         else {
+	             req.setAttribute("error", "Unknown user, please try again");
+	             req.getreqDispatcher("/login.jsp").forward(req, res);
+	         }
+
+	     } catch (Exception e) {
+	    	// TODO Auto-generated catch block
+			e.printStackTrace();
+	     } finally {
+	    	 if (stmt != null) stmt.close();
+	     }
+		 
+	}
+	
+	@Override
+	public void doPost(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException  {
+	     String id = req.getParameter("realname");
+	     String password = req.getParameter("mypassword");
+	     
+	     Statement stmt = null;
+	     
+	     try {
+	    	 stmt = con.createStatement();
+	    	 ResultSet rs = stmt.executeQuery("SELECT * FROM users WHERE username LIKE '" + id + "'");
+	     
+	    	 if (rs.next()) {
+	             req.getSession().setAttribute("username", rs.getString("username"));
+	             res.sendRedirect("home");
+	         }
+	         else {
+	             req.setAttribute("error", "Unknown user, please try again");
+	             req.getreqDispatcher("/login.jsp").forward(req, res);
+	         }
+
+	     } catch (Exception e) {
+	    	// TODO Auto-generated catch block
+			e.printStackTrace();
+	     } finally {
+	    	 if (stmt != null) stmt.close();
+	     }
+		 
+	}
 }

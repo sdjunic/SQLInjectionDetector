@@ -1,15 +1,22 @@
 package libraryMethod;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
+import Parse.ParseData;
 import execution.Task;
 import main.LibraryMethodDecl;
 import main.exception.SQLInjection;
 import object.VariableExec;
 import object.values.ObjValue;
 import object.values.StringVal;
+import rs.etf.pp1.symboltable.Tab;
+import symbol.Table;
 import symbol.object.Method;
+import symbol.object.Obj;
+import symbol.object.TypeReference;
+import symbol.object.UnknownType;
 
 public class SpecialAction {
 	
@@ -20,6 +27,7 @@ public class SpecialAction {
 	public static final String CRITICAL_OUTPUT = "__CO_";
 	
 	private String left;
+	private TypeReference returnType;
 	
 	private boolean isCriticalOutput;
 	private ActionTreeNode actionTree;
@@ -35,7 +43,7 @@ public class SpecialAction {
 		{
 			if (left.startsWith(RETURN))
 			{
-				assert methodDecl.retType != null;
+				assert methodDecl.retTypeName != null && !methodDecl.retTypeName.equals("void");
 			}
 			
 			if (left.startsWith(THIS))
@@ -53,7 +61,6 @@ public class SpecialAction {
 		
 		if (expression.startsWith("=")) // calculate boolean expression to get safety value for NEW object
 		{
-			// TODO: assert that we have "default class object" for left type
 			this.isCriticalOutput = false;
 			this.actionTree = parseExpression(expression.substring(1), methodDecl);
 			this.right = null;
@@ -99,6 +106,10 @@ public class SpecialAction {
 		return this.isCriticalOutput;
 	}
 	
+	public void setReturnType(TypeReference returnType) {
+		this.returnType = returnType;
+	}
+
 	public void execute(VariableExec thisObj, List<VariableExec> actualArgs, VariableExec returnDest, Task task) throws SQLInjection
 	{
 		if (isCriticalOutput)
@@ -129,7 +140,7 @@ public class SpecialAction {
 		else
 		{
 			fullLeftName = GetDataNode.getFullName(this.left, thisObj, actualArgs);
-			assert (!fullLeftName.isEmpty() && !Character.isDigit(fullLeftName.get(0).charAt(0)));
+			assert (!fullLeftName.isEmpty() && !GetDataNode.isNumeric(fullLeftName.get(0)));
 		}
 		
 		if (right != null)
@@ -141,8 +152,10 @@ public class SpecialAction {
 		}
 		
 		assert this.actionTree != null;
-		boolean rightSafetyValue = actionTree.execute(thisObj, actualArgs, task);		
-		task.values.put(fullLeftName, StringVal.getString(rightSafetyValue));
+		assert returnType != null && returnType.type != null && returnType.type.isRefType() && !(returnType.type instanceof UnknownType);
+		
+		boolean rightSafetyValue = actionTree.execute(thisObj, actualArgs, task);	
+		task.values.put(fullLeftName, ((symbol.object.Class)this.returnType.type).getDefaultObject(rightSafetyValue));
 	}
 	
 	private ActionTreeNode parseExpression(String expression, LibraryMethodDecl methodDecl)

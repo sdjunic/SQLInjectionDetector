@@ -5,12 +5,12 @@ import java.util.List;
 
 public class LibraryClassDecl {
 	
-	class Field
+	public class LibField
 	{
 		public String type;
 		public String name;
 		
-		public Field(String type, String name)
+		public LibField(String type, String name)
 		{
 			this.type = type;
 			this.name = name;
@@ -21,25 +21,18 @@ public class LibraryClassDecl {
 	public String className;
 	public String superClass;
 	
-	public List<Field> fields;
-	
-	public LibraryClassDecl()
-	{
-		this.packageName = null;
-		this.className = null;
-		this.superClass = null;
-		this.fields = new LinkedList<>();
-	}
+	public List<LibField> fields;
 
 	public LibraryClassDecl(String packageName, String className, String superClass) {
 		this.packageName = packageName;
 		this.className = className;
 		this.superClass = superClass;
+		this.fields = new LinkedList<>();
 	}
 	
 	public void addField(String type, String name)
 	{
-		this.fields.add(new LibraryClassDecl.Field(type, name));
+		this.fields.add(new LibraryClassDecl.LibField(type, name));
 	}
 
 }

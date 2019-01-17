@@ -42,7 +42,7 @@ public class GetDataNode implements ActionTreeNode {
 			return;
 		}
 		
-		assert (argument.startsWith(SpecialAction.THIS) || (!argument.isEmpty() && Character.isDigit(argument.charAt(0))));
+		assert (argument.startsWith(SpecialAction.THIS) || (!argument.isEmpty() && isNumeric(argument)));
 		
 		this.argument = argument;
 	}
@@ -63,15 +63,29 @@ public class GetDataNode implements ActionTreeNode {
 	public static boolean getSafetyValue(String specArgument, VariableExec thisObj, List<VariableExec> actualArgs, Task task)
 	{
 		ObjValue object = getObject(specArgument, thisObj, actualArgs, task);
-		assert object != null;
+		assert object != null; 
 		return object.isSafe();
+	}
+	
+	public static boolean isNumeric(String str)  
+	{  
+	  try  
+	  {  
+	    double d = Integer.parseInt(str);
+	  }  
+	  catch(NumberFormatException nfe)  
+	  {  
+	    return false;  
+	  }  
+	  return true;  
 	}
 	
 	public static ObjValue getObject(String specArgument, VariableExec thisObj, List<VariableExec> actualArgs, Task task)
 	{
 		List<String> fullArgName = getFullName(specArgument, thisObj, actualArgs);
 		
-		if (fullArgName.size() == 1 && Character.isDigit(fullArgName.get(0).charAt(0)))
+		
+		if (fullArgName.size() == 1 &&  isNumeric(fullArgName.get(0)))
 		{
 			int argIndex = Integer.parseInt(fullArgName.get(0));
 			VariableExec actualArg = actualArgs.get(argIndex);
@@ -97,7 +111,7 @@ public class GetDataNode implements ActionTreeNode {
 			fullArgName.remove(0);
 			fullArgName.addAll(0, thisObj.name);
 		}
-		else if (Character.isDigit(specArgument.charAt(0)))
+		else if (isNumeric(fullArgName.get(0)))
 		{
 			int argIndex = Integer.parseInt(fullArgName.get(0));
 			VariableExec actualArg = actualArgs.get(argIndex);

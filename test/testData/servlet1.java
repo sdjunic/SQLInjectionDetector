@@ -5,7 +5,10 @@ import java.sql.*;
 
 public class Test extends HttpServlet {
 	
-	private Connection con = null;
+	public void getConnection()
+	{
+		return getConnection("server", ".", "4092", "testdb", "clouduser", "pass123");
+	}
 	
 	public void getConnection(String serverName,String instanceName,String port,String databaseName,String userName,String password) {
 		String connectoinString = "jdbc:sqlserver://" + serverName + 
@@ -26,6 +29,7 @@ public class Test extends HttpServlet {
 	     Statement stmt = null;
 	     
 	     try {
+			 Connection con = getConnection();
 	    	 stmt = con.createStatement();
 	    	 ResultSet rs = stmt.executeQuery("SELECT * FROM users WHERE username LIKE '" + id + "'");
 	     
@@ -55,7 +59,7 @@ public class Test extends HttpServlet {
 	     Statement stmt = null;
 	     
 	     try {
-	    	 stmt = con.createStatement();
+	    	 stmt = getConnection().createStatement();
 	    	 ResultSet rs = stmt.executeQuery("SELECT * FROM users WHERE username LIKE '" + id + "'");
 	     
 	    	 if (rs.next()) {

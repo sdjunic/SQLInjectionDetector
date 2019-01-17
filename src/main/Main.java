@@ -27,6 +27,7 @@ import java.io.*;
 
 public class Main {
 	
+	private static List<LibraryClassDecl> libraryClassList;
 	private static List<LibraryMethodDecl> libraryMethList; 
 
 	public static PrintStream infoPS = System.out; /* null; */
@@ -34,28 +35,58 @@ public class Main {
 	
 	public static void main(String args[]) throws Exception {
 		
+		libraryClassList = new LinkedList<LibraryClassDecl>();
 		libraryMethList = new LinkedList<LibraryMethodDecl>();
+		
 		ProgramParser.setCriticalMethList(libraryMethList);
 		ClassContentParser.setCriticalMethList(libraryMethList);
 		
-//		Krenuo sam da dodajem LibraryClassDecl.
-//		Nastavak:
-//		Napraviti listu svih deklaracija kao za library metode, pa ih onda sve dodati u tabelu simbola
-//		Napraviti default objekat koji ce se klonirati kad god se iz library metode vraca objekat te klase
-//		Nakon toga, dodati metodu prepareCall iz testa, koja vraca unsafe CallableStatement objekat
+		LibraryClassDecl libraryClassDecl = new LibraryClassDecl("java.sql", "Connection", null);
+		libraryClassList.add(libraryClassDecl);
 		
-		LibraryClassDecl libraryClassDecl = new LibraryClassDecl("java.sql", "Statement", null); 
-		// TODO: what to use as default super class (Object?)
-		
+		libraryClassDecl = new LibraryClassDecl("java.sql", "Statement", null);
+		libraryClassList.add(libraryClassDecl);
+
+	
 		LibraryMethodDecl libraryMethDecl = new LibraryMethodDecl(null, "String", "concat");
-		libraryMethDecl.retType = "String";
+		libraryMethDecl.retTypeName = "String";
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= 0 & " + SpecialAction.THIS);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("org.owasp.benchmark.helpers", "DatabaseHelper", "getSqlConnection");
+		libraryMethDecl.retTypePackage = "java.sql";
+		libraryMethDecl.retTypeName = "Connection";
+		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= " + SpecialAction.SAFE);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "DriverManager", "getConnection");
+		libraryMethDecl.retTypePackage = "java.sql";
+		libraryMethDecl.retTypeName = "Connection";
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= " + SpecialAction.SAFE);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "Connection", "prepareCall");
+		libraryMethDecl.retTypePackage = "java.sql";
+		libraryMethDecl.retTypeName = "Statement";
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= 0");
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "Connection", "createStatement");
+		libraryMethDecl.retTypePackage = "java.sql";
+		libraryMethDecl.retTypeName = "Statement";
+		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= " + SpecialAction.SAFE);
 		libraryMethList.add(libraryMethDecl);
 		
 		libraryMethDecl = new LibraryMethodDecl("java.sql", "Statement", "executeQuery");
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "Statement", "executeQuery");
+		libraryMethDecl.addSpecialAction(SpecialAction.THIS, SpecialAction.CRITICAL_OUTPUT);
 		libraryMethList.add(libraryMethDecl);
 		
 		libraryMethDecl = new LibraryMethodDecl("java.sql", "CallableStatement", "executeQuery");
@@ -75,49 +106,49 @@ public class Main {
 		
 		libraryMethDecl = new LibraryMethodDecl("java.sql", "Statement", "escapeSQL");
 		libraryMethDecl.isStatic = true;
-		libraryMethDecl.retType = "String";
+		libraryMethDecl.retTypeName = "String";
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= " + SpecialAction.SAFE);
 		libraryMethList.add(libraryMethDecl);
 		
 		libraryMethDecl = new LibraryMethodDecl("javax.servlet.http", "HttpServletRequest", "getParameter");
-		libraryMethDecl.retType = "String";
+		libraryMethDecl.retTypeName = "String";
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= " + SpecialAction.UNSAFE);
 		libraryMethList.add(libraryMethDecl);
 		
 		libraryMethDecl = new LibraryMethodDecl("javax.servlet.http", "HttpServletResponse", "getParameter");
-		libraryMethDecl.retType = "String";
+		libraryMethDecl.retTypeName = "String";
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= " + SpecialAction.UNSAFE);
 		libraryMethList.add(libraryMethDecl);
 		
 		libraryMethDecl = new LibraryMethodDecl("javax.servlet.http", "HttpServletRequest", "getHeader");
-		libraryMethDecl.retType = "String";
+		libraryMethDecl.retTypeName = "String";
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= " + SpecialAction.UNSAFE);
 		libraryMethList.add(libraryMethDecl);
 		
 		libraryMethDecl = new LibraryMethodDecl("javax.servlet.http", "HttpServletResponse", "getHeader");
-		libraryMethDecl.retType = "String";
+		libraryMethDecl.retTypeName = "String";
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= " + SpecialAction.UNSAFE);
 		libraryMethList.add(libraryMethDecl);
 		
 		libraryMethDecl = new LibraryMethodDecl("java.net", "URLDecoder", "decode");
-		libraryMethDecl.retType = "String";
+		libraryMethDecl.retTypeName = "String";
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= 0");
 		libraryMethList.add(libraryMethDecl);
 		
 		libraryMethDecl = new LibraryMethodDecl("java.util", "Scanner", "next");
-		libraryMethDecl.retType = "String";
+		libraryMethDecl.retTypeName = "String";
 		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= " + SpecialAction.UNSAFE);
 		libraryMethList.add(libraryMethDecl);
 		
 		libraryMethDecl = new LibraryMethodDecl("java.util", "Scanner", "nextLine");
-		libraryMethDecl.retType = "String";
+		libraryMethDecl.retTypeName = "String";
 		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= " + SpecialAction.UNSAFE);
 		libraryMethList.add(libraryMethDecl);
 		
@@ -189,7 +220,7 @@ public class Main {
 			            		   }
 			            	   } catch (Exception e) {
 			            		   System.out.println("Error in test " + testName);
-			            		   //e.printStackTrace();
+			            		   e.printStackTrace();
 			            		   continue;
 			            	   }
 			            	   
@@ -217,80 +248,11 @@ public class Main {
 	}
 	
 	public static void testProjectForSQLInjection(File projectRoot, boolean startFromRiskyMethods, boolean initialArgumentsSafe) throws Exception{				
-		Table.makeNewTable();
+		Table.makeNewTable(libraryClassList, libraryMethList);
 		Method.methCallStack = new Stack<Method>();
 		Parse.ParseData.riskyMethods = new HashSet<Method>();
 		Parse.ParseData.mainMethods =new HashSet<Method>();
-		
-		for (LibraryMethodDecl decl : libraryMethList) {
-			Table.setScope(Table.universe());
-			
-			if (decl.packageName != null)
-			{
-				Obj packageObj = Table.find(decl.packageName);
-				symbol.object.Package currentPackage = null;
-				if (packageObj != null && packageObj instanceof symbol.object.Package) {
-					currentPackage = (symbol.object.Package)packageObj;
-					Table.setScope(currentPackage.getScope());
-				} else {
-					currentPackage = new symbol.object.Package(decl.packageName);
-					Table.insert(currentPackage);
-					Table.openScope(currentPackage);		
-					currentPackage.setScope(Table.currentScope());
-				}
-			}
-			
-			Obj classObj = Table.find(decl.className);
-			Class currentClass = null;
-			if (classObj != null && classObj instanceof symbol.object.Class) {
-				currentClass = (symbol.object.Class)classObj;
-				Table.setScope(currentClass.getScope());
-			} else {
-				currentClass = new symbol.object.Class(decl.className, null);
-				Table.insert(currentClass);
-				Table.openScope(currentClass);		
-				currentClass.setScope(Table.currentScope());
-			}
-			
-			Obj methodObj = Table.find(decl.methodName);
-			Method currentMethod = null;
-			if (methodObj != null && methodObj instanceof symbol.object.Method) {
-				continue;
-			} else {
-				currentMethod = new symbol.object.Method(decl.methodName, decl.className.equals(decl.methodName));
-				int i = 0;
-				for (String arg : decl.methodArgs) {
-					Obj obj = Table.find(arg);
-					symbol.object.Type type = null;
-					if (obj != null || obj instanceof PrimitiveType || obj instanceof Class)
-						type = (symbol.object.Type)obj;
-					else {
-						type = new UnknownType(arg, null, null, Table.currentScope());
-					}
-					currentMethod.addFormalParam(new MethParam(new TypeReference(type), "temp" + ++i));
-				}
-				currentMethod.complFormalParamAdding();
-				
-				if (decl.retType != null) {
-					Obj obj = Table.find(decl.retType);
-					symbol.object.Type retType = null;
-					if (obj != null || obj instanceof PrimitiveType || obj instanceof Class)
-						retType = (symbol.object.Type)obj;
-					else {
-						retType = new UnknownType(decl.retType, null, null, Table.currentScope());
-					}
-					currentMethod.setRetType(new TypeReference(retType));
-				}
-				if (decl.isStatic) {
-					currentMethod.setModifiers(new Modifiers(Modifier.STATIC));
-				}
-				currentMethod.setDefined(false);
-				currentMethod.setSpecialActions(decl.getSpecialActions());
-				Table.insert(currentMethod);
-				Table.openScope(currentMethod);		
-				currentMethod.setScope(Table.currentScope());
-			}
-		}
+
 		Table.setScope(Table.universe());
 		
 		if (infoPS != null) {

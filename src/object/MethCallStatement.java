@@ -196,6 +196,11 @@ public class MethCallStatement extends CallStatement {
 			Class thisObjClass = thisObjValue.getObjectType();
 			if (thisObjClass != null) {
 				Method methodToCall = thisObjClass.findMethod(this.methodToCall, this.arguments);
+				if (methodToCall == null)
+				{
+					throw new Exception("Metoda nije pronadjena!");
+				}
+				
 				if (!res.containsKey(methodToCall))
 				{
 					res.put(methodToCall, new LinkedList<>());

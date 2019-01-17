@@ -14,6 +14,10 @@ import symbol.Scope;
 import symbol.SymbolDataStructure;
 import symbol.Table;
 import symbol.object.Class;
+import object.values.ClassValue;
+import object.values.NullValue;
+import object.values.ObjValue;
+import object.values.StringVal;
 
 public class Class implements Type {
 
@@ -132,6 +136,35 @@ public class Class implements Type {
 	public String getFieldInitializerMethodName()
 	{
 		return "_field_init_" + name;
+	}
+	
+	// Used in special methods to make new object of this Class.
+	// That object will have all fields set to null, except
+	// String fields, which will have given safety value.
+	//
+	public ObjValue getDefaultObject(boolean isSafe)
+	{
+		ClassValue result = new ClassValue(this, isSafe);
+		
+		for (Obj o : getLocals().symbols()) { 
+			if (o instanceof Field) { 
+				Field field = (Field)o;
+				if(field.getType().isRefType())
+				{
+					// TODO: check are all string fields stored like this
+					if (field.getType().type.getName() == "String")
+					{
+						result.setField(field.getName(), StringVal.getString(isSafe));
+					}
+					else
+					{
+						result.setField(field.getName(), NullValue.getNullValue());
+					}
+				}
+			}
+		}
+		
+		return result;
 	}
 	
 	public Method getFieldsInitializerMethod() throws Exception {
