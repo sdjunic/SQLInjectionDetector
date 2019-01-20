@@ -4,7 +4,7 @@ public class SimpleForLoopTest5 {
 	
 	class A
 	{
-		Stirng condition;
+		String condition;
 		String update;
 		String body;
 		

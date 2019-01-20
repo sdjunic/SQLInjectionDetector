@@ -7,7 +7,7 @@ import java.util.*;
 
 import Parse.MethodParser;
 import execution.Task;
-import libraryMethod.SpecialAction;
+import javaLibrary.SpecialAction;
 import main.Main;
 import main.exception.SQLInjection;
 import object.*;
@@ -201,6 +201,10 @@ public class Method implements Obj {
 	}
 
 	public void setSpecialActions(List<SpecialAction> specialActions) {
+		for (SpecialAction specAction : specialActions)
+		{
+			specAction.bind();
+		}
 		this.specialActions = specialActions;
 	}
 

@@ -15,7 +15,12 @@ public class ArrayType implements Type {
 	
 	@Override
 	public String getName() {
-		return type.getName();
+		String arrayLivelStr = "";
+		for (int i=0; i<arrayLevel; ++i)
+		{
+			arrayLivelStr += "[]";
+		}
+		return type.getName() + arrayLivelStr;
 	}
 
 	public int getArrayLevel(){

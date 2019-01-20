@@ -1,4 +1,4 @@
-package libraryMethod;
+package javaLibrary;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -60,7 +60,7 @@ public class GetDataNode implements ActionTreeNode {
 	public static boolean getSafetyValue(String specArgument, VariableExec thisObj, List<VariableExec> actualArgs, Task task)
 	{
 		ObjValue object = getObject(specArgument, thisObj, actualArgs, task);
-		assert object != null; 
+		assert object != null;
 		return object.isSafe();
 	}
 	
@@ -112,6 +112,7 @@ public class GetDataNode implements ActionTreeNode {
 		{
 			int argIndex = Integer.parseInt(fullArgName.get(0));
 			VariableExec actualArg = actualArgs.get(argIndex);
+			assert actualArg != null;
 			
 			if (actualArg.name != null)
 			{

@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import Parse.ParseData;
-import libraryMethod.SpecialAction;
+import javaLibrary.SpecialAction;
 import main.LibraryClassDecl;
 import main.LibraryMethodDecl;
 
@@ -27,7 +27,12 @@ public class Table {
 		currentTable.currentLevel = -1;
 		currentTable.universe = currentTable.currentScope = new Scope(null, currentTable.currentLevel, null);
 		
-		currentTable.stringClass = new Class("String", null);
+		Class objectClass = new Class("Object", null);
+		openScope(objectClass);
+		objectClass.setScope(currentTable.currentScope);
+		closeScope();
+		
+		currentTable.stringClass = new Class("String", new TypeReference(objectClass));
 		openScope(currentTable.stringClass);
 		currentTable.stringClass.setScope(currentTable.currentScope);
 		closeScope();
@@ -40,10 +45,30 @@ public class Table {
 		insert(new PrimitiveType("char"));
 		insert(new PrimitiveType("float"));
 		insert(new PrimitiveType("double"));
+		insert(objectClass);
 		insert(currentTable.stringClass);
 		
 		for (LibraryClassDecl classDecl : libClassDecl)
 		{
+			// find super class if it exists
+			Table.setScope(Table.universe());
+			
+			if (classDecl.superClassPackageName != null)
+			{
+				Obj superClassPackageObj = Table.find(classDecl.superClassPackageName);
+				symbol.object.Package currentPackage = null;
+				if (superClassPackageObj != null && superClassPackageObj instanceof symbol.object.Package) {
+					currentPackage = (symbol.object.Package)superClassPackageObj;
+					Table.setScope(currentPackage.getScope());
+				} else {
+					assert false; // super class and its package must be created before this point
+				}
+			}			
+			Obj superClassObj = Table.find(classDecl.superClass);
+			assert (superClassObj != null && superClassObj instanceof symbol.object.Class);		
+			Class superClass = (Class)superClassObj;
+			
+			// find or make actual class
 			Table.setScope(Table.universe());
 			
 			if (classDecl.packageName != null)
@@ -66,7 +91,7 @@ public class Table {
 				continue;
 			}
 			
-			Class currentClass = new symbol.object.Class(classDecl.className, null);
+			Class currentClass = new symbol.object.Class(classDecl.className, new TypeReference(superClass));
 			Table.insert(currentClass);
 			Table.openScope(currentClass);		
 			currentClass.setScope(Table.currentScope());
@@ -82,7 +107,7 @@ public class Table {
 					
 					if (f.typePackage == null || f.typePackage.isEmpty())
 					{
-						String typeName = getTypeIfArray(f.typeName);				
+						String typeName = ParseData.getTypeIfArray(f.typeName);				
 						Obj obj = Table.find(typeName);
 						
 						symbol.object.Type type = null;
@@ -93,7 +118,7 @@ public class Table {
 						}
 						
 						TypeReference typeRef = new TypeReference(type);
-						int arrayLevel = getTypeArrayLevel(f.typeName);
+						int arrayLevel = ParseData.getTypeArrayLevel(f.typeName);
 						typeRef.addArrayLevel(arrayLevel);
 						
 						Table.insert(new Field(f.name, typeRef, null, null));
@@ -101,7 +126,7 @@ public class Table {
 					else
 					{
 						symbol.object.Type type = null;
-						String typeName = getTypeIfArray(f.typeName);
+						String typeName = ParseData.getTypeIfArray(f.typeName);
 						
 						List<String> typeAbsolutePath = new LinkedList<>();
 						typeAbsolutePath.add(f.typePackage);
@@ -118,13 +143,15 @@ public class Table {
 						}
 						
 						TypeReference typeRef = new TypeReference(type);
-						int arrayLevel = getTypeArrayLevel(f.typeName);
+						int arrayLevel = ParseData.getTypeArrayLevel(f.typeName);
 						typeRef.addArrayLevel(arrayLevel);
 						
 						Table.insert(new Field(f.name, typeRef, null, null));
 					}
 				}
 			}
+			
+			closeScope();
 		}
 		
 		for (LibraryMethodDecl methDecl : libMethodDecl) {
@@ -157,7 +184,7 @@ public class Table {
 				currentClass = (symbol.object.Class)classObj;
 				Table.setScope(currentClass.getScope());
 			} else {
-				currentClass = new symbol.object.Class(methDecl.className, null);
+				currentClass = new symbol.object.Class(methDecl.className, new TypeReference(objectClass));
 				Table.insert(currentClass);
 				Table.openScope(currentClass);		
 				currentClass.setScope(Table.currentScope());
@@ -171,20 +198,7 @@ public class Table {
 			Method currentMethod = new symbol.object.Method(methDecl.methodName, methDecl.isConstructor);
 			int i = 0;
 			for (String argTypeStr : methDecl.methodArgs) {
-				String typeName = getTypeIfArray(argTypeStr);
-				Obj obj = Table.find(typeName);
-				
-				symbol.object.Type type = null;
-				if (obj != null || obj instanceof PrimitiveType || obj instanceof Class)
-					type = (symbol.object.Type)obj;
-				else {
-					type = new UnknownType(typeName, null, null, Table.currentScope());
-				}
-				
-				TypeReference typeRef = new TypeReference(type);
-				int arrayLevel = getTypeArrayLevel(argTypeStr);
-				typeRef.addArrayLevel(arrayLevel);
-				
+				TypeReference typeRef = SpecialAction.getTypeForClassName(argTypeStr);
 				currentMethod.addFormalParam(new MethParam(typeRef, "temp" + ++i));
 			}
 			currentMethod.complFormalParamAdding();
@@ -192,7 +206,7 @@ public class Table {
 			if (methDecl.retTypeName != null) {
 				if (methDecl.retTypePackage == null || methDecl.retTypePackage.isEmpty())
 				{
-					String typeName = getTypeIfArray(methDecl.retTypeName);
+					String typeName = ParseData.getTypeIfArray(methDecl.retTypeName);
 					Obj obj = Table.find(typeName);
 					
 					symbol.object.Type retType = null;
@@ -203,7 +217,7 @@ public class Table {
 					}
 					
 					TypeReference typeRef = new TypeReference(retType);
-					int arrayLevel = getTypeArrayLevel(methDecl.retTypeName);
+					int arrayLevel = ParseData.getTypeArrayLevel(methDecl.retTypeName);
 					typeRef.addArrayLevel(arrayLevel);
 					
 					currentMethod.setRetType(typeRef);
@@ -211,7 +225,7 @@ public class Table {
 				else
 				{
 					symbol.object.Type retType = null;
-					String typeName = getTypeIfArray(methDecl.retTypeName);
+					String typeName = ParseData.getTypeIfArray(methDecl.retTypeName);
 					
 					List<String> returnTypeAbsolutePath = new LinkedList<>();
 					returnTypeAbsolutePath.add(methDecl.retTypePackage);
@@ -228,7 +242,7 @@ public class Table {
 					}
 					
 					TypeReference typeRef = new TypeReference(retType);
-					int arrayLevel = getTypeArrayLevel(methDecl.retTypeName);
+					int arrayLevel = ParseData.getTypeArrayLevel(methDecl.retTypeName);
 					typeRef.addArrayLevel(arrayLevel);
 					
 					currentMethod.setRetType(typeRef);
@@ -238,15 +252,10 @@ public class Table {
 				currentMethod.setModifiers(new Modifiers(Modifier.STATIC));
 			}
 			
-			for (SpecialAction specAction : methDecl.getSpecialActions())
-			{
-				specAction.setReturnType(currentMethod.getRetType());
-			}
-			
 			currentMethod.setDefined(false);
-			currentMethod.setSpecialActions(methDecl.getSpecialActions());
 			Table.insert(currentMethod);
-			Table.openScope(currentMethod);		
+			Table.openScope(currentMethod);
+			currentMethod.setSpecialActions(methDecl.getSpecialActions());
 			currentMethod.setScope(Table.currentScope());
 		}
 	}
@@ -324,24 +333,4 @@ public class Table {
 		currentTable.universe.print(sb);
 		sb.append("\r\n----------------- END SYMBOL TABLE -----------------\r\n");
 	}
-	
-	private static String getTypeIfArray(String type)
-	{
-		int i = (type + "[").indexOf("[");
-		return type.substring(0, i);
-	}
-	
-	private static int getTypeArrayLevel(String type)
-	{
-		int leftBr = 0;
-		int rightBr = 0;
-		for (int i = 0; i < type.length(); ++i)
-		{
-			if (type.charAt(i) == '[') ++leftBr;
-			else if (type.charAt(i) == ']') ++rightBr;
-		}
-		assert leftBr == rightBr;
-		return leftBr;
-	}
-	
 }

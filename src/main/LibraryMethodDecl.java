@@ -4,7 +4,7 @@ import java.util.*;
 
 import javax.swing.SpinnerDateModel;
 
-import libraryMethod.SpecialAction;
+import javaLibrary.SpecialAction;
 
 public class LibraryMethodDecl {
 	
@@ -54,9 +54,15 @@ public class LibraryMethodDecl {
 		return false;
 	}
 	
-	public void addSpecialAction(String left, String expression)
+	public void addSpecialAction(String left, String assign)
+	{
+		assert assign != null && assign.equals(SpecialAction.CRITICAL_OUTPUT);
+		addSpecialAction(left, assign, null);
+	}
+	
+	public void addSpecialAction(String left, String assign, String expression)
 	{		
-		SpecialAction specAction = new SpecialAction(left, expression, this);
+		SpecialAction specAction = new SpecialAction(left, assign, expression, this);
 		this.specialActions.add(specAction);
 	}
 	

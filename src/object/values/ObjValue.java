@@ -1,6 +1,6 @@
 package object.values;
 
-import symbol.object.Class;
+import symbol.object.Type;
 
 public abstract class ObjValue {
 	
@@ -20,7 +20,7 @@ public abstract class ObjValue {
 		this.isSafe = isSafe;
 	}
 	
-	public abstract Class getObjectType();
+	public abstract Type getObjectType();
 	
 	public abstract ObjValue shallowCopy();
 	

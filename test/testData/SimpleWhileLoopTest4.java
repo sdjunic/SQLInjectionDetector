@@ -5,7 +5,7 @@ public class SimpleWhileLoopTest4 {
 	class AA
 	{
 		public String a1;
-		public Stirng a2;
+		public String a2;
 		
 		public boolean condition(String s)
 		{

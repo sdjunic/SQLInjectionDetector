@@ -283,4 +283,22 @@ public class ParseData {
 		return Integer.parseInt(num);
 	}
 	
+	public static String getTypeIfArray(String type)
+	{
+		int i = (type + "[").indexOf("[");
+		return type.substring(0, i);
+	}
+	
+	public static int getTypeArrayLevel(String type)
+	{
+		int leftBr = 0;
+		int rightBr = 0;
+		for (int i = 0; i < type.length(); ++i)
+		{
+			if (type.charAt(i) == '[') ++leftBr;
+			else if (type.charAt(i) == ']') ++rightBr;
+		}
+		assert leftBr == rightBr;
+		return leftBr;
+	}
 }

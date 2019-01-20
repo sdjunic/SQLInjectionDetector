@@ -4,8 +4,8 @@ public class SimpleForLoopTest2 {
 	
 	class A
 	{
-		Stirng init;
-		Stirng condition;
+		String init;
+		String condition;
 		String update;
 		String body;
 		

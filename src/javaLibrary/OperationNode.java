@@ -1,4 +1,4 @@
-package libraryMethod;
+package javaLibrary;
 
 import java.util.List;
 

@@ -193,7 +193,8 @@ public class MethCallStatement extends CallStatement {
 				continue;
 			}
 			
-			Class thisObjClass = thisObjValue.getObjectType();
+			assert thisObjValue.getObjectType() instanceof Class;
+			Class thisObjClass = (Class)thisObjValue.getObjectType();
 			if (thisObjClass != null) {
 				Method methodToCall = thisObjClass.findMethod(this.methodToCall, this.arguments);
 				if (methodToCall == null)

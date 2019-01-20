@@ -239,16 +239,23 @@ public class Class implements Type {
 		while (cl != null) {
 			Collection<Obj> classContent = cl.getLocals().symbols();
 			Iterator<Obj> it = classContent.iterator();
+			List<Candidate> candidates = new LinkedList<>();
 			while (it.hasNext()) {
 				Obj o = it.next();
 				if (o instanceof Method && o.getName().startsWith(name+"(")) {
 					Method meth = (Method)o;
 					List<MethParam> params = meth.getMethParamList();
 					if (params.size() == args.size()) {
-						return meth;
+						candidates.add(new Candidate(meth));
 					}
 				}
 			}
+			
+			if (!candidates.isEmpty())
+			{
+				return this.findBestMatchingCandidate(candidates, args);
+			}
+			
 			if (cl.getSuperClass() != null && cl.getSuperClass().type != null && cl.getSuperClass().type instanceof Class) {
 				cl = (Class)cl.getSuperClass().type;
 			} else { 
@@ -258,20 +265,26 @@ public class Class implements Type {
 		return null;
 	}
 	
-	
-	public Method findConstructor(List<VariableExec> args) throws Exception {
+	public Method findConstructor(List<VariableExec> args) throws Exception {		
 		Collection<Obj> classContent = this.getLocals().symbols();
 		Iterator<Obj> it = classContent.iterator();
+		List<Candidate> candidates = new LinkedList<>();
 		while (it.hasNext()) {
 			Obj o = it.next();
 			if (o instanceof Method && o.getName().startsWith(name+"(")) {
 				Method meth = (Method)o;
 				List<MethParam> params = meth.getMethParamList();
 				if (params.size() == args.size()) {
-					return meth;
+					candidates.add(new Candidate(meth));
 				}
 			}
 		}
+		
+		if (!candidates.isEmpty())
+		{
+			return this.findBestMatchingCandidate(candidates, args);
+		}
+		
 		if (args.size() == 0) { // add default constructor
 			Method defCon = new Method(name, true);
 			defCon.complFormalParamAdding();
@@ -342,6 +355,116 @@ public class Class implements Type {
 		}
 		
 		return null;
+	}
+	
+	class Candidate
+	{
+		public Method method;
+		public int rate;
+		
+		public Candidate(Method m)
+		{
+			this.method = m;
+			this.rate = 0;
+		}
+	}
+	
+	public Method findBestMatchingCandidate(List<Candidate> candidates, List<VariableExec> args)
+	{
+		assert candidates != null && !candidates.isEmpty();
+		
+		for (Candidate candidate : candidates)
+		{
+			List<MethParam> params = candidate.method.getMethParamList();
+			
+			for (int i = 0; i < params.size(); ++i)
+			{
+				MethParam param = params.get(i);
+				VariableExec arg = args.get(i);
+				
+				if (arg == null)
+				{
+					continue;
+				}
+				
+				Type argType = null;
+				if (arg.object != null)
+				{
+					if (arg.object instanceof Type)
+					{
+						argType = ((Type)arg.object);
+					}
+					else if (arg.object instanceof Field)
+					{
+						argType = ((Field)arg.object).getType().type;
+					}
+					else if (arg.object instanceof Variable)
+					{
+						argType = ((Variable)arg.object).getType().type;
+					}
+				} else if (arg.value != null)
+				{
+					argType = arg.value.getObjectType();
+				}
+				
+				if (param.getType().getName().equals(argType.getName()))
+				{
+					candidate.rate += 5;
+				}
+				else
+				{
+					// TODO: add logic derived type match
+					Type paramSourceType = param.getType().type;
+					int paramArrayLevel = 0;
+					if (paramSourceType instanceof ArrayType)
+					{
+						paramSourceType = ((ArrayType)paramSourceType).getType().type;
+						paramArrayLevel = ((ArrayType)paramSourceType).getArrayLevel();
+					}
+					
+					Type argSourceType = argType;
+					int argArrayLevel = 0;
+					if (argSourceType instanceof ArrayType)
+					{
+						argSourceType = ((ArrayType)argSourceType).getType().type;
+						argArrayLevel = ((ArrayType)argSourceType).getArrayLevel();
+					}
+					
+					if (paramArrayLevel != argArrayLevel) continue;
+					
+					Type argSuperClass = argSourceType;
+					while(true)
+					{
+						if (argSuperClass instanceof Class && ((Class)argSuperClass).superClass != null)
+						{
+							argSuperClass = ((Class)argSourceType).superClass.type;
+						}
+						else
+						{
+							break;
+						}
+						
+						if (argSuperClass.getName().equals(paramSourceType.getName()))
+						{
+							candidate.rate += 3;
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		Method bestCandidate = null;
+		int bestRate = -1;
+		for (Candidate candidate : candidates)
+		{
+			if (candidate.rate > bestRate)
+			{
+				bestRate = candidate.rate;
+				bestCandidate = candidate.method;
+			}
+		}		
+		return bestCandidate;
 	}
 	
 	public Field findField(String name) {

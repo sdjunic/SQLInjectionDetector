@@ -21,13 +21,19 @@ public class LibraryClassDecl {
 	
 	public String packageName;
 	public String className;
+	public String superClassPackageName;
 	public String superClass;
 	
 	public List<LibField> fields;
 
-	public LibraryClassDecl(String packageName, String className, String superClass) {
+	public LibraryClassDecl(String packageName, String className) {
+		this(packageName, className, null, "Object");
+	}
+	
+	public LibraryClassDecl(String packageName, String className, String superClassPackageName, String superClass) {
 		this.packageName = packageName;
 		this.className = className;
+		this.superClassPackageName = superClassPackageName;
 		this.superClass = superClass;
 		this.fields = new LinkedList<>();
 	}

@@ -314,7 +314,7 @@ non terminal VariableExec postfix_expression;
 non terminal postincrement_expression, postdecrement_expression;
 non terminal VariableExec unary_expression, unary_expression_not_plus_minus;
 non terminal preincrement_expression, predecrement_expression;
-non terminal cast_expression;
+non terminal VariableExec cast_expression;
 non terminal VariableExec multiplicative_expression, additive_expression;
 non terminal VariableExec shift_expression, relational_expression, equality_expression;
 non terminal VariableExec and_expression, exclusive_or_expression, inclusive_or_expression;
@@ -2140,18 +2140,33 @@ unary_expression_not_plus_minus ::=
 		postfix_expression:res {: RESULT = res; :}
 	|	COMP unary_expression
 	|	NOT unary_expression
-	|	cast_expression
+	|	cast_expression:res {: RESULT = res; :}
 	;
 	
 cast_expression ::=
-		LPAREN primitive_type dims_opt RPAREN unary_expression
-	|	LPAREN name RPAREN unary_expression_not_plus_minus
-	|	LPAREN name dims RPAREN unary_expression_not_plus_minus
+		LPAREN primitive_type dims_opt RPAREN unary_expression:res
+		{:
+			RESULT = res;
+		:}
+	|	LPAREN name RPAREN unary_expression_not_plus_minus:res
+		{:
+			RESULT = res;
+		:}
+	|	LPAREN name dims RPAREN unary_expression_not_plus_minus:res
+		{:
+			RESULT = res;
+		:}
 	|	LPAREN name LT type_argument_list_1 dims_opt RPAREN
-			unary_expression_not_plus_minus
+			unary_expression_not_plus_minus:res
+		{:
+			RESULT = res;
+		:}
 	|	LPAREN name LT type_argument_list_1 DOT
 			class_or_interface_type dims_opt RPAREN
-			unary_expression_not_plus_minus
+			unary_expression_not_plus_minus:res
+		{:
+			RESULT = res;
+		:}
 	;
 	
 multiplicative_expression ::=
@@ -2375,7 +2390,7 @@ unary_expression_not_plus_minus_nn ::=
 		postfix_expression_nn:res {: RESULT = res; :}
 	|	COMP unary_expression
 	|	NOT unary_expression
-	|	cast_expression
+	|	cast_expression:res {: RESULT = res; :}
 	;
 	
 unary_expression_nn ::=

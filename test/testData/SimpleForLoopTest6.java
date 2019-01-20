@@ -6,7 +6,7 @@ public class SimpleForLoopTest6 {
 	{
 		String x = safe;
 		String init = null;
-		Stirng condition = null;
+		String condition = null;
 		String update = null;
 		String body = null;
 
