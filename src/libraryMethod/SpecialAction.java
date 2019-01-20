@@ -1,20 +1,18 @@
 package libraryMethod;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
-import Parse.ParseData;
 import execution.Task;
 import main.LibraryMethodDecl;
 import main.exception.SQLInjection;
 import object.VariableExec;
+import object.values.ArrayValue;
 import object.values.ObjValue;
-import object.values.StringVal;
-import rs.etf.pp1.symboltable.Tab;
-import symbol.Table;
+import symbol.object.ArrayType;
 import symbol.object.Method;
-import symbol.object.Obj;
 import symbol.object.TypeReference;
 import symbol.object.UnknownType;
 
@@ -69,7 +67,7 @@ public class SpecialAction {
 		{
 			this.isCriticalOutput = false;
 			this.actionTree = null;
-			this.right = expression.substring(2);
+			this.right = expression.substring(2).trim();
 			
 			if (this.right.contains(THIS))
 			{
@@ -130,7 +128,14 @@ public class SpecialAction {
 		{
 			if (returnDest.name != null)
 			{
-				fullLeftName = returnDest.name;
+				fullLeftName = new LinkedList<String>();
+				fullLeftName.addAll(returnDest.name);
+				List<String> fields = Arrays.asList(this.left.replaceFirst(RETURN, "").split("\\."));
+				for (String field : fields)
+				{
+					if (field.trim().isEmpty()) continue;
+					else fullLeftName.add(field.trim());
+				}
 			}
 			else
 			{
@@ -154,8 +159,17 @@ public class SpecialAction {
 		assert this.actionTree != null;
 		assert returnType != null && returnType.type != null && returnType.type.isRefType() && !(returnType.type instanceof UnknownType);
 		
-		boolean rightSafetyValue = actionTree.execute(thisObj, actualArgs, task);	
-		task.values.put(fullLeftName, ((symbol.object.Class)this.returnType.type).getDefaultObject(rightSafetyValue));
+		boolean rightSafetyValue = actionTree.execute(thisObj, actualArgs, task);
+		if (this.returnType.type instanceof ArrayType)
+		{
+			ObjValue defaultElem = ((symbol.object.Class)((symbol.object.ArrayType)this.returnType.type).getType().type).getDefaultObject(rightSafetyValue);
+			ArrayValue defaultArrayValue = new ArrayValue(rightSafetyValue, defaultElem);
+			task.values.put(fullLeftName, defaultArrayValue);
+		}
+		else
+		{
+			task.values.put(fullLeftName, ((symbol.object.Class)this.returnType.type).getDefaultObject(rightSafetyValue));
+		}
 	}
 	
 	private ActionTreeNode parseExpression(String expression, LibraryMethodDecl methodDecl)

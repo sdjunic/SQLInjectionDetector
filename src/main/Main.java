@@ -45,18 +45,96 @@ public class Main {
 		libraryClassList.add(libraryClassDecl);
 		
 		libraryClassDecl = new LibraryClassDecl("java.sql", "Statement", null);
+		libraryClassDecl.addField("java.sql", "Connection", "connection");
 		libraryClassList.add(libraryClassDecl);
 
+		libraryClassDecl = new LibraryClassDecl("java.sql", "ResultSet", null);
+		libraryClassList.add(libraryClassDecl);
+		
+		libraryClassDecl = new LibraryClassDecl("javax.servlet.http", "Cookie", null);
+		libraryClassList.add(libraryClassDecl);
 	
+		libraryClassDecl = new LibraryClassDecl(null, "StringBuilder", null);
+		libraryClassList.add(libraryClassDecl);
+		
+		libraryClassDecl = new LibraryClassDecl(null, "CharSequence", null);
+		libraryClassList.add(libraryClassDecl);
+		
 		LibraryMethodDecl libraryMethDecl = new LibraryMethodDecl(null, "String", "concat");
 		libraryMethDecl.retTypeName = "String";
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= 0 & " + SpecialAction.THIS);
 		libraryMethList.add(libraryMethDecl);
 		
+		libraryMethDecl = new LibraryMethodDecl(null, "String", "split");
+		libraryMethDecl.retTypeName = "String[]";
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= 0");
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl(null, "String", "substring");
+		libraryMethDecl.retTypeName = "String";
+		libraryMethDecl.methodArgs.add("int");
+		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= " + SpecialAction.THIS);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl(null, "String", "substring");
+		libraryMethDecl.retTypeName = "String";
+		libraryMethDecl.methodArgs.add("int");
+		libraryMethDecl.methodArgs.add("int");
+		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= " + SpecialAction.THIS);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl(null, "StringBuilder", "StringBuilder");
+		libraryMethDecl.isConstructor = true;
+		libraryMethDecl.retTypeName = "StringBuilder";
+		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, ":= " + SpecialAction.SAFE);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl(null, "StringBuilder", "StringBuilder");
+		libraryMethDecl.isConstructor = true;
+		libraryMethDecl.retTypeName = "StringBuilder";
+		libraryMethDecl.methodArgs.add("int");
+		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, ":= " + SpecialAction.SAFE);
+		libraryMethList.add(libraryMethDecl);
+
+		libraryMethDecl = new LibraryMethodDecl(null, "StringBuilder", "StringBuilder");
+		libraryMethDecl.isConstructor = true;
+		libraryMethDecl.retTypeName = "StringBuilder";
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, ":= 0");
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl(null, "StringBuilder", "StringBuilder");
+		libraryMethDecl.isConstructor = true;
+		libraryMethDecl.retTypeName = "StringBuilder";
+		libraryMethDecl.methodArgs.add("CharSequence");
+		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, ":= 0");
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl(null, "StringBuilder", "append");
+		libraryMethDecl.retTypeName = "StringBuilder";
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.addSpecialAction(SpecialAction.THIS, "= " + "0 & " + SpecialAction.THIS);
+		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, ":= " + SpecialAction.THIS);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl(null, "StringBuilder", "append");
+		libraryMethDecl.retTypeName = "StringBuilder";
+		libraryMethDecl.methodArgs.add("CharSequence");
+		libraryMethDecl.addSpecialAction(SpecialAction.THIS, "= " + "0 & " + SpecialAction.THIS);
+		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, ":= " + SpecialAction.THIS);
+		libraryMethList.add(libraryMethDecl);
+		
 		libraryMethDecl = new LibraryMethodDecl("org.owasp.benchmark.helpers", "DatabaseHelper", "getSqlConnection");
 		libraryMethDecl.retTypePackage = "java.sql";
 		libraryMethDecl.retTypeName = "Connection";
+		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= " + SpecialAction.SAFE);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("org.owasp.benchmark.helpers", "DatabaseHelper", "getSqlStatement");
+		libraryMethDecl.retTypePackage = "java.sql";
+		libraryMethDecl.retTypeName = "Statement";
 		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= " + SpecialAction.SAFE);
 		libraryMethList.add(libraryMethDecl);
 		
@@ -72,14 +150,64 @@ public class Main {
 		libraryMethDecl.retTypeName = "Statement";
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= 0");
+		libraryMethDecl.addSpecialAction(SpecialAction.RETURN + ".connection", ":= " + SpecialAction.THIS);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "Connection", "prepareCall");
+		libraryMethDecl.retTypePackage = "java.sql";
+		libraryMethDecl.retTypeName = "Statement";
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.methodArgs.add("int");
+		libraryMethDecl.methodArgs.add("int");
+		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= 0");
+		libraryMethDecl.addSpecialAction(SpecialAction.RETURN + ".connection", ":= " + SpecialAction.THIS);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "Connection", "prepareCall");
+		libraryMethDecl.retTypePackage = "java.sql";
+		libraryMethDecl.retTypeName = "Statement";
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.methodArgs.add("int");
+		libraryMethDecl.methodArgs.add("int");
+		libraryMethDecl.methodArgs.add("int");
+		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= 0");
+		libraryMethDecl.addSpecialAction(SpecialAction.RETURN + ".connection", ":= " + SpecialAction.THIS);
 		libraryMethList.add(libraryMethDecl);
 		
 		libraryMethDecl = new LibraryMethodDecl("java.sql", "Connection", "createStatement");
 		libraryMethDecl.retTypePackage = "java.sql";
 		libraryMethDecl.retTypeName = "Statement";
 		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= " + SpecialAction.SAFE);
+		libraryMethDecl.addSpecialAction(SpecialAction.RETURN + ".connection", ":= " + SpecialAction.THIS);
 		libraryMethList.add(libraryMethDecl);
 		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "Statement", "execute");
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "Statement", "execute");
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.methodArgs.add("int");
+		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "Statement", "execute");
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.methodArgs.add("int[]");
+		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "Statement", "execute");
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.methodArgs.add("String[]");
+		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "Statement", "executeBatch");
+		libraryMethDecl.addSpecialAction(SpecialAction.THIS, SpecialAction.CRITICAL_OUTPUT);
+		libraryMethList.add(libraryMethDecl);
+				
 		libraryMethDecl = new LibraryMethodDecl("java.sql", "Statement", "executeQuery");
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
@@ -104,6 +232,24 @@ public class Main {
 		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
 		libraryMethList.add(libraryMethDecl);
 		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "Statement", "executeUpdate");
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.methodArgs.add("int[]");
+		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "Statement", "executeUpdate");
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.methodArgs.add("String[]");
+		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "Statement", "getConnection");
+		libraryMethDecl.retTypePackage = "java.sql";
+		libraryMethDecl.retTypeName = "Connection";
+		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, ":= " + SpecialAction.THIS + ".connection");
+		libraryMethList.add(libraryMethDecl);
+		
 		libraryMethDecl = new LibraryMethodDecl("java.sql", "Statement", "escapeSQL");
 		libraryMethDecl.isStatic = true;
 		libraryMethDecl.retTypeName = "String";
@@ -117,15 +263,25 @@ public class Main {
 		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= " + SpecialAction.UNSAFE);
 		libraryMethList.add(libraryMethDecl);
 		
-		libraryMethDecl = new LibraryMethodDecl("javax.servlet.http", "HttpServletResponse", "getParameter");
+		libraryMethDecl = new LibraryMethodDecl("javax.servlet.http", "HttpServletRequest", "getHeader");
 		libraryMethDecl.retTypeName = "String";
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= " + SpecialAction.UNSAFE);
 		libraryMethList.add(libraryMethDecl);
 		
-		libraryMethDecl = new LibraryMethodDecl("javax.servlet.http", "HttpServletRequest", "getHeader");
+		libraryMethDecl = new LibraryMethodDecl("javax.servlet.http", "HttpServletRequest", "getQueryString");
 		libraryMethDecl.retTypeName = "String";
-		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= " + SpecialAction.UNSAFE);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("javax.servlet.http", "HttpServletRequest", "getCookies");
+		libraryMethDecl.retTypePackage = "javax.servlet.http";
+		libraryMethDecl.retTypeName = "Cookie[]";
+		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= " + SpecialAction.UNSAFE);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("javax.servlet.http", "Cookie", "getValue");
+		libraryMethDecl.retTypeName = "String";
 		libraryMethDecl.addSpecialAction(SpecialAction.RETURN, "= " + SpecialAction.UNSAFE);
 		libraryMethList.add(libraryMethDecl);
 		
@@ -219,9 +375,9 @@ public class Main {
 			            			   System.out.println("Test " + testName + " failed!");
 			            		   }
 			            	   } catch (Exception e) {
-			            		   System.out.println("Error in test " + testName);
+			            		   System.err.println("Error in test " + testName);
 			            		   e.printStackTrace();
-			            		   continue;
+			            		   System.exit(0);
 			            	   }
 			            	   
 			            	   if (vulnerability.equals("true")) 

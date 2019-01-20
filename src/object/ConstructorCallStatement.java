@@ -75,6 +75,13 @@ public class ConstructorCallStatement extends CallStatement {
 			Main.infoPS.println("Calling constructor " + constructor.getName() + " (" + taskGroup.size() + ")");
 		}
 		
+		// Execute special constructor inline
+		if (!constructor.isDefined())
+		{
+			constructor.executeSpecialMethod(null, arguments, left, taskGroup);
+			return;
+		}
+		
 		parse();
 		
 		// Set new execution block

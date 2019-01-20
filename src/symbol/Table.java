@@ -5,6 +5,7 @@ import symbol.object.Class;
 import symbol.object.Package;
 import symbol.object.Modifiers.Modifier;
 
+import java.time.chrono.IsoChronology;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -79,20 +80,60 @@ public class Table {
 						continue;
 					}
 					
-					Obj obj = Table.find(f.type);
-					symbol.object.Type type = null;
-					if (obj != null || obj instanceof PrimitiveType || obj instanceof Class)
-						type = (symbol.object.Type)obj;
-					else {
-						type = new UnknownType(f.type, null, null, Table.currentScope());
+					if (f.typePackage == null || f.typePackage.isEmpty())
+					{
+						String typeName = getTypeIfArray(f.typeName);				
+						Obj obj = Table.find(typeName);
+						
+						symbol.object.Type type = null;
+						if (obj != null || obj instanceof PrimitiveType || obj instanceof Class)
+							type = (symbol.object.Type)obj;
+						else {
+							type = new UnknownType(typeName, null, null, Table.currentScope());
+						}
+						
+						TypeReference typeRef = new TypeReference(type);
+						int arrayLevel = getTypeArrayLevel(f.typeName);
+						typeRef.addArrayLevel(arrayLevel);
+						
+						Table.insert(new Field(f.name, typeRef, null, null));
 					}
-					
-					Table.insert(new Field(f.name, new TypeReference(type), null, null));
+					else
+					{
+						symbol.object.Type type = null;
+						String typeName = getTypeIfArray(f.typeName);
+						
+						List<String> typeAbsolutePath = new LinkedList<>();
+						typeAbsolutePath.add(f.typePackage);
+						typeAbsolutePath.add(typeName);	
+						
+						symbol.object.Obj obj = ParseData.findObjectByAbsolutePath(typeAbsolutePath);
+						if (obj != null || obj instanceof PrimitiveType || obj instanceof Class) {
+							type = (symbol.object.Type)obj;
+						}
+						else {
+							List<List<String>> importedObjects = new LinkedList<>();
+							importedObjects.add(typeAbsolutePath);
+							type = new UnknownType(typeName, importedObjects, null, Table.currentScope());
+						}
+						
+						TypeReference typeRef = new TypeReference(type);
+						int arrayLevel = getTypeArrayLevel(f.typeName);
+						typeRef.addArrayLevel(arrayLevel);
+						
+						Table.insert(new Field(f.name, typeRef, null, null));
+					}
 				}
 			}
 		}
 		
 		for (LibraryMethodDecl methDecl : libMethodDecl) {
+			if (methDecl.isConstructor)
+			{
+				assert methDecl.className.equals(methDecl.methodName);
+				assert methDecl.retTypePackage == methDecl.packageName && methDecl.retTypeName == methDecl.className;
+			}
+			
 			Table.setScope(Table.universe());
 			
 			if (methDecl.packageName != null)
@@ -127,39 +168,54 @@ public class Table {
 				continue;
 			}
 			
-			Method currentMethod = new symbol.object.Method(methDecl.methodName, methDecl.className.equals(methDecl.methodName));
+			Method currentMethod = new symbol.object.Method(methDecl.methodName, methDecl.isConstructor);
 			int i = 0;
-			for (String arg : methDecl.methodArgs) {
-				Obj obj = Table.find(arg);
+			for (String argTypeStr : methDecl.methodArgs) {
+				String typeName = getTypeIfArray(argTypeStr);
+				Obj obj = Table.find(typeName);
+				
 				symbol.object.Type type = null;
 				if (obj != null || obj instanceof PrimitiveType || obj instanceof Class)
 					type = (symbol.object.Type)obj;
 				else {
-					type = new UnknownType(arg, null, null, Table.currentScope());
+					type = new UnknownType(typeName, null, null, Table.currentScope());
 				}
-				currentMethod.addFormalParam(new MethParam(new TypeReference(type), "temp" + ++i));
+				
+				TypeReference typeRef = new TypeReference(type);
+				int arrayLevel = getTypeArrayLevel(argTypeStr);
+				typeRef.addArrayLevel(arrayLevel);
+				
+				currentMethod.addFormalParam(new MethParam(typeRef, "temp" + ++i));
 			}
 			currentMethod.complFormalParamAdding();
 			
 			if (methDecl.retTypeName != null) {
 				if (methDecl.retTypePackage == null || methDecl.retTypePackage.isEmpty())
 				{
-					Obj obj = Table.find(methDecl.retTypeName);
+					String typeName = getTypeIfArray(methDecl.retTypeName);
+					Obj obj = Table.find(typeName);
+					
 					symbol.object.Type retType = null;
 					if (obj != null || obj instanceof PrimitiveType || obj instanceof Class)
 						retType = (symbol.object.Type)obj;
 					else {
-						retType = new UnknownType(methDecl.retTypeName, null, null, Table.currentScope());
+						retType = new UnknownType(typeName, null, null, Table.currentScope());
 					}
-					currentMethod.setRetType(new TypeReference(retType));
+					
+					TypeReference typeRef = new TypeReference(retType);
+					int arrayLevel = getTypeArrayLevel(methDecl.retTypeName);
+					typeRef.addArrayLevel(arrayLevel);
+					
+					currentMethod.setRetType(typeRef);
 				}
 				else
 				{
 					symbol.object.Type retType = null;
+					String typeName = getTypeIfArray(methDecl.retTypeName);
 					
 					List<String> returnTypeAbsolutePath = new LinkedList<>();
 					returnTypeAbsolutePath.add(methDecl.retTypePackage);
-					returnTypeAbsolutePath.add(methDecl.retTypeName);		
+					returnTypeAbsolutePath.add(typeName);		
 					
 					symbol.object.Obj obj = ParseData.findObjectByAbsolutePath(returnTypeAbsolutePath);
 					if (obj != null || obj instanceof PrimitiveType || obj instanceof Class) {
@@ -168,9 +224,14 @@ public class Table {
 					else {
 						List<List<String>> importedObjects = new LinkedList<>();
 						importedObjects.add(returnTypeAbsolutePath);
-						retType = new UnknownType(methDecl.retTypeName, importedObjects, null, Table.currentScope());
+						retType = new UnknownType(typeName, importedObjects, null, Table.currentScope());
 					}
-					currentMethod.setRetType(new TypeReference(retType));
+					
+					TypeReference typeRef = new TypeReference(retType);
+					int arrayLevel = getTypeArrayLevel(methDecl.retTypeName);
+					typeRef.addArrayLevel(arrayLevel);
+					
+					currentMethod.setRetType(typeRef);
 				}
 			}
 			if (methDecl.isStatic) {
@@ -262,6 +323,25 @@ public class Table {
 		sb.append("------------------- SYMBOL TABLE -------------------\r\n\r\n");
 		currentTable.universe.print(sb);
 		sb.append("\r\n----------------- END SYMBOL TABLE -----------------\r\n");
+	}
+	
+	private static String getTypeIfArray(String type)
+	{
+		int i = (type + "[").indexOf("[");
+		return type.substring(0, i);
+	}
+	
+	private static int getTypeArrayLevel(String type)
+	{
+		int leftBr = 0;
+		int rightBr = 0;
+		for (int i = 0; i < type.length(); ++i)
+		{
+			if (type.charAt(i) == '[') ++leftBr;
+			else if (type.charAt(i) == ']') ++rightBr;
+		}
+		assert leftBr == rightBr;
+		return leftBr;
 	}
 	
 }

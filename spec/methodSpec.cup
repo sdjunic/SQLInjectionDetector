@@ -288,7 +288,8 @@ non terminal while_statement, while_statement_no_short_if;
 non terminal WhileLoopStatement do_, do_body;
 non terminal do_statement;
 non terminal ForLoopStatement for_lparen;
-non terminal foreach_statement, foreach_statement_no_short_if, foreach_rparen;
+non terminal foreach_statement, foreach_statement_no_short_if;
+non terminal ForeachLoopStatement foreach_header;
 non terminal ForLoopStatement for_loop_init, for_loop_condition, for_loop_update;
 non terminal for_statement, for_statement_no_short_if;
 non terminal for_init_opt, for_init;
@@ -456,7 +457,11 @@ class_or_interface ::=
 	
 class_or_interface_type ::=
 		class_or_interface:x {: RESULT = x; :}
-	|	class_or_interface:x LT type_argument_list_1 {: /*TODO*/ :}
+	|	class_or_interface:x LT type_argument_list_1 
+		{: 
+			// Ignore template arguments
+			RESULT = x;
+		:}
 	;
 
 class_type ::=	class_or_interface_type:x {: RESULT = x; :} ;
@@ -1532,24 +1537,58 @@ for_lparen ::=
 		:}
 	;
 	
-foreach_rparen ::=
-		RPAREN 
+foreach_header ::=
+		for_lparen type:t variable_declarator_id:var COLON expression:arrayVar RPAREN
 		{:
-			// TODO: check this 
-			parser.parsingTopMethod.currentBlockEnd();
+			parser.parsingTopMethod.currentBlockEnd(); // Close ForLoopStatement opened in for_lparen
+		
+			ForeachLoopStatement foreachLoopStmt = new ForeachLoopStatement(parser.parsingTopMethod.getCurrentBlock());
+			parser.parsingTopMethod.addStatement(foreachLoopStmt);
+			parser.parsingTopMethod.setCurrentBlock(foreachLoopStmt.getStmtBlock());
+			if (t.isRefType())
+			{
+				assert arrayVar.name != null && !arrayVar.name.isEmpty();
+				if (arrayVar.name != null && !arrayVar.name.isEmpty())
+				{
+					String newVar = arrayVar.name.get(arrayVar.name.size() - 1) + "[]";
+					arrayVar.name.remove(arrayVar.name.size() - 1);
+					arrayVar.name.add(newVar);
+				}
+			
+				var.initValue = arrayVar;
+				TypeReference varType = t;
+				if (var.arrayLevel > 0) {
+					varType = new TypeReference(t.type);
+					varType.addArrayLevel(var.arrayLevel);
+				}
+				
+				symbol.object.Variable varObject = new symbol.object.Variable(var.name, varType);
+				Table.insert(varObject);
+				VariableExec left = new VariableExec(var.name, varObject);
+				parser.parsingTopMethod.addStatement(new AssignmentStatement(left, var.initValue), true /* is local variable declaration */);
+			}
+			RESULT = foreachLoopStmt;
 		:}
 	;
 	
-//TODO: consider adding foreach loop
-foreach_statement ::=
-		for_lparen type variable_declarator_id COLON expression foreach_rparen
-			statement
+foreach_statement ::= 
+		foreach_header:loop statement 
+		{:
+			loop.parsingDone();
+			assert parser.parsingTopMethod.getCurrentBlock() == loop.getStmtBlock();
+			parser.parsingTopMethod.currentBlockEnd();
+			assert parser.parsingTopMethod.getCurrentBlock() == loop.getStmtBlock().getParentStatementsBlock();
+		:}
 	;
-
-//TODO: consider adding foreach loop	
+	
 foreach_statement_no_short_if ::=
-		for_lparen type variable_declarator_id COLON expression foreach_rparen
-			statement_no_short_if
+		foreach_header:loop statement_no_short_if 
+		{:
+			loop.parsingDone();
+			assert parser.parsingTopMethod.getCurrentBlock() == loop.getStmtBlock();
+			parser.parsingTopMethod.currentBlockEnd();
+			assert parser.parsingTopMethod.getCurrentBlock() == loop.getStmtBlock().getParentStatementsBlock();
+		:}
 	;
 	
 for_loop_init ::=
@@ -1716,7 +1755,7 @@ primary_no_new_array ::=
 	|	class_instance_creation_expression:res {: RESULT = res; :}
 	|	field_access:res {: RESULT = res; :}
 	|	method_invocation:res {: RESULT = res; :}
-	|	array_access
+	|	array_access:res {: RESULT = res; :}
 	|	name DOT THIS
 	|	VOID DOT CLASS
 	|	primitive_type DOT CLASS
@@ -1987,9 +2026,47 @@ method_invocation ::=
 	;
 	
 array_access ::=
-		name LBRACK expression RBRACK
-	|	primary_no_new_array LBRACK expression RBRACK
+		name:n LBRACK expression RBRACK
+		{:
+			if (parsingClassLevel == 0) {
+				RESULT = null;
+				
+				Obj obj = ParseData.findName(n.subList(0,1), parser.parsingTopMethod.getImportedObjects(), parser.parsingTopMethod.getImportedScopes(), Table.currentScope());
+				if (obj != null) {
+					if (obj instanceof Field) {
+						n.add(0, "this");
+					}
+				}
+				obj = ParseData.findName(n, parser.parsingTopMethod.getImportedObjects(), parser.parsingTopMethod.getImportedScopes(), Table.currentScope());
+				if (obj != null) {
+					if ((obj instanceof Field && ((Field)obj).getType().type.isRefType())
+						|| (obj instanceof symbol.object.Variable && ((symbol.object.Variable)obj).getType().type.isRefType())
+						|| (obj instanceof MethParam && ((MethParam)obj).getType().type.isRefType())
+						|| (obj instanceof Class && ((Class)obj).isRefType())) 
+					{
+						VariableExec res = new VariableExec(n + "[]", obj);
+						RESULT = res; 
+					}
+				}
+			}
+		:}
+	|	primary_no_new_array:varExec LBRACK expression RBRACK
+		{:
+			if (parsingClassLevel == 0) {
+				assert varExec.name != null && !varExec.name.isEmpty();
+				if (varExec.name != null && !varExec.name.isEmpty())
+				{
+					String newVar = varExec.name.get(varExec.name.size() - 1) + "[]";
+					varExec.name.remove(varExec.name.size() - 1);
+					varExec.name.add(newVar);
+				}
+				RESULT = varExec; 
+			}
+		:}
 	|	array_creation_init LBRACK expression RBRACK
+		{:
+			// TODO create array
+		:}
 	;
 	
 postfix_expression ::=

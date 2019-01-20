@@ -13,6 +13,7 @@ public class LibraryMethodDecl {
 	public String methodName;
 	public String retTypePackage;
 	public String retTypeName;
+	public boolean isConstructor;
 	public boolean isStatic;
 	public List<String> methodArgs;
 	
@@ -24,24 +25,26 @@ public class LibraryMethodDecl {
 		this.methodName = null;
 		this.retTypePackage = null;
 		this.retTypeName = null;
+		this.isConstructor = false;
 		this.isStatic = false;
 		this.methodArgs = new LinkedList<String>();
 		this.specialActions = new LinkedList<SpecialAction>();;
 	}
 	
-	public LibraryMethodDecl(String packageName, String className, String methodName, String retTypePackage, String retTypeName, boolean isStatic, List<String> methodArgs,  List<SpecialAction> specialActions) {
+	public LibraryMethodDecl(String packageName, String className, String methodName, String retTypePackage, String retTypeName, boolean isConstructor, boolean isStatic, List<String> methodArgs,  List<SpecialAction> specialActions) {
 		this.packageName = packageName;
 		this.className = className;
 		this.methodName = methodName;
 		this.retTypePackage = retTypePackage;
 		this.retTypeName = retTypeName;
+		this.isConstructor = isConstructor;
 		this.isStatic = isStatic;
 		this.methodArgs = methodArgs;
 		this.specialActions = specialActions;
 	}
 
 	public LibraryMethodDecl(String packageName, String methodName, String className) {
-		this(packageName, methodName, className, null, null, false, new LinkedList<String>(), new LinkedList<SpecialAction>());
+		this(packageName, methodName, className, null, null, false, false, new LinkedList<String>(), new LinkedList<SpecialAction>());
 	}
 	
 	public boolean isCriticalOutput() {
@@ -64,8 +67,12 @@ public class LibraryMethodDecl {
 	
 	public String getMethSign() {
 		String methSign = "";
-		if (retTypeName == null || retTypeName.isEmpty() || retTypeName.equals("void")) methSign+= "void ";
-		else methSign += (retTypePackage == null ? "" : retTypePackage) + retTypeName + " ";
+		
+		if (!isConstructor)
+		{
+			if (retTypeName == null || retTypeName.isEmpty() || retTypeName.equals("void")) methSign+= "void ";
+			else methSign += (retTypePackage == null ? "" : retTypePackage) + retTypeName + " ";
+		}
 		
 		if (methodName != null && !methodName.isEmpty()) methSign += methodName;
 		else methSign += "noName";

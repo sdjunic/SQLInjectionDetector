@@ -34,6 +34,12 @@ public class TypeReference {
 		Iterator<TypeReference> it = unknownTypes.iterator();
 		while (it.hasNext()) {
 			TypeReference typeRef = it.next();
+
+			if (typeRef.type instanceof ArrayType)
+			{
+				typeRef = ((ArrayType)typeRef.type).getType();
+			}
+			assert typeRef.type instanceof UnknownType;
 			UnknownType unknownType = (UnknownType)typeRef.type;
 			Obj obj = ParseData.findName(unknownType.getFullName(), unknownType.getImportedObjects(), 
 					unknownType.getImportedScopes(), unknownType.getScope());

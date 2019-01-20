@@ -7,12 +7,14 @@ public class LibraryClassDecl {
 	
 	public class LibField
 	{
-		public String type;
+		public String typePackage;
+		public String typeName;
 		public String name;
 		
-		public LibField(String type, String name)
+		public LibField(String typePackage, String typeName, String name)
 		{
-			this.type = type;
+			this.typePackage = typePackage;
+			this.typeName = typeName;
 			this.name = name;
 		}
 	}
@@ -30,9 +32,9 @@ public class LibraryClassDecl {
 		this.fields = new LinkedList<>();
 	}
 	
-	public void addField(String type, String name)
+	public void addField(String typePackage, String typeName, String name)
 	{
-		this.fields.add(new LibraryClassDecl.LibField(type, name));
+		this.fields.add(new LibraryClassDecl.LibField(typePackage, typeName, name));
 	}
 
 }
