@@ -1,6 +1,6 @@
 <test-metadata>
    <testName>prevoz3</testName>
    <vulnerability>true</vulnerability>
-   <analyzeFromMain>true</analyzeFromMain>
+   <analyzeFromMethod>main</analyzeFromMethod>
    <initArgumentsSafe>false</initArgumentsSafe>
 </test-metadata>

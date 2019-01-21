@@ -146,7 +146,7 @@ public class SQLIDetectorGUI {
 				boolean startFromRiskyMethods = rdbtnRiskyMethods.isSelected();
 				boolean initialArgumentsSafe = rdbtnSafe.isSelected();
 				try {
-					Main.testProjectForSQLInjection(projectRoot, startFromRiskyMethods, initialArgumentsSafe);
+					Main.testProjectForSQLInjection(projectRoot, startFromRiskyMethods ? "risky" : "main", initialArgumentsSafe);
 					textAreaOutput.setText("This code isn't vulnerable to SQL injection.");
 					
 				} catch (Exception ex) {

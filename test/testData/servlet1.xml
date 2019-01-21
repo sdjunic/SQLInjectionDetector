@@ -1,6 +1,6 @@
 <test-metadata>
    <testName>servlet1.java</testName>
    <vulnerability>true</vulnerability>
-   <analyzeFromMain>false</analyzeFromMain>
+   <analyzeFromMethod>risky</analyzeFromMethod>
    <initArgumentsSafe>false</initArgumentsSafe>
 </test-metadata>

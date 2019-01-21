@@ -312,53 +312,6 @@ public class Method implements Obj {
 			for (SpecialAction specAct : specialActions) {
 				specAct.execute(thisObj, actualArgs, returnDest, t);
 			}
-				
-//				if (specArg.type == SpecialArg.TYPE_CRITICAL_OUTPUT) {
-//					VariableExec actualArg = null;
-//					assert (specArg.index != SpecialArg.INDEX_RETURN_OBJ);
-//					if (specArg.index == -1) { actualArg = thisObj; }
-//					else { actualArg = actualArgs.get(specArg.index); }
-//					ObjValue obj;
-//					if (actualArg.value != null)
-//					{
-//						obj = actualArg.value;
-//					}
-//					else
-//					{
-//						obj = values.get(actualArg.name);
-//					}
-//					if (obj != null && !obj.isSafe()) {
-//						StringBuilder sb = new StringBuilder();
-//						sb.append("SQL injection detected!\r\n\r\nCritical method call stack:\r\n");
-//						printMethodCallStack(sb);
-//						throw new main.exception.SQLInjection(sb.toString());
-//					}
-//				} else {
-//					//TODO: consider adding safety change not only for return obj, but for all arguments of ClassType
-//					//
-//					VariableExec actualArg = null;
-//					assert (specArg.index == SpecialArg.INDEX_RETURN_OBJ);
-//					assert (retType.type == Table.getStringClass());
-//					
-//					if (specArg.index == SpecialArg.INDEX_RETURN_OBJ && returnDest != null) {
-//						assert (returnDest.name != null);
-//						values.put(returnDest.name, StringVal.getString(specArg.type == SpecialArg.TYPE_SAFE_ARG));
-//						continue;
-//					}
-////					else if (specArg.index == -1) { actualArg = thisObj; }
-////					else { actualArg = actualArgs.get(specArg.index); }
-////					ObjValue obj;
-////					if (actualArg.value != null)
-////					{
-////						obj = actualArg.value;
-////					}
-////					else
-////					{
-////						obj = values.get(actualArg.name);
-////					}
-////					assert (obj instanceof ClassValue);
-////					obj.setSafe(specArg.type == SpecialArg.TYPE_SAFE_ARG);
-//				}
 		}
 	}
 	

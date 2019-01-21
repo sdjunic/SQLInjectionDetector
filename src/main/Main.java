@@ -41,9 +41,16 @@ public class Main {
 		
 		JavaLib.getLibDeclarations(libraryClassList, libraryMethList);
 		
-		// TODO: consider filtering critical methods only
-		ProgramParser.setCriticalMethList(libraryMethList);
-		ClassContentParser.setCriticalMethList(libraryMethList);
+		List<LibraryMethodDecl> criticalMethodList = new LinkedList<LibraryMethodDecl>();
+		for(LibraryMethodDecl libMethDecl : libraryMethList)
+		{
+			if (libMethDecl.isCriticalOutput())
+			{
+				criticalMethodList.add(libMethDecl);
+			}
+		}
+		ProgramParser.setCriticalMethList(criticalMethodList);
+		ClassContentParser.setCriticalMethList(criticalMethodList);
 		
 		if (args.length > 1 && (args[0].equals("-test") || args[1].equals("-test"))) {
 			int vulnerableTests = 0;
@@ -78,10 +85,10 @@ public class Main {
 				               Element eElement = (Element) nNode;
 				               String testName = eElement.getElementsByTagName("testName").item(0).getTextContent();
 			            	   String vulnerability = eElement.getElementsByTagName("vulnerability").item(0).getTextContent();
-			            	   String analyzeFromMain = eElement.getElementsByTagName("analyzeFromMain").item(0).getTextContent();
+			            	   String analyzeFromMethod = eElement.getElementsByTagName("analyzeFromMethod").item(0).getTextContent();
 			            	   String initArgumentsSafe = eElement.getElementsByTagName("initArgumentsSafe").item(0).getTextContent();
 			            	   
-			            	   if (testName == null || vulnerability == null || analyzeFromMain == null || initArgumentsSafe == null) {
+			            	   if (testName == null || vulnerability == null || analyzeFromMethod == null || initArgumentsSafe == null) {
 			            		   System.out.println("Error in test xml file " + listOfFiles[i].getName());
 			            		   continue;
 			            	   }
@@ -98,7 +105,7 @@ public class Main {
 			            	   
 			            	   
 			            	   try {
-			            		   testProjectForSQLInjection(testFolder, analyzeFromMain.equals("false"), initArgumentsSafe.equals("true"));
+			            		   testProjectForSQLInjection(testFolder, analyzeFromMethod, initArgumentsSafe.equals("true"));
 			            		   
 			            		   if (vulnerability.equals("false")) {
 			            			   safeCorrect++;
@@ -140,12 +147,13 @@ public class Main {
 		}
 	}
 	
-	public static void testProjectForSQLInjection(File projectRoot, boolean startFromRiskyMethods, boolean initialArgumentsSafe) throws Exception{				
+	public static void testProjectForSQLInjection(File projectRoot, String startFrom, boolean initialArgumentsSafe) throws Exception{				
 		Table.makeNewTable(libraryClassList, libraryMethList);
 		Method.methCallStack = new Stack<Method>();
+		Parse.ParseData.allProjectMethods = new HashSet<Method>();
 		Parse.ParseData.riskyMethods = new HashSet<Method>();
-		Parse.ParseData.mainMethods =new HashSet<Method>();
-
+		Parse.ParseData.mainMethods = new HashSet<Method>();
+		
 		Table.setScope(Table.universe());
 		
 		if (infoPS != null) {
@@ -177,14 +185,18 @@ public class Main {
 				infoPS.println(sb);
 				infoPS.println("\r\n---UNKNOWN TYPES TABLE---\r\n" + TypeReference.getAllUnknownTypes() + "-END UNKNOWN TYPES TABLE-\r\n");
 			
-				if (startFromRiskyMethods) infoPS.println("\r\nRisky methods:\r\n");
-				else infoPS.println("\r\nMain methods:\r\n");
+				if (startFrom.equals("risky")) infoPS.println("Analyzing from risky methods!");
+				else if (startFrom.equals("main")) infoPS.println("Analyzing from main methods!");
+				else if (startFrom.equals("all")) infoPS.println("Analyzing from all methods!");
+				else assert false;
 			}
 			
 			{
 				Iterator<Method> it = null;
-				if (startFromRiskyMethods) it = ParseData.riskyMethods.iterator();
-				else it = ParseData.mainMethods.iterator();
+				if (startFrom.equals("risky")) it = ParseData.riskyMethods.iterator();
+				else if (startFrom.equals("main")) it = ParseData.mainMethods.iterator();
+				else if (startFrom.equals("all")) it = ParseData.allProjectMethods.iterator();
+				else assert false;
 				
 				while (it.hasNext()) {
 					Method m = it.next();
@@ -217,9 +229,10 @@ public class Main {
 			}
 			
 		} finally {
-			StringBuilder sb = new StringBuilder();
-			Table.print(sb);
-			if (infoPS != null) infoPS.println(sb);
+//			// Print symbol table after execution
+//			StringBuilder sb = new StringBuilder();
+//			Table.print(sb);
+//			if (infoPS != null) infoPS.println(sb);
 			
 			for(File file: tempFolder.listFiles()) file.delete();
 			tempFolder.delete();

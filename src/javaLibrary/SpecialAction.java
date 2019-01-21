@@ -132,7 +132,7 @@ public class SpecialAction {
 				assert false;
 			}
 		}
-		else if(assign.startsWith(CRITICAL_OUTPUT)) // check CRITICAL OUTPUT safety
+		else if(assign.equals(CRITICAL_OUTPUT)) // check CRITICAL OUTPUT safety
 		{
 			this.assignOp = AssignOperator.OP_CRITICAL_OUTPUT;
 			assert !left.startsWith(RETURN);
@@ -209,7 +209,7 @@ public class SpecialAction {
 	
 	public boolean isCriticalOutput()
 	{
-		return assignOp.equals(AssignOperator.OP_CRITICAL_OUTPUT);
+		return assign.equals(CRITICAL_OUTPUT);
 	}
 	
 	public void execute(VariableExec thisObj, List<VariableExec> actualArgs, VariableExec returnDest, Task task) throws SQLInjection

@@ -22,6 +22,12 @@ public class JavaLib {
 		libraryClassDecl = new LibraryClassDecl("java.sql", "Statement");
 		libraryClassDecl.addField("java.sql", "Connection", "connection");
 		libraryClassList.add(libraryClassDecl);
+		
+		libraryClassDecl = new LibraryClassDecl("java.sql", "PreparedStatement", "java.sql", "Statement");
+		libraryClassList.add(libraryClassDecl);
+		
+		libraryClassDecl = new LibraryClassDecl("java.sql", "CallableStatement", "java.sql", "PreparedStatement");
+		libraryClassList.add(libraryClassDecl);
 
 		libraryClassDecl = new LibraryClassDecl("java.sql", "ResultSet");
 		libraryClassList.add(libraryClassDecl);
@@ -29,6 +35,10 @@ public class JavaLib {
 		libraryClassDecl = new LibraryClassDecl("javax.servlet.http", "Cookie");
 		libraryClassDecl.addField(null, "String", "name");
 		libraryClassDecl.addField(null, "String", "value");
+		libraryClassList.add(libraryClassDecl);
+		
+		libraryClassDecl = new LibraryClassDecl("java.util", "Enumeration");
+		libraryClassDecl.addField(null, "Object", "element");
 		libraryClassList.add(libraryClassDecl);
 		
 		libraryClassDecl = new LibraryClassDecl("java.util", "HashMap");
@@ -189,11 +199,11 @@ public class JavaLib {
 		
 		libraryMethDecl = new LibraryMethodDecl("java.sql", "Connection", "prepareCall");
 		libraryMethDecl.retTypePackage = "java.sql";
-		libraryMethDecl.retTypeName = "Statement";
+		libraryMethDecl.retTypeName = "CallableStatement";
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.addSpecialAction(
 				SpecialAction.RETURN,
-				SpecialAction.ASSIGN_NEW_OBJECT("java.sql.Statement"),
+				SpecialAction.ASSIGN_NEW_OBJECT("java.sql.CallableStatement"),
 				"0");
 		libraryMethDecl.addSpecialAction(
 				SpecialAction.RETURN + ".connection",
@@ -203,13 +213,13 @@ public class JavaLib {
 		
 		libraryMethDecl = new LibraryMethodDecl("java.sql", "Connection", "prepareCall");
 		libraryMethDecl.retTypePackage = "java.sql";
-		libraryMethDecl.retTypeName = "Statement";
+		libraryMethDecl.retTypeName = "CallableStatement";
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.methodArgs.add("int");
 		libraryMethDecl.methodArgs.add("int");
 		libraryMethDecl.addSpecialAction(
 				SpecialAction.RETURN,
-				SpecialAction.ASSIGN_NEW_OBJECT("java.sql.Statement"),
+				SpecialAction.ASSIGN_NEW_OBJECT("java.sql.CallableStatement"),
 				"0");
 		libraryMethDecl.addSpecialAction(
 				SpecialAction.RETURN + ".connection",
@@ -219,14 +229,106 @@ public class JavaLib {
 		
 		libraryMethDecl = new LibraryMethodDecl("java.sql", "Connection", "prepareCall");
 		libraryMethDecl.retTypePackage = "java.sql";
-		libraryMethDecl.retTypeName = "Statement";
+		libraryMethDecl.retTypeName = "CallableStatement";
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.methodArgs.add("int");
 		libraryMethDecl.methodArgs.add("int");
 		libraryMethDecl.methodArgs.add("int");
 		libraryMethDecl.addSpecialAction(
 				SpecialAction.RETURN,
-				SpecialAction.ASSIGN_NEW_OBJECT("java.sql.Statement"),
+				SpecialAction.ASSIGN_NEW_OBJECT("java.sql.CallableStatement"),
+				"0");
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN + ".connection",
+				SpecialAction.ASSIGN_EXISTING_OBJECT,
+				SpecialAction.THIS);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "Connection", "prepareStatement");
+		libraryMethDecl.retTypePackage = "java.sql";
+		libraryMethDecl.retTypeName = "PreparedStatement";
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN,
+				SpecialAction.ASSIGN_NEW_OBJECT("java.sql.PreparedStatement"),
+				"0");
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN + ".connection",
+				SpecialAction.ASSIGN_EXISTING_OBJECT,
+				SpecialAction.THIS);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "Connection", "prepareStatement");
+		libraryMethDecl.retTypePackage = "java.sql";
+		libraryMethDecl.retTypeName = "PreparedStatement";
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.methodArgs.add("int");
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN,
+				SpecialAction.ASSIGN_NEW_OBJECT("java.sql.PreparedStatement"),
+				"0");
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN + ".connection",
+				SpecialAction.ASSIGN_EXISTING_OBJECT,
+				SpecialAction.THIS);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "Connection", "prepareStatement");
+		libraryMethDecl.retTypePackage = "java.sql";
+		libraryMethDecl.retTypeName = "PreparedStatement";
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.methodArgs.add("int[]");
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN,
+				SpecialAction.ASSIGN_NEW_OBJECT("java.sql.PreparedStatement"),
+				"0");
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN + ".connection",
+				SpecialAction.ASSIGN_EXISTING_OBJECT,
+				SpecialAction.THIS);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "Connection", "prepareStatement");
+		libraryMethDecl.retTypePackage = "java.sql";
+		libraryMethDecl.retTypeName = "PreparedStatement";
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.methodArgs.add("int");
+		libraryMethDecl.methodArgs.add("int");
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN,
+				SpecialAction.ASSIGN_NEW_OBJECT("java.sql.PreparedStatement"),
+				"0");
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN + ".connection",
+				SpecialAction.ASSIGN_EXISTING_OBJECT,
+				SpecialAction.THIS);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "Connection", "prepareStatement");
+		libraryMethDecl.retTypePackage = "java.sql";
+		libraryMethDecl.retTypeName = "PreparedStatement";
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.methodArgs.add("int");
+		libraryMethDecl.methodArgs.add("int");
+		libraryMethDecl.methodArgs.add("int");
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN,
+				SpecialAction.ASSIGN_NEW_OBJECT("java.sql.PreparedStatement"),
+				"0");
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN + ".connection",
+				SpecialAction.ASSIGN_EXISTING_OBJECT,
+				SpecialAction.THIS);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "Connection", "prepareStatement");
+		libraryMethDecl.retTypePackage = "java.sql";
+		libraryMethDecl.retTypeName = "PreparedStatement";
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.methodArgs.add("String[]");
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN,
+				SpecialAction.ASSIGN_NEW_OBJECT("java.sql.PreparedStatement"),
 				"0");
 		libraryMethDecl.addSpecialAction(
 				SpecialAction.RETURN + ".connection",
@@ -309,7 +411,7 @@ public class JavaLib {
 		libraryMethDecl.methodArgs.add("String[]");
 		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
 		libraryMethList.add(libraryMethDecl);
-		
+				
 		libraryMethDecl = new LibraryMethodDecl("java.sql", "Statement", "getConnection");
 		libraryMethDecl.retTypePackage = "java.sql";
 		libraryMethDecl.retTypeName = "Connection";
@@ -329,6 +431,35 @@ public class JavaLib {
 				SpecialAction.SAFE);
 		libraryMethList.add(libraryMethDecl);
 		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "PreparedStatement", "execute");
+		libraryMethDecl.addSpecialAction(SpecialAction.THIS, SpecialAction.CRITICAL_OUTPUT);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "PreparedStatement", "executeQuery");
+		libraryMethDecl.addSpecialAction(SpecialAction.THIS, SpecialAction.CRITICAL_OUTPUT);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "PreparedStatement", "executeUpdate");
+		libraryMethDecl.addSpecialAction(SpecialAction.THIS, SpecialAction.CRITICAL_OUTPUT);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "PreparedStatement", "execute");
+		libraryMethDecl.addSpecialAction(SpecialAction.THIS, SpecialAction.CRITICAL_OUTPUT);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "PreparedStatement", "executeQuery");
+		libraryMethDecl.addSpecialAction(SpecialAction.THIS, SpecialAction.CRITICAL_OUTPUT);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "PreparedStatement", "setString");
+		libraryMethDecl.methodArgs.add("int");
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.THIS, 
+				SpecialAction.SET_SAFE, 
+				"1 & " + SpecialAction.THIS);
+		libraryMethList.add(libraryMethDecl);
+		
 		libraryMethDecl = new LibraryMethodDecl("javax.servlet.http", "HttpServletRequest", "getParameter");
 		libraryMethDecl.retTypeName = "String";
 		libraryMethDecl.methodArgs.add("String");
@@ -343,6 +474,20 @@ public class JavaLib {
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.addSpecialAction(
 				SpecialAction.RETURN,
+				SpecialAction.ASSIGN_NEW_OBJECT("String"),
+				SpecialAction.UNSAFE);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("javax.servlet.http", "HttpServletRequest", "getHeaders");
+		libraryMethDecl.retTypePackage = "java.util";
+		libraryMethDecl.retTypeName = "Enumeration";
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN,
+				SpecialAction.ASSIGN_NEW_OBJECT("java.util.Enumeration"),
+				SpecialAction.UNSAFE);
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN + ".element",
 				SpecialAction.ASSIGN_NEW_OBJECT("String"),
 				SpecialAction.UNSAFE);
 		libraryMethList.add(libraryMethDecl);
@@ -422,6 +567,14 @@ public class JavaLib {
 				SpecialAction.RETURN + ".value",
 				SpecialAction.ASSIGN_EXISTING_OBJECT,
 				"1");
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.util", "Enumeration", "nextElement");
+		libraryMethDecl.retTypeName = "Object";
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN,
+				SpecialAction.ASSIGN_EXISTING_OBJECT,
+				SpecialAction.THIS + ".element");
 		libraryMethList.add(libraryMethDecl);
 		
 		libraryMethDecl = new LibraryMethodDecl("java.util", "HashMap", "HashMap");

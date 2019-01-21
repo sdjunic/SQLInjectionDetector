@@ -1,0 +1,7 @@
+<test-metadata>
+    <testName>BenchmarkTest01301.java</testName>
+    <vulnerability>false</vulnerability>
+    <analyzeFromMethod>all</analyzeFromMethod>
+    <initArgumentsSafe>true</initArgumentsSafe>
+</test-metadata>
+

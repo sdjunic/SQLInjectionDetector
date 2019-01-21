@@ -1,3 +1,6 @@
+P0) - Investigate tests in testData, there are couple of false negative tests (probably "student" tests)
+P1) - Think what to do with static fields, at least in OWSAP helper classes
+
 1) 	- Add one global ValuesHolder map, for static fields
 2) 	- Add handling for null pointer exception in dereferencing object field  { A a = null; read(a.b); }
 3) DONE	- Make NullObj singleton, to ensure equality between VH maps after: { a = null; b = null; } and { a = null; b = a; } (also make only two static StringVal instances (safe and unsafe))

@@ -12,6 +12,7 @@ public class ParseData {
 	
 	public static Set<Method> riskyMethods = null;
 	public static Set<Method> mainMethods = null;
+	public static Set<Method> allProjectMethods = null;
 	
 	public static Package currentPackage = null;
 	public static Method currentMethod = null;
@@ -32,6 +33,7 @@ public class ParseData {
 	}
 	
 	public static void lookForMainMethod() {
+		allProjectMethods.add(currentMethod);
 		if (currentMethod.getName().startsWith("main(") && currentMethod.isStatic() && currentMethod.getRetType() == null) {
 			List<MethParam> args = currentMethod.getMethParamList();
 			if (args.size() == 1 && args.get(0).getType() != null && args.get(0).getType().type != null) {

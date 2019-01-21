@@ -17,7 +17,8 @@ public class Database {
 		PreparedStatement stmt = null; 
 		User u = null;
 		try {
-			stmt = con.prepareStatement("SELECT * FROM " + table + " WHERE username LIKE ?");
+			Connection con2 = org.owasp.benchmark.helpers.DatabaseHelper.getSqlConnection();
+			stmt = con2.prepareStatement("SELECT * FROM " + table + " WHERE username LIKE ?");
 			stmt.setString(1, username);
 			ResultSet rs = stmt.executeQuery();
 			if (rs.next()) {

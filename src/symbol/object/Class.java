@@ -152,9 +152,13 @@ public class Class implements Type {
 				if(field.getType().isRefType())
 				{
 					// TODO: check are all string fields stored like this
-					if (field.getType().type.getName() == "String")
+					if (field.getType().type.getName().equals("String"))
 					{
 						result.setField(field.getName(), StringVal.getString(isSafe));
+					}
+					else if (field.getName().equals("super") && !field.getType().type.getName().equals("Object"))
+					{
+						result.setField("super", ((Class)superClass.type).getDefaultObject(isSafe));
 					}
 					else
 					{
@@ -163,7 +167,7 @@ public class Class implements Type {
 				}
 			}
 		}
-		
+
 		return result;
 	}
 	

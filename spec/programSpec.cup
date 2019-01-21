@@ -1591,7 +1591,6 @@ method_invocation ::=
 			if (name != null && name.size() > 1) {
 				String methName = name.get(name.size() - 1);
 				for (LibraryMethodDecl critMeth : ProgramParser.criticalMethList) {
-					if (!critMeth.isCriticalOutput()) continue;
 					if (methName.equals(critMeth.methodName) && num.intValue() == critMeth.methodArgs.size()) 
 					{
 						ParseData.riskyMethods.add(ParseData.currentMethod);

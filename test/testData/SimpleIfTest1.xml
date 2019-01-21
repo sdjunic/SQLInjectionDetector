@@ -1,6 +1,6 @@
 <test-metadata>
    <testName>SimpleIfTest1.java</testName>
    <vulnerability>false</vulnerability>
-   <analyzeFromMain>true</analyzeFromMain>
+   <analyzeFromMethod>main</analyzeFromMethod>
    <initArgumentsSafe>false</initArgumentsSafe>
 </test-metadata>

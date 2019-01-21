@@ -32,11 +32,11 @@ public class LibraryMethodDecl {
 	}
 	
 	public LibraryMethodDecl(String packageName, String className, String methodName, String retTypePackage, String retTypeName, boolean isConstructor, boolean isStatic, List<String> methodArgs,  List<SpecialAction> specialActions) {
-		this.packageName = packageName;
-		this.className = className;
-		this.methodName = methodName;
-		this.retTypePackage = retTypePackage;
-		this.retTypeName = retTypeName;
+		this.packageName = packageName == null ? null : packageName.trim();
+		this.className = className == null ? null : className.trim();
+		this.methodName = methodName == null ? null : methodName.trim();
+		this.retTypePackage = retTypePackage == null ? null : retTypePackage.trim();
+		this.retTypeName = retTypeName == null ? null : retTypeName.trim();
 		this.isConstructor = isConstructor;
 		this.isStatic = isStatic;
 		this.methodArgs = methodArgs;
