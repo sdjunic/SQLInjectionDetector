@@ -34,8 +34,17 @@ public class MethodValuesHolder extends ValuesHolder {
 	@Override
 	public ObjValue get(String name) {
 		if (name == null) return null;
-		ObjValue result = values.get(name);
-		return result;
+		if (name.endsWith("[]"))
+		{
+			ObjValue array = values.get(name.replaceAll("\\[\\]", ""));
+			if (array == null) return null;
+			assert array instanceof ArrayValue;
+			return ((ArrayValue)array).element;
+		}
+		else
+		{
+			return values.get(name);
+		}
 	}
 	
 	// Copy the whole values holder map recursively, and set all references 

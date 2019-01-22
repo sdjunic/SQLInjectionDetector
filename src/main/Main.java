@@ -59,6 +59,8 @@ public class Main {
 			int vulnerableCorrect = 0;
 			int safeCorrect = 0;
 			
+			List<String> failedTests = new LinkedList<>();
+			
 			/* TEST MODE */
 			String testsFolderPath = null;
 			if (args[0].equals("-test")) {
@@ -110,13 +112,17 @@ public class Main {
 			            		   if (vulnerability.equals("false")) {
 			            			   safeCorrect++;
 			            		   } else {
+			            			   failedTests.add(testName);
 			            			   System.out.println("Test " + testName + " failed!");
+			            			   System.out.println();
 			            		   }
 			            	   } catch (main.exception.SQLInjection e) {
 			            		   if (vulnerability.equals("true")) {
 			            			   vulnerableCorrect++;
 			            		   } else {
+			            			   failedTests.add(testName);
 			            			   System.out.println("Test " + testName + " failed!");
+			            			   System.out.println();
 			            		   }
 			            	   } catch (Exception e) {
 			            		   System.err.println("Error in test " + testName);
@@ -136,6 +142,16 @@ public class Main {
 				        }
 					}
 				}
+			}
+			
+			if (!failedTests.isEmpty())
+			{
+				System.out.println("FAILED TESTS:");
+				for (String s : failedTests)
+				{
+					System.out.println(s);
+				}
+				System.out.println();
 			}
 			
 			System.out.println("True positive: " + vulnerableCorrect + "/" + vulnerableTests);

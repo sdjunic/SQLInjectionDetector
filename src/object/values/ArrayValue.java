@@ -32,5 +32,12 @@ public class ArrayValue extends ObjValue {
 		super.setSafe(isSafe);
 		element.setSafe(isSafe);
 	}
+	
+	@Override
+	public String toString()
+	{
+		assert this.isSafe() == this.element.isSafe();
+		return (this.element.isSafe() ? "S " : "U ") + type.getName(); 
+	}
 
 }

@@ -1550,6 +1550,7 @@ foreach_header ::=
 				assert arrayVar.name != null && !arrayVar.name.isEmpty();
 				if (arrayVar.name != null && !arrayVar.name.isEmpty())
 				{
+					assert !arrayVar.name.get(arrayVar.name.size() - 1).endsWith("[]");
 					String newVar = arrayVar.name.get(arrayVar.name.size() - 1) + "[]";
 					arrayVar.name.remove(arrayVar.name.size() - 1);
 					arrayVar.name.add(newVar);
@@ -1874,6 +1875,8 @@ argument_list ::=
 		:}
 	;
 	
+// TODO: add assignment statement with right side VariableExec.value = ArrayValue 
+//		 where ArrayValue.element is not be set (or it is NullValue)
 array_creation_uninit ::=
 		NEW primitive_type dim_exprs dims_opt
 	|	NEW class_or_interface_type dim_exprs dims_opt
@@ -1912,6 +1915,8 @@ field_access ::=
 						else if (obj instanceof Field) t = ((Field)obj).getType().type;
 						else if (obj instanceof MethParam) t = ((MethParam)obj).getType().type;
 						else if (obj instanceof symbol.object.Variable) t = ((symbol.object.Variable)obj).getType().type;
+						else if (obj instanceof ArrayType) assert false; // TODO
+													
 	
 						if (t != null && t instanceof Class) {
 							Class classType = (Class)t;
@@ -1959,7 +1964,12 @@ method_invocation ::=
 						if (obj != null) {
 							if (obj instanceof Class) { //STATIC method
 								m = ((Class)obj).findMethod(n.get(n.size()-1), args);
-							} else {
+							}
+							else if (obj instanceof ArrayType)
+							{
+								assert false; // TODO
+							}
+							else {
 								if (obj instanceof symbol.object.Variable || obj instanceof Field || obj instanceof MethParam) {
 									thisObj = new VariableExec(n.subList(0, n.size()-1), obj);
 									Type t = null;
@@ -1968,6 +1978,7 @@ method_invocation ::=
 									else if (obj instanceof MethParam) t = ((MethParam)obj).getType().type;
 									
 									if (t instanceof Class) m = ((Class)t).findMethod(n.get(n.size()-1), args);
+									if (t instanceof ArrayType) assert false; // TODO
 								}
 							}
 						}
@@ -2044,7 +2055,10 @@ array_access ::=
 						|| (obj instanceof MethParam && ((MethParam)obj).getType().type.isRefType())
 						|| (obj instanceof Class && ((Class)obj).isRefType())) 
 					{
-						VariableExec res = new VariableExec(n + "[]", obj);
+						String lastNamePart = n.get(n.size() - 1);
+						n.remove(n.size() - 1);
+						n.add(lastNamePart + "[]");
+						VariableExec res = new VariableExec(n, obj);
 						RESULT = res; 
 					}
 				}
@@ -2056,6 +2070,7 @@ array_access ::=
 				assert varExec.name != null && !varExec.name.isEmpty();
 				if (varExec.name != null && !varExec.name.isEmpty())
 				{
+					assert !varExec.name.get(varExec.name.size() - 1).endsWith("[]");
 					String newVar = varExec.name.get(varExec.name.size() - 1) + "[]";
 					varExec.name.remove(varExec.name.size() - 1);
 					varExec.name.add(newVar);
@@ -2082,7 +2097,10 @@ postfix_expression ::=
 							if ((obj instanceof Field && ((Field)obj).getType().type.isRefType())
 								|| (obj instanceof symbol.object.Variable && ((symbol.object.Variable)obj).getType().type.isRefType())
 								|| (obj instanceof MethParam && ((MethParam)obj).getType().type.isRefType())
-								|| (obj instanceof Class && ((Class)obj).isRefType())) RESULT = res;
+								|| (obj instanceof Class && ((Class)obj).isRefType())
+								|| (obj instanceof ArrayType && ((ArrayType)obj).getType().type != null 
+															 && ((ArrayType)obj).getType().type.isRefType())) 
+									RESULT = res;
 						}
 					}
 				} 
@@ -2104,7 +2122,11 @@ postfix_expression ::=
 					if ((obj instanceof Field && ((Field)obj).getType().type.isRefType())
 					|| (obj instanceof symbol.object.Variable && ((symbol.object.Variable)obj).getType().type.isRefType())
 					|| (obj instanceof MethParam && ((MethParam)obj).getType().type.isRefType())
-					|| (obj instanceof Class && ((Class)obj).isRefType())) RESULT = new VariableExec(n, obj);
+					|| (obj instanceof Class && ((Class)obj).isRefType())
+					|| (obj instanceof ArrayType && ((ArrayType)obj).getType().type != null 
+															 && ((ArrayType)obj).getType().type.isRefType()))
+															 
+							RESULT = new VariableExec(n, obj);
 				}
 			}
 		:}

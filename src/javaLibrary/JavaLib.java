@@ -41,12 +41,16 @@ public class JavaLib {
 		libraryClassDecl.addField(null, "Object", "element");
 		libraryClassList.add(libraryClassDecl);
 		
-		libraryClassDecl = new LibraryClassDecl("java.util", "HashMap");
+		libraryClassDecl = new LibraryClassDecl("java.util", "Map");
 		libraryClassDecl.addField(null, "Object", "key");
 		libraryClassDecl.addField(null, "Object", "value");
 		libraryClassList.add(libraryClassDecl);
 		
+		libraryClassDecl = new LibraryClassDecl("java.util", "HashMap", "java.util", "Map");
+		libraryClassList.add(libraryClassDecl);
+		
 		libraryClassDecl = new LibraryClassDecl("javax.servlet.http", "HttpServletRequest");
+		libraryClassDecl.alwaysUnsafe = true;
 		libraryClassList.add(libraryClassDecl);
 		
 		libraryClassDecl = new LibraryClassDecl("javax.servlet.http", "HttpServletResponse");
@@ -469,6 +473,45 @@ public class JavaLib {
 				SpecialAction.UNSAFE);
 		libraryMethList.add(libraryMethDecl);
 		
+		libraryMethDecl = new LibraryMethodDecl("javax.servlet.http", "HttpServletRequest", "getParameterMap");
+		libraryMethDecl.retTypePackage = "java.util";
+		libraryMethDecl.retTypeName = "Map";
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN,
+				SpecialAction.ASSIGN_NEW_OBJECT("java.util.Map"),
+				SpecialAction.UNSAFE);
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN + ".key",
+				SpecialAction.ASSIGN_NEW_OBJECT("String"),
+				SpecialAction.UNSAFE);
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN + ".value",
+				SpecialAction.ASSIGN_NEW_OBJECT("String[]"),
+				SpecialAction.UNSAFE);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("javax.servlet.http", "HttpServletRequest", "getParameterNames");
+		libraryMethDecl.retTypePackage = "java.util";
+		libraryMethDecl.retTypeName = "Enumeration";
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN,
+				SpecialAction.ASSIGN_NEW_OBJECT("java.util.Enumeration"),
+				SpecialAction.UNSAFE);
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN + ".element",
+				SpecialAction.ASSIGN_NEW_OBJECT("String"),
+				SpecialAction.UNSAFE);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("javax.servlet.http", "HttpServletRequest", "getParameterValues");
+		libraryMethDecl.retTypeName = "String[]";
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN,
+				SpecialAction.ASSIGN_NEW_OBJECT("String[]"),
+				SpecialAction.UNSAFE);
+		libraryMethList.add(libraryMethDecl);
+		
 		libraryMethDecl = new LibraryMethodDecl("javax.servlet.http", "HttpServletRequest", "getHeader");
 		libraryMethDecl.retTypeName = "String";
 		libraryMethDecl.methodArgs.add("String");
@@ -595,7 +638,7 @@ public class JavaLib {
 				SpecialAction.SAFE);
 		libraryMethList.add(libraryMethDecl);
 		
-		libraryMethDecl = new LibraryMethodDecl("java.util", "HashMap", "put");
+		libraryMethDecl = new LibraryMethodDecl("java.util", "Map", "put");
 		libraryMethDecl.retTypeName = "Object";
 		libraryMethDecl.methodArgs.add("Object");
 		libraryMethDecl.methodArgs.add("Object");
@@ -613,13 +656,28 @@ public class JavaLib {
 				SpecialAction.THIS + ".value & 1");
 		libraryMethList.add(libraryMethDecl);
 		
-		libraryMethDecl = new LibraryMethodDecl("java.util", "HashMap", "get");
+		libraryMethDecl = new LibraryMethodDecl("java.util", "Map", "get");
 		libraryMethDecl.retTypeName = "Object";
 		libraryMethDecl.methodArgs.add("Object");
 		libraryMethDecl.addSpecialAction(
 				SpecialAction.RETURN,
 				SpecialAction.ASSIGN_EXISTING_OBJECT,
 				SpecialAction.THIS + ".value");
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.util", "Map", "clear");
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.THIS,
+				SpecialAction.SET_SAFE,
+				SpecialAction.SAFE);
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.THIS + ".key",
+				SpecialAction.ASSIGN_NEW_OBJECT("Object"),
+				SpecialAction.SAFE);
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.THIS + ".value",
+				SpecialAction.ASSIGN_NEW_OBJECT("Object"),
+				SpecialAction.SAFE);
 		libraryMethList.add(libraryMethDecl);
 		
 		libraryMethDecl = new LibraryMethodDecl("javax.servlet.http", "HttpServletResponse", "getHeader");

@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import symbol.object.ArrayType;
 import symbol.object.Class;
 import symbol.object.Type;
 
@@ -99,6 +100,33 @@ public abstract class ValuesHolder {
 				return StringVal.getString(isSafe);
 			} else {
 				return new ClassValue(cl, isSafe);
+			}
+		}
+		return null;
+	}
+	
+	public static ObjValue makeDefaultObjValue(Type objectType, boolean isSafe) {
+		if (objectType.isValueType()) return null;
+		if (objectType instanceof Class) {
+			Class cl = ((Class)objectType);
+			if ("String".equals(cl.getName())) {
+				return StringVal.getString(isSafe);
+			} else {
+				return cl.getDefaultObject(isSafe);
+			}
+		}
+		if (objectType instanceof ArrayType)
+		{
+			Type arraySourceType = ((ArrayType)objectType).getType().type;
+			if (arraySourceType instanceof Class) {
+				Class cl = ((Class)arraySourceType);
+				ObjValue elem = null;
+				if ("String".equals(cl.getName())) {
+					elem = StringVal.getString(isSafe);
+				} else {
+					elem = cl.getDefaultObject(isSafe);
+				}
+				return new ArrayValue(isSafe, elem, ((ArrayType)objectType));
 			}
 		}
 		return null;

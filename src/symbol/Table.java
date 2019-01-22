@@ -96,6 +96,8 @@ public class Table {
 			Table.openScope(currentClass);		
 			currentClass.setScope(Table.currentScope());
 			
+			currentClass.setAlwaysUnsafe(classDecl.alwaysUnsafe);
+			
 			if (classDecl.fields != null && !classDecl.fields.isEmpty())
 			{
 				for (LibraryClassDecl.LibField f : classDecl.fields)

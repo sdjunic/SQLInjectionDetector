@@ -23,6 +23,7 @@ public class LibraryClassDecl {
 	public String className;
 	public String superClassPackageName;
 	public String superClass;
+	public boolean alwaysUnsafe = false;
 	
 	public List<LibField> fields;
 

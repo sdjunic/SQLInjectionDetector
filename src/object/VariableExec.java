@@ -70,7 +70,7 @@ public class VariableExec {
 	@Override
 	public String toString(){
 		if (name != null) return ParseData.makeFullNameWithDots(name);
-		if (object != null) return object.getName();
+		if (object != null) assert false; //return object.getName();
 		if (value != null) return value.toString();
 		return "UNKNOWN";
 	}

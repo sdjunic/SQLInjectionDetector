@@ -28,11 +28,13 @@ public class TaskExecutor {
 		if (!m.isStatic()) {
 			Obj methodClass = m.getScope().getOuter().getParrentObj();
 			if (!(methodClass instanceof Class)) throw new Exception();
-			values.addObject((Class)methodClass, "this", initialArgumentsSafe);
+			//values.addObject((Class)methodClass, "this", initialArgumentsSafe);
+			values.put("this", values.makeDefaultObjValue((Class)methodClass, initialArgumentsSafe));
 		}
 		List<MethParam> lmp = m.getMethParamList();
 		for (int i=0; i<lmp.size(); ++i) {
 			values.addObject(lmp.get(i).getType().type, lmp.get(i).getName(), initialArgumentsSafe);
+			values.put(lmp.get(i).getName(), values.makeDefaultObjValue(lmp.get(i).getType().type, initialArgumentsSafe));
 		}
 		
 		// Hash method input values, in case of recursion.

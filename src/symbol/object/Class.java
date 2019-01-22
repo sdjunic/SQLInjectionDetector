@@ -21,6 +21,9 @@ import object.values.StringVal;
 
 public class Class implements Type {
 
+	// Default object is always unsafe (e.g. HttpServletRequest)
+	private boolean alwaysUnsafe = false;
+	
 	private static int anonymousClassCount = 0;
 	private String name;
 	private Scope myScope = null;
@@ -138,12 +141,19 @@ public class Class implements Type {
 		return "_field_init_" + name;
 	}
 	
+	public void setAlwaysUnsafe(boolean alwaysUnsafe)
+	{
+		this.alwaysUnsafe = alwaysUnsafe; 
+	}
+	
 	// Used in special methods to make new object of this Class.
 	// That object will have all fields set to null, except
 	// String fields, which will have given safety value.
 	//
 	public ObjValue getDefaultObject(boolean isSafe)
 	{
+		isSafe = isSafe && !alwaysUnsafe;
+		
 		ClassValue result = new ClassValue(this, isSafe);
 		
 		for (Obj o : getLocals().symbols()) { 
@@ -156,7 +166,7 @@ public class Class implements Type {
 					{
 						result.setField(field.getName(), StringVal.getString(isSafe));
 					}
-					else if (field.getName().equals("super") && !field.getType().type.getName().equals("Object"))
+					else if (field.getName().equals("super") && !field.getType().type.getName().equals("Object") && superClass.type instanceof Class)
 					{
 						result.setField("super", ((Class)superClass.type).getDefaultObject(isSafe));
 					}

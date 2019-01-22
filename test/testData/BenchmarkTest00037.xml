@@ -1,5 +1,5 @@
 <test-metadata>
-    <testName>BenchmarkTest00025.java</testName>
+    <testName>BenchmarkTest00037.java</testName>
     <vulnerability>true</vulnerability>
     <analyzeFromMethod>all</analyzeFromMethod>
     <initArgumentsSafe>true</initArgumentsSafe>
