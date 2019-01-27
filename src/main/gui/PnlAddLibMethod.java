@@ -13,14 +13,14 @@ import javax.swing.border.LineBorder;
 import java.awt.Color;
 
 public class PnlAddLibMethod extends JPanel {
-	private JTextField textField;
-	private JTextField textField_1;
-	private JTextField textField_2;
-	private JTextField textField_3;
-	private JTextField textField_6;
-	private JTextField textField_7;
-	private JTextField textField_8;
-	private JTextField textField_9;
+	private JTextField tfMethodName;
+	private JTextField tfReturnType;
+	private JTextField tfClass;
+	private JTextField tfPackage;
+	private JTextField tfLeftCriticalOutput;
+	private JTextField tfArgumentType;
+	private JTextField tfLeft;
+	private JTextField tfExpression;
 
 	/**
 	 * Create the panel.
@@ -52,25 +52,25 @@ public class PnlAddLibMethod extends JPanel {
 		separator.setBounds(0, 148, 910, 2);
 		add(separator);
 		
-		textField = new JTextField();
-		textField.setBounds(115, 92, 166, 20);
-		add(textField);
-		textField.setColumns(10);
+		tfMethodName = new JTextField();
+		tfMethodName.setBounds(115, 92, 166, 20);
+		add(tfMethodName);
+		tfMethodName.setColumns(10);
 		
-		textField_1 = new JTextField();
-		textField_1.setColumns(10);
-		textField_1.setBounds(115, 117, 166, 20);
-		add(textField_1);
+		tfReturnType = new JTextField();
+		tfReturnType.setColumns(10);
+		tfReturnType.setBounds(115, 117, 166, 20);
+		add(tfReturnType);
 		
-		textField_2 = new JTextField();
-		textField_2.setColumns(10);
-		textField_2.setBounds(115, 67, 166, 20);
-		add(textField_2);
+		tfClass = new JTextField();
+		tfClass.setColumns(10);
+		tfClass.setBounds(115, 67, 166, 20);
+		add(tfClass);
 		
-		textField_3 = new JTextField();
-		textField_3.setColumns(10);
-		textField_3.setBounds(115, 42, 166, 20);
-		add(textField_3);
+		tfPackage = new JTextField();
+		tfPackage.setColumns(10);
+		tfPackage.setBounds(115, 42, 166, 20);
+		add(tfPackage);
 		
 		JCheckBox chckbxIsStatic = new JCheckBox("is static");
 		chckbxIsStatic.setBounds(332, 41, 97, 23);
@@ -84,9 +84,9 @@ public class PnlAddLibMethod extends JPanel {
 		lblMethodFunctionality.setBounds(20, 165, 127, 14);
 		add(lblMethodFunctionality);
 		
-		JComboBox comboBox = new JComboBox();
-		comboBox.setBounds(64, 188, 166, 20);
-		add(comboBox);
+		JComboBox cbSpecialActionType = new JComboBox();
+		cbSpecialActionType.setBounds(64, 188, 166, 20);
+		add(cbSpecialActionType);
 		
 		JLabel lblType = new JLabel("Type");
 		lblType.setBounds(30, 190, 77, 14);
@@ -97,50 +97,50 @@ public class PnlAddLibMethod extends JPanel {
 		add(panel_3);
 		panel_3.setLayout(null);
 		
-		textField_8 = new JTextField();
-		textField_8.setColumns(10);
-		textField_8.setBounds(30, 11, 156, 20);
-		panel_3.add(textField_8);
+		tfLeft = new JTextField();
+		tfLeft.setColumns(10);
+		tfLeft.setBounds(30, 11, 156, 20);
+		panel_3.add(tfLeft);
 		
-		JLabel label_1 = new JLabel(":=");
-		label_1.setFont(new Font("Tahoma", Font.BOLD, 12));
-		label_1.setBounds(196, 14, 40, 14);
-		panel_3.add(label_1);
+		JLabel lblAssignOp = new JLabel(":=");
+		lblAssignOp.setFont(new Font("Tahoma", Font.BOLD, 12));
+		lblAssignOp.setBounds(196, 14, 40, 14);
+		panel_3.add(lblAssignOp);
 		
-		textField_9 = new JTextField();
-		textField_9.setColumns(10);
-		textField_9.setBounds(219, 11, 540, 20);
-		panel_3.add(textField_9);
+		tfExpression = new JTextField();
+		tfExpression.setColumns(10);
+		tfExpression.setBounds(219, 11, 540, 20);
+		panel_3.add(tfExpression);
 		
-		JButton button_1 = new JButton("Add");
-		button_1.setBounds(772, 10, 89, 23);
-		panel_3.add(button_1);
+		JButton btnAddAssignmentAction = new JButton("Add");
+		btnAddAssignmentAction.setBounds(772, 10, 89, 23);
+		panel_3.add(btnAddAssignmentAction);
 		
 		JPanel panel_1 = new JPanel();
 		panel_1.setLayout(null);
 		panel_1.setBounds(0, 210, 385, 43);
 		add(panel_1);
 		
-		textField_6 = new JTextField();
-		textField_6.setColumns(10);
-		textField_6.setBounds(30, 11, 156, 20);
-		panel_1.add(textField_6);
+		tfLeftCriticalOutput = new JTextField();
+		tfLeftCriticalOutput.setColumns(10);
+		tfLeftCriticalOutput.setBounds(30, 11, 156, 20);
+		panel_1.add(tfLeftCriticalOutput);
 		
 		JLabel lblIsCriticalOutput = new JLabel("is critical output");
 		lblIsCriticalOutput.setBounds(196, 14, 120, 14);
 		panel_1.add(lblIsCriticalOutput);
 		
-		JButton button = new JButton("Add");
-		button.setBounds(282, 10, 89, 23);
-		panel_1.add(button);
+		JButton btnAddCriticalOutput = new JButton("Add");
+		btnAddCriticalOutput.setBounds(282, 10, 89, 23);
+		panel_1.add(btnAddCriticalOutput);
 		
 		JSeparator separator_1 = new JSeparator();
 		separator_1.setBounds(-1, 254, 910, 2);
 		add(separator_1);
 		
-		JButton btnFinish = new JButton("Finish");
-		btnFinish.setBounds(806, 16, 89, 23);
-		add(btnFinish);
+		JButton btnAddMethod = new JButton("Finish");
+		btnAddMethod.setBounds(806, 16, 89, 23);
+		add(btnAddMethod);
 		
 		JTextArea textArea = new JTextArea();
 		textArea.setBounds(0, 254, 910, 335);
@@ -160,14 +160,14 @@ public class PnlAddLibMethod extends JPanel {
 		lblType_1.setBounds(20, 33, 52, 14);
 		panel_2.add(lblType_1);
 		
-		textField_7 = new JTextField();
-		textField_7.setColumns(10);
-		textField_7.setBounds(56, 31, 226, 20);
-		panel_2.add(textField_7);
+		tfArgumentType = new JTextField();
+		tfArgumentType.setColumns(10);
+		tfArgumentType.setBounds(56, 31, 226, 20);
+		panel_2.add(tfArgumentType);
 		
-		JButton btnAdd_1 = new JButton("Add");
-		btnAdd_1.setBounds(292, 29, 89, 23);
-		panel_2.add(btnAdd_1);
+		JButton btnAddArgument = new JButton("Add");
+		btnAddArgument.setBounds(292, 29, 89, 23);
+		panel_2.add(btnAddArgument);
 
 	}
 

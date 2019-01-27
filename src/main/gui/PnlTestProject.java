@@ -11,7 +11,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 public class PnlTestProject extends JPanel {
-	private JTextField textField;
+	private JTextField tfProjectPath;
 
 	/**
 	 * Create the panel.
@@ -23,18 +23,18 @@ public class PnlTestProject extends JPanel {
 		lblProjectPath.setBounds(20, 20, 75, 14);
 		add(lblProjectPath);
 		
-		textField = new JTextField();
-		textField.setBounds(105, 17, 311, 20);
-		add(textField);
-		textField.setColumns(10);
+		tfProjectPath = new JTextField();
+		tfProjectPath.setBounds(105, 17, 311, 20);
+		add(tfProjectPath);
+		tfProjectPath.setColumns(10);
 		
 		JLabel lblStartAnalysisFrom = new JLabel("Start analysis from ");
 		lblStartAnalysisFrom.setBounds(20, 47, 131, 14);
 		add(lblStartAnalysisFrom);
 		
-		JComboBox comboBox = new JComboBox();
-		comboBox.setBounds(141, 44, 69, 20);
-		add(comboBox);
+		JComboBox cbStartFrom = new JComboBox();
+		cbStartFrom.setBounds(141, 44, 69, 20);
+		add(cbStartFrom);
 		
 		JLabel lblMethods = new JLabel("method(s)");
 		lblMethods.setBounds(220, 47, 93, 14);

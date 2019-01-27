@@ -9,12 +9,12 @@ import javax.swing.JTextArea;
 import javax.swing.JCheckBox;
 
 public class PnlAddLibClass extends JPanel {
-	private JTextField textField;
-	private JTextField textField_1;
-	private JTextField textField_2;
-	private JTextField textField_3;
-	private JTextField textField_4;
-	private JTextField textField_5;
+	private JTextField tfNewClassPackage;
+	private JTextField tfNewClassName;
+	private JTextField tfSuperClassPackage;
+	private JTextField tfSuperClassName;
+	private JTextField tfFieldType;
+	private JTextField tfFieldName;
 
 	/**
 	 * Create the panel.
@@ -50,25 +50,25 @@ public class PnlAddLibClass extends JPanel {
 		separator.setBounds(0, 176, 910, 2);
 		add(separator);
 		
-		textField = new JTextField();
-		textField.setBounds(108, 43, 195, 20);
-		add(textField);
-		textField.setColumns(10);
+		tfNewClassPackage = new JTextField();
+		tfNewClassPackage.setBounds(108, 43, 195, 20);
+		add(tfNewClassPackage);
+		tfNewClassPackage.setColumns(10);
 		
-		textField_1 = new JTextField();
-		textField_1.setColumns(10);
-		textField_1.setBounds(108, 70, 195, 20);
-		add(textField_1);
+		tfNewClassName = new JTextField();
+		tfNewClassName.setColumns(10);
+		tfNewClassName.setBounds(108, 70, 195, 20);
+		add(tfNewClassName);
 		
-		textField_2 = new JTextField();
-		textField_2.setColumns(10);
-		textField_2.setBounds(108, 117, 195, 20);
-		add(textField_2);
+		tfSuperClassPackage = new JTextField();
+		tfSuperClassPackage.setColumns(10);
+		tfSuperClassPackage.setBounds(108, 117, 195, 20);
+		add(tfSuperClassPackage);
 		
-		textField_3 = new JTextField();
-		textField_3.setColumns(10);
-		textField_3.setBounds(108, 144, 195, 20);
-		add(textField_3);
+		tfSuperClassName = new JTextField();
+		tfSuperClassName.setColumns(10);
+		tfSuperClassName.setBounds(108, 144, 195, 20);
+		add(tfSuperClassName);
 		
 		JLabel lblFields = new JLabel("Fields");
 		lblFields.setBounds(20, 189, 64, 14);
@@ -78,15 +78,15 @@ public class PnlAddLibClass extends JPanel {
 		lblType.setBounds(30, 214, 64, 14);
 		add(lblType);
 		
-		textField_4 = new JTextField();
-		textField_4.setColumns(10);
-		textField_4.setBounds(108, 214, 195, 20);
-		add(textField_4);
+		tfFieldType = new JTextField();
+		tfFieldType.setColumns(10);
+		tfFieldType.setBounds(108, 214, 195, 20);
+		add(tfFieldType);
 		
-		textField_5 = new JTextField();
-		textField_5.setColumns(10);
-		textField_5.setBounds(108, 241, 195, 20);
-		add(textField_5);
+		tfFieldName = new JTextField();
+		tfFieldName.setColumns(10);
+		tfFieldName.setBounds(108, 241, 195, 20);
+		add(tfFieldName);
 		
 		JLabel lblName = new JLabel("Name");
 		lblName.setBounds(30, 244, 64, 14);
