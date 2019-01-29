@@ -33,15 +33,16 @@ public class SpecialAction {
 	
 	public static String ASSIGN_NEW_OBJECT(String type)
 	{
-		return ASSIGN_NEW_OBJECT + "(" + type.trim() + ") ";
+		return ASSIGN_NEW_OBJECT_PREFIX + type.trim() + ASSIGN_NEW_OBJECT_SUFIX;
 	}
 	
-	public static final String SET_SAFE = "safe=";
-	private static final String ASSIGN_NEW_OBJECT = "=new";
+	public static final String SET_SAFE = ":s=";
+	private static final String ASSIGN_NEW_OBJECT_PREFIX = ":n(";
+	private static final String ASSIGN_NEW_OBJECT_SUFIX = ")=";
 	public static final String ASSIGN_EXISTING_OBJECT = ":=";
 	
-	public static final String THIS = "__this_";
-	public static final String RETURN = "__return_";
+	public static final String THIS = "this";
+	public static final String RETURN = "__return";
 	public static final String SAFE = "__safe_";
 	public static final String UNSAFE = "__unsafe_";
 	public static final String CRITICAL_OUTPUT = "__CO_";
@@ -57,7 +58,6 @@ public class SpecialAction {
 	private TypeReference newObjType = null;	
 	private ActionTreeNode actionTree = null;
 	private String right = null;
-	
 	
 	public SpecialAction(String left, String assign, String expression, LibraryMethodDecl methodDecl) {
 		this.left = left.trim();
@@ -98,18 +98,18 @@ public class SpecialAction {
 			this.assignOp = AssignOperator.OP_SET_SAFE;
 			this.actionTree = parseExpression(expression, methodDecl);
 		}
-		else if (assign.startsWith(ASSIGN_NEW_OBJECT)) // calculate boolean expression to get safety value for NEW object
+		else if (assign.startsWith(ASSIGN_NEW_OBJECT_PREFIX)) // calculate boolean expression to get safety value for NEW object
 		{										  // and assign that object to left variable
-			assign = assign.substring(ASSIGN_NEW_OBJECT.length() + 1 /* '(' */).trim();
-			if (assign.contains("?"))
+			assign = assign.substring(ASSIGN_NEW_OBJECT_PREFIX.length()).trim();
+			assign = assign.substring(0, assign.length() - ASSIGN_NEW_OBJECT_SUFIX.length()).trim();
+			if (assign.contains("|"))
 			{
-				this.objToCopyTypeFrom = assign.substring(0, assign.indexOf("?"));
-				assign = assign.substring(assign.indexOf("?") + 1);
+				this.objToCopyTypeFrom = assign.substring(0, assign.indexOf("|"));
+				assign = assign.substring(assign.indexOf("|") + 1);
 			}
-			String newObjTypeString = assign.substring(0, assign.length() - 1).trim();
 			
 			this.assignOp = AssignOperator.OP_ASSIGN_NEW_OBJECT;
-			this.newObjType = getTypeForClassName(newObjTypeString);
+			this.newObjType = getTypeForClassName(assign);
 			this.actionTree = parseExpression(expression, methodDecl);
 		}
 		else if (assign.equals(ASSIGN_EXISTING_OBJECT)) // assign EXISTING object to left variable
@@ -390,6 +390,21 @@ public class SpecialAction {
 		assert exprStack.peek().operation == null;
 		
 		return exprStack.peek().left;
+	}
+	
+	@Override
+	public String toString()
+	{
+		String res = left.trim() + " ";
+		if (assignOp == AssignOperator.OP_CRITICAL_OUTPUT)
+		{
+			res += "is critical output";
+		}
+		else
+		{
+			res += assign + " " + expression;
+		}
+		return res;
 	}
 	
 };

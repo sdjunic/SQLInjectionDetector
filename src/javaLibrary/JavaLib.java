@@ -648,11 +648,11 @@ public class JavaLib {
 				SpecialAction.THIS + ".value");
 		libraryMethDecl.addSpecialAction(
 				SpecialAction.THIS + ".key",
-				SpecialAction.ASSIGN_NEW_OBJECT("0?Object"),
+				SpecialAction.ASSIGN_NEW_OBJECT("0|Object"),
 				SpecialAction.THIS + ".key & 0");
 		libraryMethDecl.addSpecialAction(
 				SpecialAction.THIS + ".value",
-				SpecialAction.ASSIGN_NEW_OBJECT("1?Object"),
+				SpecialAction.ASSIGN_NEW_OBJECT("1|Object"),
 				SpecialAction.THIS + ".value & 1");
 		libraryMethList.add(libraryMethDecl);
 		

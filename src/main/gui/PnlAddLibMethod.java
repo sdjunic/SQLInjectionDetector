@@ -9,10 +9,31 @@ import javax.swing.JComboBox;
 import javax.swing.JButton;
 import javax.swing.JTextArea;
 import java.awt.Font;
+import java.awt.Insets;
+
 import javax.swing.border.LineBorder;
+
+import javaLibrary.SpecialAction;
+import main.LibraryMethodDecl;
+
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class PnlAddLibMethod extends JPanel {
+	
+	private final String SA_CO = "Critical output";
+	private final String SA_ASSIGN_EXISTING = "Assign existing object";
+	private final String SA_ASSIGN_NEW = "Assign new object";
+	private final String SA_SET_SAFETY = "Set safety value";
+	
+	private final String SPECIAL_ACTION_TYPE[] = { SA_CO, SA_ASSIGN_EXISTING, SA_ASSIGN_NEW, SA_SET_SAFETY };
+	
+	private LibraryMethodDecl currentMethod = null;
+	
+	private JLabel lblAssignOp;
+	
 	private JTextField tfMethodName;
 	private JTextField tfReturnType;
 	private JTextField tfClass;
@@ -21,7 +42,146 @@ public class PnlAddLibMethod extends JPanel {
 	private JTextField tfArgumentType;
 	private JTextField tfLeft;
 	private JTextField tfExpression;
+	
+	private JPanel pnlAddArguments;
+	private JPanel pnlAddAssignmentAction;
+	private JPanel pnlAddCriticalOutput;
+	private JPanel pnlAddNewAssignmentAction;
+	
+	private JCheckBox chckbxIsStatic;
+	private JCheckBox chckbxIsConstructor; 
+	
+	private JComboBox cbSpecialActionType;
+	
+	private JTextArea textArea;
+	private JTextField tfLeftAssignNewOp;
+	private JTextField tfAssignNewRetType;
+	private JTextField tfExpressionAssignNew;
 
+	private boolean checkMethodDeclaration()
+	{
+		if (tfClass.getText().trim().isEmpty())
+		{
+			textArea.setText("Fill new method - class field!");
+			return false;
+		}
+		
+		if (tfMethodName.getText().trim().isEmpty())
+		{
+			textArea.setText("Fill new method - method name field!");
+			return false;
+		}
+		
+		currentMethod = new LibraryMethodDecl(tfPackage.getText(), tfClass.getText(), tfMethodName.getText());
+		currentMethod.isStatic = chckbxIsStatic.isSelected();
+		currentMethod.isConstructor = chckbxIsConstructor.isSelected();
+		
+		String retType = tfReturnType.getText().trim();
+		if (!(retType.isEmpty() || retType.equals("void")))
+		{
+			String retPackageName = retType.substring(0, retType.lastIndexOf("."));
+			String retTypeName = retType.substring(retType.lastIndexOf(".") + 1);
+			
+			currentMethod.retTypePackage = retPackageName;
+			currentMethod.retTypeName = retTypeName;
+		}
+		
+		textArea.setText(currentMethod.toString());
+		
+		return true;
+	}
+	
+	private void addArgument()
+	{
+		assert !tfArgumentType.getText().trim().isEmpty();
+		assert currentMethod != null;
+		currentMethod.methodArgs.add(tfArgumentType.getText().trim());
+		tfArgumentType.setText("");
+		textArea.setText(currentMethod.toString());
+	}
+	
+	void setPanelEnabled(JPanel panel, Boolean isEnabled) {
+	    panel.setEnabled(isEnabled);
+
+	    Component[] components = panel.getComponents();
+
+	    for(int i = 0; i < components.length; i++) {
+	        if(components[i].getClass().getName() == "javax.swing.JPanel") {
+	            setPanelEnabled((JPanel) components[i], isEnabled);
+	        }
+
+	        components[i].setEnabled(isEnabled);
+	    }
+	}
+	
+	private void enableAddingArgumentsAndSpecialActions(boolean enable)
+	{
+		setPanelEnabled(pnlAddArguments, enable);
+		setPanelEnabled(pnlAddCriticalOutput, enable);
+		setPanelEnabled(pnlAddAssignmentAction, enable);
+		setPanelEnabled(pnlAddNewAssignmentAction, enable);
+		cbSpecialActionType.setEnabled(enable);
+	}
+	
+	private void showSpecialActionPanel(JPanel pnl)
+	{
+		pnlAddCriticalOutput.setVisible(false);
+		pnlAddAssignmentAction.setVisible(false);
+		pnlAddNewAssignmentAction.setVisible(false);
+		
+		if (pnl != null)
+		{
+			pnl.setVisible(true);
+		}
+	}
+	
+	private void hideSpecialActionPanels()
+	{
+		showSpecialActionPanel((JPanel)null);
+	}
+	
+	private void showSpecialActionPanel(String specialAction)
+	{
+		if (specialAction.equals(SA_CO))
+		{
+			showSpecialActionPanel(pnlAddCriticalOutput);
+		}
+		else if (specialAction.equals(SA_ASSIGN_EXISTING))
+		{
+			lblAssignOp.setText(SpecialAction.ASSIGN_EXISTING_OBJECT);
+			showSpecialActionPanel(pnlAddAssignmentAction);
+		}
+		else if (specialAction.equals(SA_SET_SAFETY))
+		{
+			lblAssignOp.setText(SpecialAction.SET_SAFE);
+			showSpecialActionPanel(pnlAddAssignmentAction);
+		}
+		else if (specialAction.equals(SA_ASSIGN_NEW))
+		{
+			showSpecialActionPanel(pnlAddNewAssignmentAction);
+		}
+		else
+		{
+			assert false;
+		}
+	}
+	
+	private void resetAllFields()
+	{
+		//tfClass.setText("");
+		//tfPackage.setText("");
+		tfMethodName.setText("");
+		tfReturnType.setText("");
+		tfLeftCriticalOutput.setText("");
+		tfArgumentType.setText("");
+		tfLeft.setText("");
+		tfExpression.setText("");
+		chckbxIsStatic.setSelected(false);
+		chckbxIsConstructor.setSelected(false);
+		textArea.setText("");
+		cbSpecialActionType.setSelectedIndex(-1);
+	}
+	
 	/**
 	 * Create the panel.
 	 */
@@ -72,11 +232,11 @@ public class PnlAddLibMethod extends JPanel {
 		tfPackage.setBounds(115, 42, 166, 20);
 		add(tfPackage);
 		
-		JCheckBox chckbxIsStatic = new JCheckBox("is static");
+		chckbxIsStatic = new JCheckBox("is static");
 		chckbxIsStatic.setBounds(332, 41, 97, 23);
 		add(chckbxIsStatic);
 		
-		JCheckBox chckbxIsConstructor = new JCheckBox("is constructor");
+		chckbxIsConstructor = new JCheckBox("is constructor");
 		chckbxIsConstructor.setBounds(332, 16, 113, 23);
 		add(chckbxIsConstructor);
 		
@@ -84,7 +244,13 @@ public class PnlAddLibMethod extends JPanel {
 		lblMethodFunctionality.setBounds(20, 165, 127, 14);
 		add(lblMethodFunctionality);
 		
-		JComboBox cbSpecialActionType = new JComboBox();
+		cbSpecialActionType = new JComboBox(SPECIAL_ACTION_TYPE);
+		cbSpecialActionType.setSelectedIndex(-1);
+		cbSpecialActionType.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				showSpecialActionPanel((String)cbSpecialActionType.getSelectedItem());
+			}
+		});
 		cbSpecialActionType.setBounds(64, 188, 166, 20);
 		add(cbSpecialActionType);
 		
@@ -92,83 +258,143 @@ public class PnlAddLibMethod extends JPanel {
 		lblType.setBounds(30, 190, 77, 14);
 		add(lblType);
 		
-		JPanel panel_3 = new JPanel();
-		panel_3.setBounds(0, 210, 871, 44);
-		add(panel_3);
-		panel_3.setLayout(null);
+		pnlAddAssignmentAction = new JPanel();
+		pnlAddAssignmentAction.setBounds(0, 210, 871, 43);
+		add(pnlAddAssignmentAction);
+		pnlAddAssignmentAction.setLayout(null);
 		
 		tfLeft = new JTextField();
 		tfLeft.setColumns(10);
 		tfLeft.setBounds(30, 11, 156, 20);
-		panel_3.add(tfLeft);
+		pnlAddAssignmentAction.add(tfLeft);
 		
-		JLabel lblAssignOp = new JLabel(":=");
+		lblAssignOp = new JLabel(":=");
 		lblAssignOp.setFont(new Font("Tahoma", Font.BOLD, 12));
-		lblAssignOp.setBounds(196, 14, 40, 14);
-		panel_3.add(lblAssignOp);
+		lblAssignOp.setBounds(196, 13, 40, 14);
+		pnlAddAssignmentAction.add(lblAssignOp);
 		
 		tfExpression = new JTextField();
 		tfExpression.setColumns(10);
 		tfExpression.setBounds(219, 11, 540, 20);
-		panel_3.add(tfExpression);
+		pnlAddAssignmentAction.add(tfExpression);
 		
 		JButton btnAddAssignmentAction = new JButton("Add");
-		btnAddAssignmentAction.setBounds(772, 10, 89, 23);
-		panel_3.add(btnAddAssignmentAction);
+		btnAddAssignmentAction.setBounds(773, 10, 89, 23);
+		pnlAddAssignmentAction.add(btnAddAssignmentAction);
 		
-		JPanel panel_1 = new JPanel();
-		panel_1.setLayout(null);
-		panel_1.setBounds(0, 210, 385, 43);
-		add(panel_1);
+		pnlAddCriticalOutput = new JPanel();
+		pnlAddCriticalOutput.setLayout(null);
+		pnlAddCriticalOutput.setBounds(0, 210, 400, 43);
+		add(pnlAddCriticalOutput);
 		
 		tfLeftCriticalOutput = new JTextField();
 		tfLeftCriticalOutput.setColumns(10);
 		tfLeftCriticalOutput.setBounds(30, 11, 156, 20);
-		panel_1.add(tfLeftCriticalOutput);
+		pnlAddCriticalOutput.add(tfLeftCriticalOutput);
 		
 		JLabel lblIsCriticalOutput = new JLabel("is critical output");
 		lblIsCriticalOutput.setBounds(196, 14, 120, 14);
-		panel_1.add(lblIsCriticalOutput);
+		pnlAddCriticalOutput.add(lblIsCriticalOutput);
 		
 		JButton btnAddCriticalOutput = new JButton("Add");
-		btnAddCriticalOutput.setBounds(282, 10, 89, 23);
-		panel_1.add(btnAddCriticalOutput);
+		btnAddCriticalOutput.setBounds(301, 10, 89, 23);
+		pnlAddCriticalOutput.add(btnAddCriticalOutput);
 		
 		JSeparator separator_1 = new JSeparator();
 		separator_1.setBounds(-1, 254, 910, 2);
 		add(separator_1);
 		
-		JButton btnAddMethod = new JButton("Finish");
-		btnAddMethod.setBounds(806, 16, 89, 23);
+		JButton btnAddMethod = new JButton("Continue");
+		btnAddMethod.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if (btnAddMethod.getText().equals("Continue"))
+				{
+					if(checkMethodDeclaration())
+					{
+						btnAddMethod.setText("Save method");
+						enableAddingArgumentsAndSpecialActions(true);
+					}
+				}
+				else
+				{
+					assert btnAddMethod.getText().equals("Save method");
+					enableAddingArgumentsAndSpecialActions(false);
+					resetAllFields();
+					btnAddMethod.setText("Continue");
+				}
+			}
+		});
+		btnAddMethod.setBounds(798, 16, 97, 23);
 		add(btnAddMethod);
 		
-		JTextArea textArea = new JTextArea();
+		textArea = new JTextArea();
 		textArea.setBounds(0, 254, 910, 335);
+		textArea.setMargin(new Insets(10,10,10,10));
 		add(textArea);
 		
-		JPanel panel_2 = new JPanel();
-		panel_2.setBorder(new LineBorder(Color.LIGHT_GRAY));
-		panel_2.setBounds(332, 70, 391, 64);
-		add(panel_2);
-		panel_2.setLayout(null);
+		pnlAddArguments = new JPanel();
+		pnlAddArguments.setBorder(new LineBorder(Color.LIGHT_GRAY));
+		pnlAddArguments.setBounds(332, 70, 391, 64);
+		add(pnlAddArguments);
+		pnlAddArguments.setLayout(null);
 		
 		JLabel lblArguments = new JLabel("Arguments");
 		lblArguments.setBounds(10, 10, 127, 14);
-		panel_2.add(lblArguments);
+		pnlAddArguments.add(lblArguments);
 		
 		JLabel lblType_1 = new JLabel("Type");
 		lblType_1.setBounds(20, 33, 52, 14);
-		panel_2.add(lblType_1);
+		pnlAddArguments.add(lblType_1);
 		
 		tfArgumentType = new JTextField();
 		tfArgumentType.setColumns(10);
 		tfArgumentType.setBounds(56, 31, 226, 20);
-		panel_2.add(tfArgumentType);
+		pnlAddArguments.add(tfArgumentType);
 		
 		JButton btnAddArgument = new JButton("Add");
+		btnAddArgument.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				addArgument();
+			}
+		});
 		btnAddArgument.setBounds(292, 29, 89, 23);
-		panel_2.add(btnAddArgument);
+		pnlAddArguments.add(btnAddArgument);
+		
+		pnlAddNewAssignmentAction = new JPanel();
+		pnlAddNewAssignmentAction.setBounds(0, 210, 871, 43);
+		add(pnlAddNewAssignmentAction);
+		pnlAddNewAssignmentAction.setLayout(null);
+		
+		tfLeftAssignNewOp = new JTextField();
+		tfLeftAssignNewOp.setBounds(29, 11, 156, 20);
+		tfLeftAssignNewOp.setColumns(10);
+		pnlAddNewAssignmentAction.add(tfLeftAssignNewOp);
+		
+		JLabel lblnew = new JLabel(":n(");
+		lblnew.setFont(new Font("Tahoma", Font.BOLD, 12));
+		lblnew.setBounds(194, 13, 61, 14);
+		pnlAddNewAssignmentAction.add(lblnew);
+		
+		tfAssignNewRetType = new JTextField();
+		tfAssignNewRetType.setColumns(10);
+		tfAssignNewRetType.setBounds(214, 11, 124, 20);
+		pnlAddNewAssignmentAction.add(tfAssignNewRetType);
+		
+		JLabel label = new JLabel(")=");
+		label.setFont(new Font("Tahoma", Font.BOLD, 12));
+		label.setBounds(341, 13, 25, 14);
+		pnlAddNewAssignmentAction.add(label);
+		
+		tfExpressionAssignNew = new JTextField();
+		tfExpressionAssignNew.setColumns(10);
+		tfExpressionAssignNew.setBounds(366, 11, 393, 20);
+		pnlAddNewAssignmentAction.add(tfExpressionAssignNew);
+		
+		JButton btnAddNewAssignmentAction = new JButton("Add");
+		btnAddNewAssignmentAction.setBounds(773, 10, 89, 23);
+		pnlAddNewAssignmentAction.add(btnAddNewAssignmentAction);
 
+		enableAddingArgumentsAndSpecialActions(false);
+		hideSpecialActionPanels();
 	}
-
 }

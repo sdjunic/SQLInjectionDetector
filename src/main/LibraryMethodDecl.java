@@ -2,8 +2,6 @@ package main;
 
 import java.util.*;
 
-import javax.swing.SpinnerDateModel;
-
 import javaLibrary.SpecialAction;
 
 public class LibraryMethodDecl {
@@ -32,11 +30,11 @@ public class LibraryMethodDecl {
 	}
 	
 	public LibraryMethodDecl(String packageName, String className, String methodName, String retTypePackage, String retTypeName, boolean isConstructor, boolean isStatic, List<String> methodArgs,  List<SpecialAction> specialActions) {
-		this.packageName = packageName == null ? null : packageName.trim();
-		this.className = className == null ? null : className.trim();
-		this.methodName = methodName == null ? null : methodName.trim();
-		this.retTypePackage = retTypePackage == null ? null : retTypePackage.trim();
-		this.retTypeName = retTypeName == null ? null : retTypeName.trim();
+		this.packageName = packageName == null || packageName.trim().isEmpty() ? null : packageName.trim();
+		this.className = className == null || className.trim().isEmpty() ? null : className.trim();
+		this.methodName = methodName == null || methodName.trim().isEmpty() ? null : methodName.trim();
+		this.retTypePackage = retTypePackage == null || retTypePackage.trim().isEmpty() ? null : retTypePackage.trim();
+		this.retTypeName = retTypeName == null || retTypeName.trim().isEmpty() ? null : retTypeName.trim();
 		this.isConstructor = isConstructor;
 		this.isStatic = isStatic;
 		this.methodArgs = methodArgs;
@@ -89,5 +87,15 @@ public class LibraryMethodDecl {
 		if (!methodArgs.isEmpty()) methSign += methodArgs.get(methodArgs.size()-1);
 		methSign += ")";
 		return methSign;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder methSign = new StringBuilder(getMethSign());
+		for (SpecialAction specAction : specialActions)
+		{
+			methSign.append("\n\t").append(specAction.toString());
+		}
+		return methSign.toString();
 	}
 }
