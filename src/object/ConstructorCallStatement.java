@@ -123,6 +123,7 @@ public class ConstructorCallStatement extends CallStatement {
 			
 			task.values = callingConstrValues;
 			task.PC = 0;
+			task.pushMethodOnStack(constructor);
 		}
 		
 		if (!taskGroup.isEmpty())

@@ -77,6 +77,7 @@ public class EndExecBlockStatement extends Statement {
 			if (eb.isMethodBody)
 			{
 				t.values = t.values.getParentValuesHolder();
+				t.popMethodFromStack();
 			}
 			t.PC = eb.getParentEB_PC();
 		}

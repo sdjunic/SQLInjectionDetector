@@ -1,22 +1,4 @@
-/**
-* OWASP Benchmark v1.2
-*
-* This file is part of the Open Web Application Security Project (OWASP)
-* Benchmark Project. For details, please see
-* <a href="https://www.owasp.org/index.php/Benchmark">https://www.owasp.org/index.php/Benchmark</a>.
-*
-* The OWASP Benchmark is free software: you can redistribute it and/or modify it under the terms
-* of the GNU General Public License as published by the Free Software Foundation, version 2.
-*
-* The OWASP Benchmark is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
-* even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* @author Dave Wichers <a href="https://www.aspectsecurity.com">Aspect Security</a>
-* @created 2015
-*/
-
-package org.owasp.benchmark.testcode;
+package sdjunic.sqli.codeanalysis;
 
 import java.io.IOException;
 
@@ -26,8 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@WebServlet(value="/sqli-00/BenchmarkTest00052")
-public class BenchmarkTest00052 extends HttpServlet {
+public class DemoTest extends HttpServlet {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -38,14 +19,7 @@ public class BenchmarkTest00052 extends HttpServlet {
 
 	@Override
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// some code
-		response.setContentType("text/html;charset=UTF-8");
-		
-
-		org.owasp.benchmark.helpers.SeparateClassRequest scr = new org.owasp.benchmark.helpers.SeparateClassRequest( request );
-		String param = scr.getTheValue("BenchmarkTest00052");
-
-		
+		String param = sdjunic.demo.DemoClass.demoMethod();
 		String sql = "{call " + param + "}";
 				
 		try {

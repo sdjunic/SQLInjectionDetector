@@ -82,7 +82,7 @@ public class GetDataNode implements ActionTreeNode {
 		List<String> fullArgName = getFullName(specArgument, thisObj, actualArgs);
 		
 		
-		if (fullArgName.size() == 1 &&  isNumeric(fullArgName.get(0)))
+		if (fullArgName.size() == 1 && isNumeric(fullArgName.get(0)))
 		{
 			int argIndex = Integer.parseInt(fullArgName.get(0));
 			VariableExec actualArg = actualArgs.get(argIndex);

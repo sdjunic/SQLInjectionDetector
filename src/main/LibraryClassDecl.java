@@ -32,10 +32,10 @@ public class LibraryClassDecl {
 	}
 	
 	public LibraryClassDecl(String packageName, String className, String superClassPackageName, String superClass) {
-		this.packageName = packageName;
-		this.className = className;
-		this.superClassPackageName = superClassPackageName;
-		this.superClass = superClass;
+		this.packageName = packageName == null || packageName.trim().isEmpty() ? null : packageName.trim();
+		this.className = className == null || className.trim().isEmpty() ? null : className.trim();
+		this.superClassPackageName = superClassPackageName == null || superClassPackageName.trim().isEmpty() ? null : superClassPackageName.trim();
+		this.superClass = superClass == null || superClass.trim().isEmpty() ? "Object" : superClass.trim();
 		this.fields = new LinkedList<>();
 	}
 	

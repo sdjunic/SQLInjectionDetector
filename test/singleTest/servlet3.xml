@@ -1,0 +1,6 @@
+<test-metadata>
+   <testName>servlet3.java</testName>
+   <vulnerability>false</vulnerability>
+   <analyzeFromMethod>risky</analyzeFromMethod>
+   <initArgumentsSafe>false</initArgumentsSafe>
+</test-metadata>

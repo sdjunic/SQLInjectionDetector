@@ -41,8 +41,8 @@ public class LibraryMethodDecl {
 		this.specialActions = specialActions;
 	}
 
-	public LibraryMethodDecl(String packageName, String methodName, String className) {
-		this(packageName, methodName, className, null, null, false, false, new LinkedList<String>(), new LinkedList<SpecialAction>());
+	public LibraryMethodDecl(String packageName, String className, String methodName) {
+		this(packageName, className, methodName, null, null, false, false, new LinkedList<String>(), new LinkedList<SpecialAction>());
 	}
 	
 	public boolean isCriticalOutput() {
@@ -78,8 +78,14 @@ public class LibraryMethodDecl {
 			else methSign += (retTypePackage == null ? "" : retTypePackage) + retTypeName + " ";
 		}
 		
+		if (packageName != null && !packageName.isEmpty()) methSign += packageName + ".";
+		
+		if (className != null && !className.isEmpty()) methSign += className + "::";
+		else assert false;
+		
 		if (methodName != null && !methodName.isEmpty()) methSign += methodName;
-		else methSign += "noName";
+		else assert false;
+		
 		methSign += "(";
 		for (int i=0; i<methodArgs.size()-1; ++i) {
 			methSign += methodArgs.get(i) + ", ";
@@ -94,7 +100,7 @@ public class LibraryMethodDecl {
 		StringBuilder methSign = new StringBuilder(getMethSign());
 		for (SpecialAction specAction : specialActions)
 		{
-			methSign.append("\n\t").append(specAction.toString());
+			methSign.append("\n   ").append(specAction.toString());
 		}
 		return methSign.toString();
 	}

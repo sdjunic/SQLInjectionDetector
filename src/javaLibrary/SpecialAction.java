@@ -41,10 +41,10 @@ public class SpecialAction {
 	private static final String ASSIGN_NEW_OBJECT_SUFIX = ")=";
 	public static final String ASSIGN_EXISTING_OBJECT = ":=";
 	
-	public static final String THIS = "this";
-	public static final String RETURN = "__return";
-	public static final String SAFE = "__safe_";
-	public static final String UNSAFE = "__unsafe_";
+	public static final String THIS = "_this";
+	public static final String RETURN = "_return";
+	public static final String SAFE = "_safe";
+	public static final String UNSAFE = "_unsafe";
 	public static final String CRITICAL_OUTPUT = "__CO_";
 	
 	private String left = null;
@@ -219,8 +219,18 @@ public class SpecialAction {
 			if(!GetDataNode.getSafetyValue(this.left, thisObj, actualArgs, task))
 			{
 				StringBuilder sb = new StringBuilder();
-				sb.append("SQL injection detected!\r\n\r\nCritical method call stack:\r\n");
-				Method.printMethodCallStack(sb);
+				sb.append("SQL injection detected!\r\n\r\n");
+				sb.append("Critical method call stack:\r\n");
+				task.printMethodCallStack(sb);
+				List<String> fullArgName = GetDataNode.getFullName(this.left, thisObj, actualArgs);
+				if (fullArgName.size() == 1 && GetDataNode.isNumeric(fullArgName.get(0)))
+				{
+					sb.append("\r\nCritical argument index: " + fullArgName.get(0));
+				}
+				else
+				{
+					sb.append("\r\nCritical argument name: " + Parse.ParseData.makeFullNameWithDots(fullArgName));
+				}
 				throw new main.exception.SQLInjection(sb.toString());
 			}
 			
@@ -396,7 +406,7 @@ public class SpecialAction {
 	public String toString()
 	{
 		String res = left.trim() + " ";
-		if (assignOp == AssignOperator.OP_CRITICAL_OUTPUT)
+		if (assign.equals(SpecialAction.CRITICAL_OUTPUT))
 		{
 			res += "is critical output";
 		}

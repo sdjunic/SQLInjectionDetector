@@ -130,6 +130,7 @@ public class MethCallStatement extends CallStatement {
 				
 				task.values = callingMethValues;
 				task.PC = 0;
+				task.pushMethodOnStack(m);
 			}
 			
 			if (!methTasks.isEmpty())

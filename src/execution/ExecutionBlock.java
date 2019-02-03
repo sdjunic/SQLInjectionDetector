@@ -33,9 +33,11 @@ public class ExecutionBlock {
 		this.minPC = 0;
 	}
 	
-	public void createNewTask(MethodValuesHolder values)
+	public Task createNewTask(MethodValuesHolder values)
 	{
-		taskTable.add(new Task(values));
+		Task t = new Task(values);
+		taskTable.add(t);
+		return t;
 	}
 	
 	private List<Task> getNextActiveTaskGroup()

@@ -12,6 +12,7 @@ import java.awt.Font;
 import java.awt.Insets;
 
 import javax.swing.border.LineBorder;
+import javax.swing.tree.ExpandVetoException;
 
 import javaLibrary.SpecialAction;
 import main.LibraryMethodDecl;
@@ -52,6 +53,7 @@ public class PnlAddLibMethod extends JPanel {
 	private JCheckBox chckbxIsConstructor; 
 	
 	private JComboBox cbSpecialActionType;
+	private JButton btnDiscard;
 	
 	private JTextArea textArea;
 	private JTextField tfLeftAssignNewOp;
@@ -62,13 +64,13 @@ public class PnlAddLibMethod extends JPanel {
 	{
 		if (tfClass.getText().trim().isEmpty())
 		{
-			textArea.setText("Fill new method - class field!");
+			textArea.setText("The class of the new method can't be empty!");
 			return false;
 		}
 		
 		if (tfMethodName.getText().trim().isEmpty())
 		{
-			textArea.setText("Fill new method - method name field!");
+			textArea.setText("The name of the new method can't be empty!");
 			return false;
 		}
 		
@@ -79,9 +81,14 @@ public class PnlAddLibMethod extends JPanel {
 		String retType = tfReturnType.getText().trim();
 		if (!(retType.isEmpty() || retType.equals("void")))
 		{
-			String retPackageName = retType.substring(0, retType.lastIndexOf("."));
-			String retTypeName = retType.substring(retType.lastIndexOf(".") + 1);
+			String retPackageName = null;
+			String retTypeName = retType;
 			
+			if (retType.contains("."))
+			{
+				retPackageName = retType.substring(0, retType.lastIndexOf("."));
+				retTypeName = retType.substring(retType.lastIndexOf(".") + 1);
+			}
 			currentMethod.retTypePackage = retPackageName;
 			currentMethod.retTypeName = retTypeName;
 		}
@@ -91,12 +98,94 @@ public class PnlAddLibMethod extends JPanel {
 		return true;
 	}
 	
+	private void enableMethodDeclarationFields(boolean enable)
+	{
+		tfPackage.setEnabled(enable);
+		tfClass.setEnabled(enable);
+		tfMethodName.setEnabled(enable);
+		tfReturnType.setEnabled(enable);
+		chckbxIsConstructor.setEnabled(enable);
+		chckbxIsStatic.setEnabled(enable);
+	}
+	
 	private void addArgument()
 	{
-		assert !tfArgumentType.getText().trim().isEmpty();
 		assert currentMethod != null;
+		if (tfArgumentType.getText().trim().isEmpty())
+		{
+			textArea.setText("Argument type can't be empty!");
+			return;
+		}
+		
 		currentMethod.methodArgs.add(tfArgumentType.getText().trim());
+		
 		tfArgumentType.setText("");
+		textArea.setText(currentMethod.toString());
+	}
+	
+	private void addAssignmentAction()
+	{
+		assert currentMethod != null;
+		if (tfLeft.getText().trim().isEmpty())
+		{
+			textArea.setText("Left side of operator " + lblAssignOp.getText() + " can't be empty!");
+			return;
+		}
+		else if (tfExpression.getText().trim().isEmpty())
+		{
+			textArea.setText("Right side of operator " + lblAssignOp.getText() + " can't be empty!");
+			return;
+		}
+		
+		currentMethod.addSpecialAction(tfLeft.getText().trim(), lblAssignOp.getText(), tfExpression.getText().trim());
+		
+		tfLeft.setText("");
+		tfExpression.setText("");
+		textArea.setText(currentMethod.toString());
+	}
+	
+	private void addNewAssignmentAction()
+	{
+		assert currentMethod != null;
+		if (tfLeftAssignNewOp.getText().trim().isEmpty())
+		{
+			textArea.setText("Left side of operator :n()= can't be empty!");
+			return;
+		}
+		else if (tfExpressionAssignNew.getText().trim().isEmpty())
+		{
+			textArea.setText("Right side of operator :n()= can't be empty!");
+			return;
+		}
+		else if (tfAssignNewRetType.getText().trim().isEmpty())
+		{
+			textArea.setText("Return type for operator :n()= can't be empty!");
+			return;
+		}
+		
+		currentMethod.addSpecialAction(
+				tfLeftAssignNewOp.getText().trim(), 
+				SpecialAction.ASSIGN_NEW_OBJECT(tfAssignNewRetType.getText().trim()),
+				tfExpressionAssignNew.getText().trim());
+		
+		tfLeftAssignNewOp.setText("");
+		tfAssignNewRetType.setText("");
+		tfExpressionAssignNew.setText("");
+		textArea.setText(currentMethod.toString());
+	}
+	
+	private void addCriticalOutput()
+	{
+		assert currentMethod != null;
+		if (tfLeftCriticalOutput.getText().trim().isEmpty())
+		{
+			textArea.setText("Left side of 'is critical output' can't be empty!");
+			return;
+		}
+		
+		currentMethod.addSpecialAction(tfLeftCriticalOutput.getText().trim(), SpecialAction.CRITICAL_OUTPUT);
+		
+		tfLeftCriticalOutput.setText("");
 		textArea.setText(currentMethod.toString());
 	}
 	
@@ -142,7 +231,11 @@ public class PnlAddLibMethod extends JPanel {
 	
 	private void showSpecialActionPanel(String specialAction)
 	{
-		if (specialAction.equals(SA_CO))
+		if (specialAction == null)
+		{
+			hideSpecialActionPanels();
+		}
+		else if (specialAction.equals(SA_CO))
 		{
 			showSpecialActionPanel(pnlAddCriticalOutput);
 		}
@@ -168,8 +261,8 @@ public class PnlAddLibMethod extends JPanel {
 	
 	private void resetAllFields()
 	{
-		//tfClass.setText("");
-		//tfPackage.setText("");
+		tfClass.setText("");
+		tfPackage.setText("");
 		tfMethodName.setText("");
 		tfReturnType.setText("");
 		tfLeftCriticalOutput.setText("");
@@ -279,6 +372,11 @@ public class PnlAddLibMethod extends JPanel {
 		pnlAddAssignmentAction.add(tfExpression);
 		
 		JButton btnAddAssignmentAction = new JButton("Add");
+		btnAddAssignmentAction.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				addAssignmentAction();
+			}
+		});
 		btnAddAssignmentAction.setBounds(773, 10, 89, 23);
 		pnlAddAssignmentAction.add(btnAddAssignmentAction);
 		
@@ -297,6 +395,11 @@ public class PnlAddLibMethod extends JPanel {
 		pnlAddCriticalOutput.add(lblIsCriticalOutput);
 		
 		JButton btnAddCriticalOutput = new JButton("Add");
+		btnAddCriticalOutput.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				addCriticalOutput();
+			}
+		});
 		btnAddCriticalOutput.setBounds(301, 10, 89, 23);
 		pnlAddCriticalOutput.add(btnAddCriticalOutput);
 		
@@ -311,21 +414,45 @@ public class PnlAddLibMethod extends JPanel {
 				{
 					if(checkMethodDeclaration())
 					{
+						assert currentMethod != null;
 						btnAddMethod.setText("Save method");
+						enableMethodDeclarationFields(false);
 						enableAddingArgumentsAndSpecialActions(true);
+						btnDiscard.setVisible(true);
 					}
 				}
 				else
 				{
+					assert currentMethod != null;
 					assert btnAddMethod.getText().equals("Save method");
+					enableMethodDeclarationFields(true);
 					enableAddingArgumentsAndSpecialActions(false);
 					resetAllFields();
 					btnAddMethod.setText("Continue");
+					btnDiscard.setVisible(false);
+					
+					main.Main.libraryMethList.add(currentMethod);
+					currentMethod = null;
 				}
 			}
 		});
-		btnAddMethod.setBounds(798, 16, 97, 23);
+		btnAddMethod.setBounds(782, 16, 113, 23);
 		add(btnAddMethod);
+		
+		btnDiscard = new JButton("Discard");
+		btnDiscard.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				assert btnAddMethod.getText().equals("Save method");
+				enableMethodDeclarationFields(true);
+				enableAddingArgumentsAndSpecialActions(false);
+				resetAllFields();
+				btnAddMethod.setText("Continue");
+				btnDiscard.setVisible(false);
+			}
+		});
+		btnDiscard.setBounds(782, 48, 113, 23);
+		btnDiscard.setVisible(false);
+		add(btnDiscard);
 		
 		textArea = new JTextArea();
 		textArea.setBounds(0, 254, 910, 335);
@@ -391,6 +518,11 @@ public class PnlAddLibMethod extends JPanel {
 		pnlAddNewAssignmentAction.add(tfExpressionAssignNew);
 		
 		JButton btnAddNewAssignmentAction = new JButton("Add");
+		btnAddNewAssignmentAction.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				addNewAssignmentAction();
+			}
+		});
 		btnAddNewAssignmentAction.setBounds(773, 10, 89, 23);
 		pnlAddNewAssignmentAction.add(btnAddNewAssignmentAction);
 

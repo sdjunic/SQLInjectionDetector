@@ -47,7 +47,7 @@ public class Method implements Obj {
 	
 	private boolean parsed = false;	
 	
-	public static Stack<Method> methCallStack = null;
+	//public static Stack<Method> methCallStack = null;
 	
 	public boolean isParsed() {
 		return parsed;
@@ -315,24 +315,24 @@ public class Method implements Obj {
 		}
 	}
 	
-	public boolean isMethodAlreadyOnStack() {
-		Enumeration<Method> e = methCallStack.elements();
-		while (e.hasMoreElements()) {
-			Method i = e.nextElement();
-			if (this.equals(i)) {
-				return true;
-			}
-		}
-		return false;
-	}
+//	public boolean isMethodAlreadyOnStack() {
+//		Enumeration<Method> e = methCallStack.elements();
+//		while (e.hasMoreElements()) {
+//			Method i = e.nextElement();
+//			if (this.equals(i)) {
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
 	
-	public static void printMethodCallStack(StringBuilder sb) {
-		for (int i = methCallStack.size()-1; i>=0; --i) {
-			Method meth = methCallStack.get(i);
-			sb.append("- ");
-			meth.printCallSignOnly(sb);
-		}
-	}
+//	public static void printMethodCallStack(StringBuilder sb) {
+//		for (int i = methCallStack.size()-1; i>=0; --i) {
+//			Method meth = methCallStack.get(i);
+//			sb.append("- ");
+//			meth.printCallSignOnly(sb);
+//		}
+//	}
 
 	public void printCallSignOnly(StringBuilder sb) {
 		sb.append(getName()+"\r\n");

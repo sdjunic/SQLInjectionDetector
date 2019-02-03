@@ -28,8 +28,8 @@ import java.io.*;
 
 public class Main {
 	
-	private static List<LibraryClassDecl> libraryClassList;
-	private static List<LibraryMethodDecl> libraryMethList; 
+	public static List<LibraryClassDecl> libraryClassList;
+	public static List<LibraryMethodDecl> libraryMethList; 
 
 	public static PrintStream infoPS = System.out; /* null; */
 	public static boolean useCheck = true; /* false */
@@ -158,14 +158,14 @@ public class Main {
 			System.out.println("False positive: " + (safeTests - safeCorrect) + "/" + safeTests);
 		} else {
 			/* GUI MODE */
-			SQLIDetectorGUI window = new SQLIDetectorGUI(libraryMethList);
-			window.show();
+			main.gui.SQLInjectionDetectorGUI window = new main.gui.SQLInjectionDetectorGUI();
+			window.setVisible(true);
 		}
 	}
 	
 	public static void testProjectForSQLInjection(File projectRoot, String startFrom, boolean initialArgumentsSafe) throws Exception{				
 		Table.makeNewTable(libraryClassList, libraryMethList);
-		Method.methCallStack = new Stack<Method>();
+		//Method.methCallStack = new Stack<Method>();
 		Parse.ParseData.allProjectMethods = new HashSet<Method>();
 		Parse.ParseData.riskyMethods = new HashSet<Method>();
 		Parse.ParseData.mainMethods = new HashSet<Method>();
@@ -216,7 +216,7 @@ public class Main {
 				
 				while (it.hasNext()) {
 					Method m = it.next();
-					Method.methCallStack.push(m);
+					//Method.methCallStack.push(m);
 					if (infoPS != null) 
 					{
 						infoPS.println("\r\n----------------------------------------------------------------------------------------");
