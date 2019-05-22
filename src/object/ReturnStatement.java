@@ -1,5 +1,6 @@
 package object;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import execution.ExecutionBlock;
@@ -20,28 +21,42 @@ public class ReturnStatement extends Statement {
 	public void execute(List<Task> taskGroup) throws Exception {
 		ExecutionBlock eb = TaskExecutor.activeExecutionBlock;
 		boolean firstIteration = true;
+		
+		// Get values to return.
+		List<ObjValue> returnValues = new LinkedList<ObjValue>();
+		if (returnVariable != null)
+		{
+			for (Task t : taskGroup)
+			{
+				if (returnVariable.value == null)
+				{
+					returnValues.add(t.values.get(returnVariable.name));
+				}
+				else
+				{
+					returnValues.add(returnVariable.value);
+				}
+			}
+		}
+		
 		while(eb != null)
 		{
 			if (eb.isMethodBody)
 			{
+				// Return values to parent VH map.
+				int i = 0;
 				for (Task t : taskGroup)
 				{
 					if (returnVariable != null && eb.returnDestination != null)
 					{
 						MethodValuesHolder parentValues = t.values.getParentValuesHolder();
-						ObjValue returnVal;
-						if (returnVariable.value == null)
-						{
-							returnVal = t.values.get(returnVariable.name);
-						}
-						else
-						{
-							returnVal = returnVariable.value;
-						}
+						ObjValue returnVal = returnValues.get(i++);
 						parentValues.put(eb.returnDestination.name, returnVal);
 					}
 					t.PC = eb.statements.getStmtCount() - 1; // jump to ReduceStatement
 				}
+				
+				// Add tasks to appropriate EB which represents method body.
 				if (eb != TaskExecutor.activeExecutionBlock)
 				{
 					assert !firstIteration;
@@ -51,6 +66,7 @@ public class ReturnStatement extends Statement {
 			}
 			else
 			{
+				// Delete local variables.
 				List<String> localVarToRemove = eb.statements.getBlockLocalVariables();
 				for(Task task : taskGroup)
 				{
@@ -60,7 +76,7 @@ public class ReturnStatement extends Statement {
 					}
 				}
 				
-				// Tasks should be already deleted in all EB, except in active one
+				// Tasks should be already deleted in all EB, except in active one.
 				if (firstIteration)
 				{
 					assert eb.taskTable.containsAll(taskGroup);

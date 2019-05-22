@@ -3,6 +3,7 @@ package execution;
 import java.util.List;
 
 import object.values.MethodValuesHolder;
+import object.values.ValuesHolder;
 import symbol.object.Class;
 import symbol.object.MethParam;
 import symbol.object.Method;
@@ -29,12 +30,12 @@ public class TaskExecutor {
 			Obj methodClass = m.getScope().getOuter().getParrentObj();
 			if (!(methodClass instanceof Class)) throw new Exception();
 			//values.addObject((Class)methodClass, "this", initialArgumentsSafe);
-			values.put("this", values.makeDefaultObjValue((Class)methodClass, initialArgumentsSafe));
+			values.put("this", ValuesHolder.makeDefaultObjValue((Class)methodClass, initialArgumentsSafe));
 		}
 		List<MethParam> lmp = m.getMethParamList();
 		for (int i=0; i<lmp.size(); ++i) {
-			values.addObject(lmp.get(i).getType().type, lmp.get(i).getName(), initialArgumentsSafe);
-			values.put(lmp.get(i).getName(), values.makeDefaultObjValue(lmp.get(i).getType().type, initialArgumentsSafe));
+			//values.addObject(lmp.get(i).getType().type, lmp.get(i).getName(), initialArgumentsSafe);
+			values.put(lmp.get(i).getName(), ValuesHolder.makeDefaultObjValue(lmp.get(i).getType().type, initialArgumentsSafe));
 		}
 		
 		// Hash method input values, in case of recursion.
