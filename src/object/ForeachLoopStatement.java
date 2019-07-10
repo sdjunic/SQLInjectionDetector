@@ -2,7 +2,9 @@ package object;
 
 import java.util.List;
 
+import execution.ExecutionBlock;
 import execution.Task;
+import execution.TaskExecutor;
 
 public class ForeachLoopStatement extends Statement {
 
@@ -25,7 +27,25 @@ public class ForeachLoopStatement extends Statement {
 
 	@Override
 	public void execute(List<Task> taskGroup) throws Exception {
+		// Set new execution blocks
+		ExecutionBlock loopExecBlock = new ExecutionBlock(this.loopBody);
+		loopExecBlock.parentExecBlock = TaskExecutor.activeExecutionBlock;
+		loopExecBlock.brotherExecBlock = null;
+		loopExecBlock.isMethodBody = false;
+		loopExecBlock.isLoopExecBlock = true;
+		
+		// Set tasks for new ExecutionBlock
+		for (Task task : taskGroup)
+		{
+			task.PC = 0;
 
+			// Add tasks to the new execution blocks
+			//
+			loopExecBlock.taskTable.add(task);
+		}
+		
+		TaskExecutor.activeExecutionBlock.taskTable.removeAll(taskGroup);
+		TaskExecutor.activeExecutionBlock = loopExecBlock;
 	}
 
 	@Override

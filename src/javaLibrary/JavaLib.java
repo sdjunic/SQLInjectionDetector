@@ -49,6 +49,13 @@ public class JavaLib {
 		libraryClassDecl = new LibraryClassDecl("java.util", "HashMap", "java.util", "Map");
 		libraryClassList.add(libraryClassDecl);
 		
+		libraryClassDecl = new LibraryClassDecl("java.util", "List");
+		libraryClassDecl.addField(null, "Object", "element");
+		libraryClassList.add(libraryClassDecl);
+		
+		libraryClassDecl = new LibraryClassDecl("java.util", "ArrayList", "java.util", "List");
+		libraryClassList.add(libraryClassDecl);
+		
 		libraryClassDecl = new LibraryClassDecl("javax.servlet.http", "HttpServletRequest");
 		libraryClassDecl.alwaysUnsafe = true;
 		libraryClassList.add(libraryClassDecl);
@@ -58,6 +65,9 @@ public class JavaLib {
 		
 		libraryClassDecl = new LibraryClassDecl("org.owasp.benchmark.helpers", "SeparateClassRequest");
 		libraryClassDecl.addField("javax.servlet.http", "HttpServletRequest", "request");
+		libraryClassList.add(libraryClassDecl);
+		
+		libraryClassDecl = new LibraryClassDecl("org.owasp.benchmark.helpers", "ThingInterface");
 		libraryClassList.add(libraryClassDecl);
 		
 		LibraryMethodDecl libraryMethDecl = new LibraryMethodDecl(null, "String", "concat");
@@ -188,6 +198,68 @@ public class JavaLib {
 				SpecialAction.RETURN,
 				SpecialAction.ASSIGN_NEW_OBJECT("java.sql.Statement"),
 				SpecialAction.SAFE);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("org.owasp.benchmark.helpers.DatabaseHelper", "JDBCtemplate", "execute");
+		libraryMethDecl.isStatic = true;
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("org.owasp.benchmark.helpers.DatabaseHelper", "JDBCtemplate", "queryForRowSet");
+		libraryMethDecl.isStatic = true;
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("org.owasp.benchmark.helpers.DatabaseHelper", "JDBCtemplate", "queryForLong");
+		libraryMethDecl.isStatic = true;
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("org.owasp.benchmark.helpers.DatabaseHelper", "JDBCtemplate", "queryForMap");
+		libraryMethDecl.isStatic = true;
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("org.owasp.benchmark.helpers.DatabaseHelper", "JDBCtemplate", "query");
+		libraryMethDecl.isStatic = true;
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.methodArgs.add("org.springframework.jdbc.core.RowMapper");
+		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("org.owasp.benchmark.helpers.DatabaseHelper", "JDBCtemplate", "batchUpdate");
+		libraryMethDecl.isStatic = true;
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("org.owasp.benchmark.helpers.DatabaseHelper", "JDBCtemplate", "queryForInt");
+		libraryMethDecl.isStatic = true;
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("org.owasp.benchmark.helpers", "ThingFactory", "createThing");
+		libraryMethDecl.isStatic = true;
+		libraryMethDecl.retTypePackage = "org.owasp.benchmark.helpers";
+		libraryMethDecl.retTypeName = "ThingInterface";
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN,
+				SpecialAction.ASSIGN_NEW_OBJECT("org.owasp.benchmark.helpers.ThingInterface"),
+				SpecialAction.SAFE);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("org.owasp.benchmark.helpers", "ThingInterface", "doSomething");
+		libraryMethDecl.retTypeName = "String";
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN,
+				SpecialAction.ASSIGN_NEW_OBJECT("String"),
+				"0");
 		libraryMethList.add(libraryMethDecl);
 		
 		libraryMethDecl = new LibraryMethodDecl("java.sql", "DriverManager", "getConnection");
@@ -548,7 +620,7 @@ public class JavaLib {
 		libraryMethDecl.retTypeName = "Cookie[]";
 		libraryMethDecl.addSpecialAction(
 				SpecialAction.RETURN,
-				SpecialAction.ASSIGN_NEW_OBJECT("String"),
+				SpecialAction.ASSIGN_NEW_OBJECT("javax.servlet.http.Cookie[]"),
 				SpecialAction.UNSAFE);
 		libraryMethList.add(libraryMethDecl);
 		
@@ -574,6 +646,15 @@ public class JavaLib {
 				SpecialAction.RETURN,
 				SpecialAction.ASSIGN_NEW_OBJECT("String"),
 				SpecialAction.THIS + ".request");
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("org.owasp.benchmark.helpers", "SeparateClassRequest", "getTheValue");
+		libraryMethDecl.retTypeName = "String";
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN,
+				SpecialAction.ASSIGN_NEW_OBJECT("String"),
+				SpecialAction.SAFE);
 		libraryMethList.add(libraryMethDecl);
 		
 		libraryMethDecl = new LibraryMethodDecl("javax.servlet.http", "Cookie", "getName");
@@ -676,6 +757,48 @@ public class JavaLib {
 				SpecialAction.SAFE);
 		libraryMethDecl.addSpecialAction(
 				SpecialAction.THIS + ".value",
+				SpecialAction.ASSIGN_NEW_OBJECT("Object"),
+				SpecialAction.SAFE);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.util", "ArrayList", "ArrayList");
+		libraryMethDecl.isConstructor = true;
+		libraryMethDecl.retTypePackage = "java.util";
+		libraryMethDecl.retTypeName = "ArrayList";
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN,
+				SpecialAction.ASSIGN_NEW_OBJECT("java.util.ArrayList"),
+				SpecialAction.SAFE);
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN + ".element",
+				SpecialAction.ASSIGN_NEW_OBJECT("Object"),
+				SpecialAction.SAFE);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.util", "List", "add");
+		libraryMethDecl.methodArgs.add("Object");
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.THIS + ".element",
+				SpecialAction.ASSIGN_NEW_OBJECT("0|Object"),
+				SpecialAction.THIS + ".element & 0");
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.util", "List", "get");
+		libraryMethDecl.retTypeName = "Object";
+		libraryMethDecl.methodArgs.add("int");
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN,
+				SpecialAction.ASSIGN_EXISTING_OBJECT,
+				SpecialAction.THIS + ".element");
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.util", "List", "clear");
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.THIS,
+				SpecialAction.SET_SAFE,
+				SpecialAction.SAFE);
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.THIS + ".element",
 				SpecialAction.ASSIGN_NEW_OBJECT("Object"),
 				SpecialAction.SAFE);
 		libraryMethList.add(libraryMethDecl);
