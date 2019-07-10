@@ -70,7 +70,27 @@ public class JavaLib {
 		libraryClassDecl = new LibraryClassDecl("org.owasp.benchmark.helpers", "ThingInterface");
 		libraryClassList.add(libraryClassDecl);
 		
-		LibraryMethodDecl libraryMethDecl = new LibraryMethodDecl(null, "String", "concat");
+		libraryClassDecl = new LibraryClassDecl("org.springframework.jdbc.core", "JdbcTemplate");
+		libraryClassList.add(libraryClassDecl);
+		
+		libraryClassDecl = new LibraryClassDecl("org.owasp.benchmark.helpers", "DatabaseHelper");
+		libraryClassDecl.addField("org.springframework.jdbc.core", "JdbcTemplate", "JDBCtemplate");
+		libraryClassList.add(libraryClassDecl);
+		
+		libraryClassDecl = new LibraryClassDecl("org.apache.commons.codec.binary", "Base64");
+		libraryClassList.add(libraryClassDecl);
+
+		LibraryMethodDecl libraryMethDecl = new LibraryMethodDecl(null, "String", "String");
+		libraryMethDecl.isConstructor = true;
+		libraryMethDecl.retTypeName = "String";
+		libraryMethDecl.methodArgs.add("Object[]");
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN, 
+				SpecialAction.ASSIGN_NEW_OBJECT("String"),
+				"0");
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl(null, "String", "concat");
 		libraryMethDecl.retTypeName = "String";
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.addSpecialAction(
@@ -104,6 +124,14 @@ public class JavaLib {
 		libraryMethDecl.addSpecialAction(
 				SpecialAction.RETURN,
 				SpecialAction.ASSIGN_NEW_OBJECT("String"),
+				SpecialAction.THIS);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl(null, "String", "getBytes");
+		libraryMethDecl.retTypeName = "Object[]";
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN,
+				SpecialAction.ASSIGN_NEW_OBJECT("Object[]"),
 				SpecialAction.THIS);
 		libraryMethList.add(libraryMethDecl);
 		
@@ -180,6 +208,26 @@ public class JavaLib {
 				SpecialAction.THIS);
 		libraryMethList.add(libraryMethDecl);
 		
+		libraryMethDecl = new LibraryMethodDecl("org.apache.commons.codec.binary", "Base64", "encodeBase64");
+		libraryMethDecl.isStatic = true;
+		libraryMethDecl.methodArgs.add("Object[]");
+		libraryMethDecl.retTypeName = "Object[]";
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN,
+				SpecialAction.ASSIGN_NEW_OBJECT("Object[]"),
+				"0");
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("org.apache.commons.codec.binary", "Base64", "decodeBase64");
+		libraryMethDecl.isStatic = true;
+		libraryMethDecl.methodArgs.add("Object[]");
+		libraryMethDecl.retTypeName = "Object[]";
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.RETURN,
+				SpecialAction.ASSIGN_NEW_OBJECT("Object[]"),
+				"0");
+		libraryMethList.add(libraryMethDecl);
+		
 		libraryMethDecl = new LibraryMethodDecl("org.owasp.benchmark.helpers", "DatabaseHelper", "getSqlConnection");
 		libraryMethDecl.isStatic = true;
 		libraryMethDecl.retTypePackage = "java.sql";
@@ -200,44 +248,58 @@ public class JavaLib {
 				SpecialAction.SAFE);
 		libraryMethList.add(libraryMethDecl);
 		
-		libraryMethDecl = new LibraryMethodDecl("org.owasp.benchmark.helpers.DatabaseHelper", "JDBCtemplate", "execute");
+		libraryMethDecl = new LibraryMethodDecl("org.springframework.jdbc.core", "JdbcTemplate", "execute");
 		libraryMethDecl.isStatic = true;
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
 		libraryMethList.add(libraryMethDecl);
 		
-		libraryMethDecl = new LibraryMethodDecl("org.owasp.benchmark.helpers.DatabaseHelper", "JDBCtemplate", "queryForRowSet");
+		libraryMethDecl = new LibraryMethodDecl("org.springframework.jdbc.core", "JdbcTemplate", "queryForRowSet");
 		libraryMethDecl.isStatic = true;
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
 		libraryMethList.add(libraryMethDecl);
 		
-		libraryMethDecl = new LibraryMethodDecl("org.owasp.benchmark.helpers.DatabaseHelper", "JDBCtemplate", "queryForLong");
+		libraryMethDecl = new LibraryMethodDecl("org.springframework.jdbc.core", "JdbcTemplate", "queryForLong");
 		libraryMethDecl.isStatic = true;
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
 		libraryMethList.add(libraryMethDecl);
 		
-		libraryMethDecl = new LibraryMethodDecl("org.owasp.benchmark.helpers.DatabaseHelper", "JDBCtemplate", "queryForMap");
+		libraryMethDecl = new LibraryMethodDecl("org.springframework.jdbc.core", "JdbcTemplate", "queryForMap");
 		libraryMethDecl.isStatic = true;
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
 		libraryMethList.add(libraryMethDecl);
 		
-		libraryMethDecl = new LibraryMethodDecl("org.owasp.benchmark.helpers.DatabaseHelper", "JDBCtemplate", "query");
+		libraryMethDecl = new LibraryMethodDecl("org.springframework.jdbc.core", "JdbcTemplate", "query");
 		libraryMethDecl.isStatic = true;
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.methodArgs.add("org.springframework.jdbc.core.RowMapper");
 		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
 		libraryMethList.add(libraryMethDecl);
 		
-		libraryMethDecl = new LibraryMethodDecl("org.owasp.benchmark.helpers.DatabaseHelper", "JDBCtemplate", "batchUpdate");
+		libraryMethDecl = new LibraryMethodDecl("org.springframework.jdbc.core", "JdbcTemplate", "batchUpdate");
 		libraryMethDecl.isStatic = true;
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
 		libraryMethList.add(libraryMethDecl);
 		
-		libraryMethDecl = new LibraryMethodDecl("org.owasp.benchmark.helpers.DatabaseHelper", "JDBCtemplate", "queryForInt");
+		libraryMethDecl = new LibraryMethodDecl("org.springframework.jdbc.core", "JdbcTemplate", "queryForInt");
+		libraryMethDecl.isStatic = true;
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("org.springframework.jdbc.core", "JdbcTemplate", "queryForObject");
+		libraryMethDecl.isStatic = true;
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.methodArgs.add("Object[]");
+		libraryMethDecl.methodArgs.add("Object");
+		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("org.springframework.jdbc.core", "JdbcTemplate", "queryForList");
 		libraryMethDecl.isStatic = true;
 		libraryMethDecl.methodArgs.add("String");
 		libraryMethDecl.addSpecialAction("0", SpecialAction.CRITICAL_OUTPUT);
@@ -495,6 +557,14 @@ public class JavaLib {
 				SpecialAction.RETURN,
 				SpecialAction.ASSIGN_EXISTING_OBJECT,
 				SpecialAction.THIS + ".connection");
+		libraryMethList.add(libraryMethDecl);
+		
+		libraryMethDecl = new LibraryMethodDecl("java.sql", "Statement", "addBatch");
+		libraryMethDecl.methodArgs.add("String");
+		libraryMethDecl.addSpecialAction(
+				SpecialAction.THIS, 
+				SpecialAction.SET_SAFE, 
+				"0 & " + SpecialAction.THIS);
 		libraryMethList.add(libraryMethDecl);
 		
 		libraryMethDecl = new LibraryMethodDecl("java.sql", "Statement", "escapeSQL");
