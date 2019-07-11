@@ -279,9 +279,11 @@ non terminal expression_statement, statement_expression;
 non terminal IfElseStatement if_expression, if_expression_else; 
 non terminal if_then_statement;
 non terminal if_then_else_statement, if_then_else_statement_no_short_if;
-non terminal switch_statement, switch_block;
-non terminal switch_block_statement_groups;
-non terminal switch_block_statement_group;
+non terminal SwitchStatement switch_expression;
+non terminal switch_statement;
+non terminal List<StatementsBlock> switch_block;
+non terminal List<StatementsBlock> switch_block_statement_groups;
+non terminal StatementsBlock switch_block_statement_group;
 non terminal switch_labels, switch_label;
 non terminal WhileLoopStatement while_do_WHILE, while_expression;
 non terminal while_statement, while_statement_no_short_if;
@@ -1429,24 +1431,58 @@ if_then_else_statement_no_short_if ::=
 		:}
 	;
 	
+switch_expression ::=
+		SWITCH LPAREN expression RPAREN 
+		{:
+			SwitchStatement switchStmt = new SwitchStatement(parser.parsingTopMethod.getCurrentBlock());
+			parser.parsingTopMethod.addStatement(switchStmt);
+			RESULT = switchStmt;
+		:}
+	;
+	
 switch_statement ::=
-		SWITCH LPAREN expression RPAREN switch_block
+		switch_expression:switchStmt switch_block:listCaseBlocks
+		{:
+			parser.parsingTopMethod.setCurrentBlock(switchStmt.getParentStatementsBlock());
+			switchStmt.parsingDone(listCaseBlocks);
+		:}
 	;
 	
 switch_block ::=
-		LBRACE switch_block_statement_groups switch_labels RBRACE
-	|	LBRACE switch_block_statement_groups RBRACE
+		LBRACE switch_block_statement_groups:listCaseBlocks switch_labels RBRACE
+		{:
+			RESULT = listCaseBlocks;
+		:}
+	|	LBRACE switch_block_statement_groups:listCaseBlocks RBRACE
+		{:
+			RESULT = listCaseBlocks;
+		:}
 	|	LBRACE switch_labels RBRACE
 	|	LBRACE RBRACE
 	;
 	
 switch_block_statement_groups ::=
-		switch_block_statement_group
-	|	switch_block_statement_groups switch_block_statement_group
+		switch_block_statement_group:caseBlock
+		{:
+			List<StatementsBlock> res = new LinkedList<>();
+			res.add(caseBlock);
+			RESULT = res;
+		:}
+	|	switch_block_statement_groups:listCaseBlocks switch_block_statement_group:caseBlock
+		{:
+			listCaseBlocks.add(caseBlock);
+			RESULT = listCaseBlocks;
+		:}
 	;
 	
 switch_block_statement_group ::=
-		switch_labels block_statements
+		switch_labels 
+		{:
+			StatementsBlock caseBlock = new StatementsBlock();
+			parser.parsingTopMethod.setCurrentBlock(caseBlock);
+			RESULT = caseBlock;
+		:}
+		block_statements
 	;
 	
 switch_labels ::=
