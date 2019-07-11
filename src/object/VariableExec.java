@@ -14,6 +14,9 @@ public class VariableExec {
 	public Obj object = null;
 	public ObjValue value = null;
 	
+	// Used for ternary operator.
+	public VariableExec next = null;
+	
 	public VariableExec(List<String> name, Obj object) {
 		this.name = name;
 		this.object = object;

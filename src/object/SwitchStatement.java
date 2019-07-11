@@ -91,8 +91,7 @@ public class SwitchStatement extends Statement {
 			prevExecBlock = prevExecBlock.brotherExecBlock;
 		}
 		
-		TaskExecutor.activeExecutionBlock.taskTable.removeAll(taskGroup);
-		
+		TaskExecutor.activeExecutionBlock.taskTable.removeAll(taskGroup);		
 		TaskExecutor.activeExecutionBlock = activeExecBlock;
 	}
 }

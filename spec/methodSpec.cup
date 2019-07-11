@@ -2302,8 +2302,12 @@ conditional_or_expression ::=
 	
 conditional_expression ::=
 		conditional_or_expression:res {: RESULT = res; :}
-	|	conditional_or_expression QUESTION expression
-			COLON conditional_expression
+	|	conditional_or_expression QUESTION expression:r1
+			COLON conditional_expression:r2
+		{:
+			r1.next = r2;
+			RESULT = r1;
+		:}
 	;
 	
 assignment_expression ::=
@@ -2333,8 +2337,30 @@ assignment ::=	postfix_expression:left assignment_operator:op assignment_express
 							
 							if (!prevStmtUpdated)
 							{
-								AssignmentStatement assignment = new AssignmentStatement(left, right);
-								parser.parsingTopMethod.addStatement(assignment);
+								if (right.next == null)
+								{
+									AssignmentStatement assignment = new AssignmentStatement(left, right);
+									parser.parsingTopMethod.addStatement(assignment);
+								}
+								else
+								{
+									SwitchStatement switchStmt = new SwitchStatement(parser.parsingTopMethod.getCurrentBlock());
+									parser.parsingTopMethod.addStatement(switchStmt);
+									List<StatementsBlock> stmtBlockList = new LinkedList<>();
+									
+									VariableExec t = right;
+									while (t != null)
+									{
+										AssignmentStatement assignment = new AssignmentStatement(left, t);
+										StatementsBlock stmtBlock = new StatementsBlock();
+										stmtBlock.addStatement(assignment);
+										stmtBlockList.add(stmtBlock);
+										
+										t = t.next;
+									}
+									
+									switchStmt.parsingDone(stmtBlockList);
+								}
 							}
 						}
 						// TODO: check if this can be problem with new idea of returning method/constructor
