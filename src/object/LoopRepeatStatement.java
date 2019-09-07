@@ -17,7 +17,7 @@ public class LoopRepeatStatement extends Statement {
 		ExecutionBlock loopExecBlock = TaskExecutor.activeExecutionBlock;
 		assert loopExecBlock.isLoopExecBlock;
 		
-		// Delete local variables for current tasks
+		// Delete local variables for the current tasks.
 		List<String> localVarToRemove = TaskExecutor.activeExecutionBlock.statements.getBlockLocalVariables();
 		for (String var : localVarToRemove)
 		{
@@ -27,14 +27,14 @@ public class LoopRepeatStatement extends Statement {
 			}
 		}
 		
-		// Hash current tasks values
+		// Hash current tasks values.
 		List<byte[]> currentValuesHash = new LinkedList<>();
 		for(Task task : currentTasks)
 		{
 			currentValuesHash.add(task.hash());
 		}
 		
-		// Reduce current tasks	in-between	
+		// Reduce current tasks	in-between.	
 		for (int i = 0; i < currentValuesHash.size(); ++i)
 		{
 			byte i_Hash[] = currentValuesHash.get(i);
@@ -51,19 +51,19 @@ public class LoopRepeatStatement extends Statement {
 			}
 		}
 
-		// Get all tasks from previous iterations
+		// Get all tasks from previous iterations.
 		List<Task> prevItersTasks = new LinkedList<>();
 		prevItersTasks.addAll(loopExecBlock.taskTable);
 		prevItersTasks.removeAll(currentTasks);
 		
-		// Hash all previous iterations tasks values
+		// Hash all previous iterations tasks.
 		List<byte[]> prevIterationsValuesHash = new LinkedList<>();
 		for(Task task : prevItersTasks)
 		{
 			prevIterationsValuesHash.add(task.hash());
 		}
 	
-		// Reduce current tasks	against tasks from previous iterations	
+		// Reduce current tasks	against tasks from previous iterations.
 		for (int i = 0; i < prevIterationsValuesHash.size(); ++i)
 		{
 			byte i_Hash[] = prevIterationsValuesHash.get(i);

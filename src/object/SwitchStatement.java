@@ -8,7 +8,7 @@ import execution.TaskExecutor;
 
 public class SwitchStatement extends Statement {
 
-	private StatementsBlock switchStmtBody = null; // for ExecBlock which will do the task reduction
+	private StatementsBlock switchStmtBody = null; // For the ExecBlock which will do the task reduction.
 	
 	private List<StatementsBlock> caseBlocks = null; 
 	
@@ -46,7 +46,7 @@ public class SwitchStatement extends Statement {
 
 	@Override
 	public void execute(List<Task> taskGroup) throws Exception {
-		// Set new execution blocks
+		// Initialize the new execution blocks.
 		ExecutionBlock switchStmtExecBlock = new ExecutionBlock(switchStmtBody);
 		switchStmtExecBlock.parentExecBlock = TaskExecutor.activeExecutionBlock;
 		switchStmtExecBlock.brotherExecBlock = null;
@@ -78,12 +78,12 @@ public class SwitchStatement extends Statement {
 			}
 			else
 			{
-				// Set clone tasks for new ExecutionBlock
+				// Clone and move tasks to the new ExecutionBlock.
 				for (Task task : taskGroup)
 				{
 					Task cloneTask = task.clone();
 					
-					// Add tasks to the new execution blocks
+					// Move tasks to the new execution block.
 					//
 					prevExecBlock.taskTable.add(cloneTask);
 				}

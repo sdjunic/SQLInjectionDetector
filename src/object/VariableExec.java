@@ -14,8 +14,7 @@ public class VariableExec {
 	public Obj object = null;
 	public ObjValue value = null;
 	
-	// Used for ternary operator.
-	public VariableExec next = null;
+	public VariableExec next = null; // Used for ternary operator.
 	
 	public VariableExec(List<String> name, Obj object) {
 		this.name = name;
@@ -32,7 +31,6 @@ public class VariableExec {
 	public VariableExec(ObjValue value) {
 		if (value == null)
 		{
-			// TODO: is this ok?
 			this.value = NullValue.getNullValue();
 		}
 		else

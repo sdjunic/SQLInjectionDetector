@@ -1,7 +1,6 @@
 package object.values;
 
 import symbol.object.ArrayType;
-import symbol.object.Class;
 import symbol.object.Type;
 
 public class ArrayValue extends ObjValue {

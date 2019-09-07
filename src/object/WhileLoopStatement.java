@@ -5,7 +5,6 @@ import java.util.List;
 import execution.ExecutionBlock;
 import execution.Task;
 import execution.TaskExecutor;
-import object.values.MethodValuesHolder;
 
 // DO WHILE LOOP:
 //
@@ -31,9 +30,9 @@ public class WhileLoopStatement extends Statement {
 	
 	private boolean isDoWhile = false;
 	
-	private int startPC = 0;	// used for first loop iteration:
-								// for while loop start from condition (PC = body_statements_count)
-								// for do-while loop start from body (PC = 0)
+	private int startPC = 0;	// Used for the first loop iteration:
+								// for while loop start from condition (PC = body_statements_count),
+								// for do-while loop start from body (PC = 0).
 	
 	public WhileLoopStatement(StatementsBlock parentBlock, boolean isDoWhile) {
 		condition = new StatementsBlock(parentBlock);
@@ -64,7 +63,7 @@ public class WhileLoopStatement extends Statement {
 			startPC = loopBody.getStmtCount();
 		}
 		
-		execLoopBody.addStatement(new LoopRepeatStatement() /*this stmt will do reduce*/);
+		execLoopBody.addStatement(new LoopRepeatStatement() /*this statement will do reduce*/);
 		execLoopBody.addStatement(new EndExecBlockStatement(false /*reduce*/));
 	}
 	
@@ -90,20 +89,18 @@ public class WhileLoopStatement extends Statement {
 
 	@Override
 	public void execute(List<Task> taskGroup) throws Exception {
-		// Set new execution blocks
+		// initialize a new execution block.
 		ExecutionBlock loopExecBlock = new ExecutionBlock(this.execLoopBody);
 		loopExecBlock.parentExecBlock = TaskExecutor.activeExecutionBlock;
 		loopExecBlock.brotherExecBlock = null;
 		loopExecBlock.isMethodBody = false;
 		loopExecBlock.isLoopExecBlock = true;
 		
-		// Set tasks for new ExecutionBlock
+		// Move tasks to the new ExecutionBlock.
 		for (Task task : taskGroup)
 		{
 			task.PC = this.startPC;
-
-			// Add tasks to the new execution blocks
-			//
+			
 			loopExecBlock.taskTable.add(task);
 		}
 		

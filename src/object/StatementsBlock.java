@@ -3,16 +3,13 @@ package object;
 import java.util.LinkedList;
 import java.util.List;
 
-import object.values.MethodValuesHolder;
-import object.values.ObjValue;
-
 public class StatementsBlock {
 
 	private List<Statement> statements = null;
 	private StatementsBlock parentStatementsBlock = null;
 	
 	// Local variables declared in this block.
-	// Used to delete variables from VH map when stmt block is executed.
+	// Used to delete variables from method VH map when Statement block is executed.
 	private List<String> blockLocalVariables = null;
 	
 	public StatementsBlock() {

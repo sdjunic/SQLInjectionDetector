@@ -1,18 +1,10 @@
 package object.values;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-
 import symbol.object.Type;
 
 public class FieldsValuesHolder extends ValuesHolder {
 
-	private ClassValue parentObj; // this is set only for ValuesHolders of the object's fields
+	private ClassValue parentObj;
 
 	public FieldsValuesHolder(ClassValue parentObj) {
 		super();
@@ -35,38 +27,4 @@ public class FieldsValuesHolder extends ValuesHolder {
 		}
 		return result;
 	}
-
-//	// Copy all objects from this ValuesHolder and populate copyMap table,
-//	// to map original objects into newly created ones.
-//	//
-//	public void copyAllObjects(HashMap<ObjValue, ObjValue> copyMap)
-//	{
-//		for (ObjValue obj : values.values())
-//		{
-//			if (!copyMap.containsKey(obj))
-//			{
-//				copyMap.put(obj, obj.shallowCopy());
-//				if (obj instanceof ClassValue)
-//				{
-//					((ClassValue)obj).getFields().copyAllObjects(copyMap);
-//				}
-//			}
-//		}
-//	}
-	
-//	// Based on copyMap, update all references. 
-//	// This method should be called for fields of newly created ClassValue,
-//	// to replace references to original fields with references to the newly created fields.
-//	//
-//	protected void updateReferences(HashMap<ObjValue, ObjValue> copyMap)
-//	{
-//		for (Entry<String, ObjValue> vhEntry : this.values.entrySet())
-//		{
-//			ObjValue prevObj = vhEntry.getValue();
-//			assert copyMap.containsKey(prevObj);
-//			ObjValue nextObj = copyMap.get(prevObj);
-//			vhEntry.setValue(nextObj);
-//		}
-//	}
-	
 }

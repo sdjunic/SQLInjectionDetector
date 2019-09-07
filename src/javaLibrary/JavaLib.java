@@ -10,6 +10,8 @@ public class JavaLib {
 		List<LibraryClassDecl> libraryClassList,
 		List<LibraryMethodDecl> libraryMethList)
 	{
+		// Add predefined library classes/methods
+		//
 		LibraryClassDecl libraryClassDecl = new LibraryClassDecl(null, "StringBuilder");
 		libraryClassList.add(libraryClassDecl);
 		

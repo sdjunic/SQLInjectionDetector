@@ -18,7 +18,7 @@ public class DbgCheckStatement extends Statement {
 		if (main.Main.infoPS != null)
 		{
 			int taskId = 1;
-			main.Main.infoPS.println("Expexted task num: " + taskNum + " (" + taskGroup.size() + ")");
+			main.Main.infoPS.println("Expected task num: " + taskNum + " (" + taskGroup.size() + ")");
 			for (Task task : taskGroup)
 			{
 				StringBuilder sb = new StringBuilder("Task_"+ taskId++ +" values:\n");

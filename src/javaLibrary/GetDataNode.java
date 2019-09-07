@@ -68,7 +68,7 @@ public class GetDataNode implements ActionTreeNode {
 	{  
 	  try  
 	  {  
-	    double d = Integer.parseInt(str);
+	    Integer.parseInt(str);
 	  }  
 	  catch(NumberFormatException nfe)  
 	  {  

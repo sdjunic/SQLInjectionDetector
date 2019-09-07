@@ -5,7 +5,6 @@ import javax.swing.JLabel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 
-import java_cup.assoc;
 import main.LibraryClassDecl;
 
 import javax.swing.JButton;
@@ -16,6 +15,9 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 
 public class PnlAddLibClass extends JPanel {
+
+	private static final long serialVersionUID = 1L;
+
 	private LibraryClassDecl currentClass;
 	
 	private JTextField tfNewClassPackage;

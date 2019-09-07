@@ -33,8 +33,7 @@ public class StringConcat extends Statement {
 				rightVal1 = values.get(right1.name);
 			}
 		}
-		// TODO: consider assertion below
-		//assert rightVal1 != null;
+
 		if (rightVal1 == null) rightVal1 = StringVal.getString(true);
 		
 		if (right2 != null) {
@@ -44,8 +43,7 @@ public class StringConcat extends Statement {
 				rightVal2 = values.get(right2.name);
 			}
 		}
-		// TODO: consider assertion below
-		//assert rightVal2 != null;
+
 		if (rightVal2== null) rightVal2 = StringVal.getString(true);
 	
 		values.put(left.name, StringVal.getString(rightVal1.isSafe() && rightVal2.isSafe()));

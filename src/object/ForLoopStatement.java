@@ -24,7 +24,7 @@ public class ForLoopStatement extends Statement {
 	
 	protected StatementsBlock execLoopBody = null;	// = (body + update + condition)
 	
-	private int startPC = 0;	// used to start first loop iteration from condition
+	private int startPC = 0; // Used to start the loop iteration from the condition.
 
 	
 	public ForLoopStatement(StatementsBlock parentBlock) {
@@ -60,16 +60,13 @@ public class ForLoopStatement extends Statement {
 		
 		startPC = loopBody.getStmtCount() + update.getStmtCount();
 		
-		execLoopBody.addStatement(new LoopRepeatStatement() /*this stmt will do reduce*/);
+		execLoopBody.addStatement(new LoopRepeatStatement() /* this statement will reduce tasks */);
 		execLoopBody.addStatement(new EndExecBlockStatement(false /*reduce*/));
 	}
 
 	@Override
 	public void print(StringBuilder sb, String indention) {
 		sb.append(indention + "FOR\r\n");
-		// This belongs to previous block
-		//sb.append(indention + "init\r\n"); 
-		//init.print(sb, indention.concat("    "));
 		sb.append(indention + "cond\r\n");
 		condition.print(sb, indention.concat("    "));
 		sb.append(indention + "body\r\n");
@@ -81,20 +78,20 @@ public class ForLoopStatement extends Statement {
 	
 	@Override
 	public void execute(List<Task> taskGroup) throws Exception {
-		// Set new execution blocks
+		// Initialize a new execution block.
 		ExecutionBlock loopExecBlock = new ExecutionBlock(this.execLoopBody);
 		loopExecBlock.parentExecBlock = TaskExecutor.activeExecutionBlock;
 		loopExecBlock.brotherExecBlock = null;
 		loopExecBlock.isMethodBody = false;
 		loopExecBlock.isLoopExecBlock = true;
 		
-		// Set tasks for new ExecutionBlock
+		// Move tasks to the new ExecutionBlock.
 		for (Task task : taskGroup)
 		{
+			// Set PC to the first condition instruction.
 			task.PC = this.startPC;
 
-			// Add tasks to the new execution blocks
-			//
+			// Add tasks to the new execution block.
 			loopExecBlock.taskTable.add(task);
 		}
 		

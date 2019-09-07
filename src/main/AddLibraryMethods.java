@@ -26,6 +26,9 @@ import java.awt.event.WindowEvent;
 import javax.swing.JRadioButton;
 
 public class AddLibraryMethods extends JFrame {
+
+	private static final long serialVersionUID = 1L;
+
 	private LibraryMethodDecl method = new LibraryMethodDecl();
 	
 	private JPanel contentPane;
@@ -132,7 +135,7 @@ public class AddLibraryMethods extends JFrame {
 				}
 				method.methodName = methName;
 				
-				String retType = tbRetType.getText().trim();
+//				String retType = tbRetType.getText().trim();
 //				if (retType.isEmpty() || retType.toLowerCase().equals("void")){
 //					retType = null;
 //				} else {
@@ -374,8 +377,8 @@ public class AddLibraryMethods extends JFrame {
 		
 		btnAddArgument.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String argType = tbArgumentType.getText().trim();
 				
+//				String argType = tbArgumentType.getText().trim();		
 //				if (!argType.isEmpty()) {
 //					if (rdbtnArgCritical.isSelected()){
 //						method.specialArguments.add(new SpecialArg(method.methodArgs.size(), SpecialArg.TYPE_CRITICAL_OUTPUT));

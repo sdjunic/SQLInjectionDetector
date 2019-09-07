@@ -27,20 +27,20 @@ public class ForeachLoopStatement extends Statement {
 
 	@Override
 	public void execute(List<Task> taskGroup) throws Exception {
-		// Set new execution blocks
+		// Initialize a new execution block.
 		ExecutionBlock loopExecBlock = new ExecutionBlock(this.loopBody);
 		loopExecBlock.parentExecBlock = TaskExecutor.activeExecutionBlock;
 		loopExecBlock.brotherExecBlock = null;
 		loopExecBlock.isMethodBody = false;
 		loopExecBlock.isLoopExecBlock = true;
 		
-		// Set tasks for new ExecutionBlock
+		// Move tasks to the new ExecutionBlock.
 		for (Task task : taskGroup)
 		{
+			// Reset PC.
 			task.PC = 0;
 
-			// Add tasks to the new execution blocks
-			//
+			// Add tasks to the new execution block.
 			loopExecBlock.taskTable.add(task);
 		}
 		

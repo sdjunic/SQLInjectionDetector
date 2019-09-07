@@ -19,9 +19,9 @@ public class MethCallStatement extends CallStatement {
 	private String methodToCall = null;
 	private VariableExec thisObj = null;
 	
-	private Method staticMethodToCall = null; // for static methods
+	private Method staticMethodToCall = null; // For static methods.
 	
-	private Method libraryMethodToCall = null; // for non-static library methods when this object is null
+	private Method libraryMethodToCall = null; // For non-static library methods when this object is null.
 	private boolean isLibraryMethod = false;
 	
 	public MethCallStatement(VariableExec left, Method method, VariableExec thisObj, List<VariableExec> arguments) {
@@ -77,7 +77,7 @@ public class MethCallStatement extends CallStatement {
 			Method m = methodToCall.getKey();
 			List<Task> methTasks = methodToCall.getValue();
 			
-			// Execute special method inline
+			// Execute special method inline.
 			if (!m.isDefined())
 			{
 				m.executeSpecialMethod(thisObj, arguments, left, methTasks);
@@ -86,14 +86,14 @@ public class MethCallStatement extends CallStatement {
 			
 			m.parseMethod();
 			
-			// Set new execution block
+			// initialize a new execution block.
 			ExecutionBlock methodExecBlock = new ExecutionBlock(m.getBody());
 			methodExecBlock.parentExecBlock = TaskExecutor.activeExecutionBlock;
 			methodExecBlock.brotherExecBlock = prevMethodExecBlock;
 			methodExecBlock.isMethodBody = true;
 			methodExecBlock.returnDestination = left;
 			
-			// Set tasks for new ExecutionBlock
+			// Move tasks to the new ExecutionBlock.
 			Iterator<Task> taskIter = methTasks.iterator();
 			while (taskIter.hasNext())
 			{
@@ -101,7 +101,7 @@ public class MethCallStatement extends CallStatement {
 				
 				MethodValuesHolder callingMethValues = new MethodValuesHolder(task.values, m);
 				
-				// Populate ValuesHolder for method body
+				// Populate ValuesHolder for the new method.
 				if (staticMethodToCall == null)
 				{
 					ObjValue thisObjValue = task.values.get(thisObj.name);
@@ -116,7 +116,7 @@ public class MethCallStatement extends CallStatement {
 					callingMethValues.put(m.getMethParamList().get(i).getName(), argumentVal);
 				}
 				
-				// Hash method input values, in case of recursion.
+				// Hash method input values (for recursion cycle detection).
 				callingMethValues.saveInputMVH_hash();
 				if(callingMethValues.checkForRecursionCycle())
 				{
@@ -135,18 +135,18 @@ public class MethCallStatement extends CallStatement {
 			
 			if (!methTasks.isEmpty())
 			{
-				// Add all tasks to new execution block,
+				// Add all tasks to the new execution block...
 				methodExecBlock.taskTable.addAll(methTasks);
 			
-				// and remove them from current execution block
+				// and remove them from the current execution block.
 				TaskExecutor.activeExecutionBlock.taskTable.removeAll(methTasks);
 
 				prevMethodExecBlock = methodExecBlock;
 			}
 		}
 		
-		// If all methods were special we didn't add new EB, just continue execution in the same EB.
-		// If all tasks completes recursion cycle we didn't add new EB, just continue execution in the same EB.
+		// If all the methods were special, or all tasks completes recursion cycle, we didn't make a new EB.
+		// In such cases just continue execution in the same EB.
 		if (prevMethodExecBlock != null)
 		{
 			TaskExecutor.activeExecutionBlock = prevMethodExecBlock;
@@ -216,53 +216,6 @@ public class MethCallStatement extends CallStatement {
 		
 		return res;
 	}
-	
-//	public void execute(MethodValuesHolder values) throws Exception {
-//		Method methodToCall = staticMethodToCall;
-//		
-//		if (isInitFieldsMethod)
-//		{
-//			Method.methCallStack.push(methodToCall);
-//			methodToCall.executeMethod(values);
-//			Method.methCallStack.pop();
-//			return;
-//		}
-//		
-//		MethodValuesHolder callingMethValues = new MethodValuesHolder(values);
-//		
-//		if (methodToCall == null) {
-//			ObjValue thisObjValue = values.get(thisObj.name);
-//			Class thisObjClass = thisObjValue.getObjectType();
-//			if (thisObjClass != null) {
-//				
-//				methodToCall = thisObjClass.findMethod(this.methodToCall, this.arguments);
-//
-//				callingMethValues.put("this", thisObjValue);
-//				
-//			} else {
-//				throw new Exception("Metoda nije pronadjena!");
-//			}
-//		}
-//		
-//		if (methodToCall.isMethodAlreadyOnStack()) { return; }
-//		Method.methCallStack.push(methodToCall);
-//		
-//		for (int i=0; i<arguments.size(); ++i) {
-//			ObjValue argumentVal = null;
-//			if (arguments.get(i) == null) continue;
-//			if (arguments.get(i).value != null) argumentVal = arguments.get(i).value;
-//			else argumentVal = values.get(arguments.get(i).name);
-//			if (argumentVal == null) continue;
-//			callingMethValues.put(methodToCall.getMethParamList().get(i).getName(), argumentVal);
-//		}
-//		
-//		ObjValue returnVal = methodToCall.executeMethod(callingMethValues);
-//		if (left != null) {
-//			values.put(left.name, returnVal);
-//		}
-//		
-//		Method.methCallStack.pop();
-//	}
 	
 	@Override
 	public void print(StringBuilder sb, String indention) {

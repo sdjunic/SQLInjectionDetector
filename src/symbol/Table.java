@@ -5,7 +5,6 @@ import symbol.object.Class;
 import symbol.object.Package;
 import symbol.object.Modifiers.Modifier;
 
-import java.time.chrono.IsoChronology;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -50,7 +49,7 @@ public class Table {
 		
 		for (LibraryClassDecl classDecl : libClassDecl)
 		{
-			// find super class if it exists
+			// Find super class if it exists.
 			Table.setScope(Table.universe());
 			
 			if (classDecl.superClassPackageName != null)
@@ -61,14 +60,14 @@ public class Table {
 					currentPackage = (symbol.object.Package)superClassPackageObj;
 					Table.setScope(currentPackage.getScope());
 				} else {
-					assert false; // super class and its package must be created before this point
+					assert false; // Super class and its package must be created before this point.
 				}
 			}			
 			Obj superClassObj = Table.find(classDecl.superClass);
 			assert (superClassObj != null && superClassObj instanceof symbol.object.Class);		
 			Class superClass = (Class)superClassObj;
 			
-			// find or make actual class
+			// Find or make the actual class.
 			Table.setScope(Table.universe());
 			
 			if (classDecl.packageName != null)

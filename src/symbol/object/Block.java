@@ -44,6 +44,4 @@ public class Block implements Obj {
 		sb.append("\r\n").append(tab).append("}");
 	}
 	
-	
-	
 }

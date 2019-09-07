@@ -10,19 +10,11 @@ import org.w3c.dom.*;
 
 import symbol.Table;
 import symbol.object.TypeReference;
-import symbol.object.UnknownType;
 import symbol.object.Class;
-import symbol.object.MethParam;
 import symbol.object.Method;
-import symbol.object.Modifiers;
-import symbol.object.Modifiers.Modifier;
-import symbol.object.Obj;
-import symbol.object.PrimitiveType;
 import Parse.*;
 import execution.TaskExecutor;
 import javaLibrary.JavaLib;
-import javaLibrary.SpecialAction;
-import object.values.MethodValuesHolder;
 
 import java.io.*;
 
@@ -31,8 +23,8 @@ public class Main {
 	public static List<LibraryClassDecl> libraryClassList;
 	public static List<LibraryMethodDecl> libraryMethList; 
 
-	public static PrintStream infoPS = System.out; /* null; */
-	public static boolean useCheck = true; /* false */
+	public static PrintStream infoPS = System.out; /* Set to null to skip printing info. */
+	public static boolean useCheck = true; /* Set to false to ignore DbgCheckStatement. */
 	
 	public static void main(String args[]) throws Exception {
 		
@@ -165,7 +157,6 @@ public class Main {
 	
 	public static void testProjectForSQLInjection(File projectRoot, String startFrom, boolean initialArgumentsSafe) throws Exception{				
 		Table.makeNewTable(libraryClassList, libraryMethList);
-		//Method.methCallStack = new Stack<Method>();
 		Parse.ParseData.allProjectMethods = new HashSet<Method>();
 		Parse.ParseData.riskyMethods = new HashSet<Method>();
 		Parse.ParseData.mainMethods = new HashSet<Method>();
@@ -216,7 +207,6 @@ public class Main {
 				
 				while (it.hasNext()) {
 					Method m = it.next();
-					//Method.methCallStack.push(m);
 					if (infoPS != null) 
 					{
 						infoPS.println("\r\n----------------------------------------------------------------------------------------");
@@ -226,11 +216,11 @@ public class Main {
 					try {
 						TaskExecutor.execute(m, initialArgumentsSafe);
 						
-						// For testing purposes:
-						// Good test shouldn't have problem with null pointers or with infinite recursion.
-						// It's OK to kill some tasks because of that, but we should always have at least one task,
-						// which executes to the end. We can't throw exception here, since in realistic usage, 
-						// execution from risky methods can hit null pointer exception on all tasks.
+						// Only for testing purposes:
+						// A good test, executed from the Main method, shouldn't have a problem with null pointers
+						// or with infinite recursion. It's OK to kill some tasks because of that, but we should always
+						// have at least one task that executes to the end. We can't throw an exception here, 
+						// since in regular usage, execution from risky methods can hit null pointer exception on all tasks.
 						//
 						assert (TaskExecutor.finalTaskCount > 0);
 						

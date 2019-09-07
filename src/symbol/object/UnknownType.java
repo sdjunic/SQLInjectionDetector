@@ -85,6 +85,6 @@ public class UnknownType implements Type {
 	}
 	
 	@Override
-	public void print(StringBuilder sb, int tabNum) { sb.append("UNKNOWN TYPE SHOULDN'T BE PRINTED"); }
+	public void print(StringBuilder sb, int tabNum) { sb.append("UNKNOWN TYPE SHOULD NOT BE PRINTED"); }
 
 }

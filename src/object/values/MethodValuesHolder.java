@@ -13,7 +13,7 @@ public class MethodValuesHolder extends ValuesHolder {
 
 	private MethodValuesHolder parentValuesHolder = null;
 	
-	// Used to detect identical method call on stack.
+	// Used to detect identical method calls on stack.
 	// Used to determine and terminate recursion cycle. 
 	//
 	private Method method = null;
@@ -63,7 +63,7 @@ public class MethodValuesHolder extends ValuesHolder {
 	public void saveInputMVH_hash() throws NoSuchAlgorithmException
 	{
 		assert (this.methodInputMVH_hash == null);
-		// Get string representation of this MVH map
+		// Get string representation of this MVH map.
 		StringBuilder sb = new StringBuilder();
 		this.print(sb, "", true);
 		MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -90,15 +90,15 @@ public class MethodValuesHolder extends ValuesHolder {
 	
 	public byte[] hash() throws NoSuchAlgorithmException
 	{
-		// Get string representation of this and all parent Method VH maps
+		// Get string representation of this and all parent Method VH maps.
 		StringBuilder sb = new StringBuilder();
 		MethodValuesHolder mvh = this;
 		
 		// We must check all parent MVH maps, because two tasks with different maps
 		// can call the method which don't see the difference between these
 		// tasks (for example static method, with no arguments). 
-		// In that case, if we hash only current MVH maps at the end of such method
-		// we will got the same values and we will reduce non-equal tasks.
+		// In such case, if we hash only current MVH maps at the end of such method
+		// we would get the same values and we would reduce non-equal tasks.
 		// 
 		while(mvh != null)
 		{
@@ -120,8 +120,8 @@ public class MethodValuesHolder extends ValuesHolder {
 		HashMap<ObjValue, ObjValue> copyMap = new HashMap<>();
 		
 		// Copy all objects and make capyMap table, which is mapping between
-		// previous and new object. Also populate new ValuesHolder map, with
-		// references to new objects that we are creating in this method.
+		// original and new object. Also populate new ValuesHolder map, with
+		// references to new objects that we are created in this method.
 		//
 		MethodValuesHolder currentMethVHMap = this;
 		MethodValuesHolder resultCopyVHMap = null;
@@ -164,19 +164,7 @@ public class MethodValuesHolder extends ValuesHolder {
 			currentMethVHMap = currentMethVHMap.parentValuesHolder;
 		}
 		
-		assert (resultCopyVHMap != null);
-		
-//		// Update field references for all new objects of type ClassValue, using the
-//		// previously created mapping in copyMap.
-//		//
-//		for (ObjValue newValue : copyMap.values())
-//		{
-//			if (newValue instanceof ClassValue)
-//			{
-//				((ClassValue)newValue).getFields().updateReferences(copyMap);
-//			}
-//		}
-		
+		assert (resultCopyVHMap != null);		
 		return resultCopyVHMap;
 	}
 

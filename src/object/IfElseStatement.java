@@ -8,10 +8,10 @@ import execution.TaskExecutor;
 
 public class IfElseStatement extends Statement {
 
-	private StatementsBlock ifStmtBody = null; // for ExecBlock which will do the task reduction
+	private StatementsBlock ifStmtBody = null; // For ExecBlock which will do the task reduction.
 	
-	private StatementsBlock ifThenBody = null; // for actual statements in true branch
-	private StatementsBlock elseBody = null; // for actual statements in false branch
+	private StatementsBlock ifThenBody = null; // For actual statements in positive branch.
+	private StatementsBlock elseBody = null; // For actual statements in negative branch.
 	
 	public IfElseStatement(StatementsBlock parentBlock) {
 		ifStmtBody = new StatementsBlock(parentBlock);
@@ -69,7 +69,7 @@ public class IfElseStatement extends Statement {
 
 	@Override
 	public void execute(List<Task> taskGroup) throws Exception {
-		// Set new execution blocks
+		// Initialize the new execution blocks.
 		ExecutionBlock ifStmtExecBlock = new ExecutionBlock(ifStmtBody);
 		ifStmtExecBlock.parentExecBlock = TaskExecutor.activeExecutionBlock;
 		ifStmtExecBlock.brotherExecBlock = null;
@@ -89,11 +89,12 @@ public class IfElseStatement extends Statement {
 		ifThenExecBlock.brotherExecBlock = elseExecBlock;
 		ifThenExecBlock.isMethodBody = false;
 		
-		// Set tasks for new ExecutionBlock
+		// Move tasks to the new ExecutionBlocks.
 		for (Task task : taskGroup)
 		{
 			task.PC = 0;
 			
+			// Clone tasks for negative branch.
 			Task elseBranchTask = task.clone();
 			
 			// Add tasks to the new execution blocks
@@ -113,7 +114,7 @@ public class IfElseStatement extends Statement {
 		
 		TaskExecutor.activeExecutionBlock.taskTable.removeAll(taskGroup);
 		
-		// Brother of ifThenExecBlock is elseExecBlock, if it exists
+		// Brother of ifThenExecBlock is elseExecBlock, if it exists.
 		TaskExecutor.activeExecutionBlock = ifThenExecBlock;
 	}
 

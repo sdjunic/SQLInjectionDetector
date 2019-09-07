@@ -4,14 +4,11 @@ import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
-import main.Main;
-
 import javax.swing.JComboBox;
 import javax.swing.JRadioButton;
 import javax.swing.JSeparator;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
-import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -20,6 +17,9 @@ import java.awt.event.ActionEvent;
 import javax.swing.DefaultComboBoxModel;
 
 public class PnlTestProject extends JPanel {
+
+	private static final long serialVersionUID = 1L;
+
 	private JTextField tfProjectPath;
 	
 	private JRadioButton rdbtnSafe;

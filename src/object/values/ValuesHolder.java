@@ -185,7 +185,7 @@ public abstract class ValuesHolder {
 		}
 	}
 	
-	// Import all mappings from sourceMap.
+	// Import all mappings from the sourceMap.
 	//
 	public void importMappings(ValuesHolder sourceMap)
 	{

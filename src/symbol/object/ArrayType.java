@@ -72,6 +72,6 @@ public class ArrayType implements Type {
 	}
 
 	@Override
-	public void print(StringBuilder sb, int tabNum) { sb.append("ARRAY TYPE SHOULDN'T PRINTED"); }
+	public void print(StringBuilder sb, int tabNum) { sb.append("ARRAY TYPE SHOULD NOT BE PRINTED"); }
 	
 }

@@ -12,7 +12,6 @@ import java.awt.Font;
 import java.awt.Insets;
 
 import javax.swing.border.LineBorder;
-import javax.swing.tree.ExpandVetoException;
 
 import javaLibrary.SpecialAction;
 import main.LibraryMethodDecl;
@@ -23,6 +22,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 public class PnlAddLibMethod extends JPanel {
+	
+	private static final long serialVersionUID = 1L;
 	
 	private final String SA_CO = "Critical output";
 	private final String SA_ASSIGN_EXISTING = "Assign existing object";

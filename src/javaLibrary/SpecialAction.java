@@ -15,7 +15,6 @@ import object.values.ObjValue;
 import symbol.Table;
 import symbol.object.ArrayType;
 import symbol.object.Class;
-import symbol.object.Method;
 import symbol.object.Obj;
 import symbol.object.PrimitiveType;
 import symbol.object.TypeReference;
@@ -73,7 +72,7 @@ public class SpecialAction {
 	
 	private void bind_priv(String left, String assign, String expression, LibraryMethodDecl methodDecl)
 	{
-		// Assert that special argument is applicable to appropriate method
+		// Assert that special argument is applicable to its method.
 		{
 			if (left.startsWith(RETURN))
 			{
@@ -93,13 +92,13 @@ public class SpecialAction {
 			}
 		}
 		
-		if (assign.equals(SET_SAFE)) // calculate boolean expression and set safety value for left variable
+		if (assign.equals(SET_SAFE)) // Calculate boolean expression and set safety value for left variable.
 		{
 			this.assignOp = AssignOperator.OP_SET_SAFE;
 			this.actionTree = parseExpression(expression, methodDecl);
 		}
-		else if (assign.startsWith(ASSIGN_NEW_OBJECT_PREFIX)) // calculate boolean expression to get safety value for NEW object
-		{										  // and assign that object to left variable
+		else if (assign.startsWith(ASSIGN_NEW_OBJECT_PREFIX)) // Calculate boolean expression to get safety value for NEW object
+		{										              // and assign that object to left variable.
 			assign = assign.substring(ASSIGN_NEW_OBJECT_PREFIX.length()).trim();
 			assign = assign.substring(0, assign.length() - ASSIGN_NEW_OBJECT_SUFIX.length()).trim();
 			if (assign.contains("|"))
@@ -112,7 +111,7 @@ public class SpecialAction {
 			this.newObjType = getTypeForClassName(assign);
 			this.actionTree = parseExpression(expression, methodDecl);
 		}
-		else if (assign.equals(ASSIGN_EXISTING_OBJECT)) // assign EXISTING object to left variable
+		else if (assign.equals(ASSIGN_EXISTING_OBJECT)) // Assign existing object to left variable.
 		{
 			this.assignOp = AssignOperator.OP_ASSIGN_EXISTING_OBJECT;
 			this.right = expression;
@@ -132,7 +131,7 @@ public class SpecialAction {
 				assert false;
 			}
 		}
-		else if(assign.equals(CRITICAL_OUTPUT)) // check CRITICAL OUTPUT safety
+		else if(assign.equals(CRITICAL_OUTPUT)) // Check the safety of the CRITICAL OUTPUT.
 		{
 			this.assignOp = AssignOperator.OP_CRITICAL_OUTPUT;
 			assert !left.startsWith(RETURN);
@@ -361,7 +360,7 @@ public class SpecialAction {
 			}
 			else
 			{
-				// Assert that special argument is applicable to appropriate method
+				// Assert that special argument is applicable to its method.
 				{
 					assert (!token.startsWith(RETURN));
 					

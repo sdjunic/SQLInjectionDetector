@@ -53,7 +53,7 @@ public class ReturnStatement extends Statement {
 						ObjValue returnVal = returnValues.get(i++);
 						parentValues.put(eb.returnDestination.name, returnVal);
 					}
-					t.PC = eb.statements.getStmtCount() - 1; // jump to ReduceStatement
+					t.PC = eb.statements.getStmtCount() - 1; // Jump to ReduceStatement.
 				}
 				
 				// Add tasks to appropriate EB which represents method body.
@@ -76,7 +76,7 @@ public class ReturnStatement extends Statement {
 					}
 				}
 				
-				// Tasks should be already deleted in all EB, except in active one.
+				// Tasks should already be deleted in all EB, except in active one.
 				if (firstIteration)
 				{
 					assert eb.taskTable.containsAll(taskGroup);

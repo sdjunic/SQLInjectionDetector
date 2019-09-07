@@ -11,8 +11,6 @@ import javaLibrary.SpecialAction;
 import main.Main;
 import main.exception.SQLInjection;
 import object.*;
-import object.values.*;
-import object.values.ClassValue;
 import symbol.Scope;
 import symbol.SymbolDataStructure;
 import symbol.Table;
@@ -46,8 +44,6 @@ public class Method implements Obj {
 	private StatementsBlock currentBlock = null;
 	
 	private boolean parsed = false;	
-	
-	//public static Stack<Method> methCallStack = null;
 	
 	public boolean isParsed() {
 		return parsed;
@@ -252,26 +248,6 @@ public class Method implements Obj {
 		this.currentBlock = this.currentBlock.getParentStatementsBlock();
 	}
 	
-//	public Type getReturnVariableType() {
-//		VariableExec v = this.body.getReturnVar();
-//		if (v != null && v.object != null) {
-//			if (v.object instanceof Class) return (Class)v.object;
-//			if (v.object instanceof symbol.object.Variable) {
-//				symbol.object.Variable var = (symbol.object.Variable)v.object;
-//				if (var.getType() != null) return var.getType().type;
-//			}
-//			if (v.object instanceof Field) {
-//				Field var = (Field)v.object;
-//				if (var.getType() != null) return var.getType().type;
-//			}
-//			if (v.object instanceof MethParam) {
-//				MethParam var = (MethParam)v.object;
-//				if (var.getType() != null) return var.getType().type;
-//			}
-//		}
-//		return null;
-//	}
-	
 	public void parseMethod() throws Exception {
 		assert this.isDefined;
 		if (!this.parsed)
@@ -306,33 +282,12 @@ public class Method implements Obj {
 		assert !this.isDefined;
 		assert !specialActions.isEmpty();
 		for (Task t : tasks)
-		{
-			ValuesHolder values = t.values;
-			
+		{			
 			for (SpecialAction specAct : specialActions) {
 				specAct.execute(thisObj, actualArgs, returnDest, t);
 			}
 		}
 	}
-	
-//	public boolean isMethodAlreadyOnStack() {
-//		Enumeration<Method> e = methCallStack.elements();
-//		while (e.hasMoreElements()) {
-//			Method i = e.nextElement();
-//			if (this.equals(i)) {
-//				return true;
-//			}
-//		}
-//		return false;
-//	}
-	
-//	public static void printMethodCallStack(StringBuilder sb) {
-//		for (int i = methCallStack.size()-1; i>=0; --i) {
-//			Method meth = methCallStack.get(i);
-//			sb.append("- ");
-//			meth.printCallSignOnly(sb);
-//		}
-//	}
 
 	public void printCallSignOnly(StringBuilder sb) {
 		sb.append(getName()+"\r\n");

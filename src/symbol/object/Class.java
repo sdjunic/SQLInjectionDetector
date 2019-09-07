@@ -21,7 +21,7 @@ import object.values.StringVal;
 
 public class Class implements Type {
 
-	// Default object is always unsafe (e.g. HttpServletRequest)
+	// Default object is always unsafe (e.g. HttpServletRequest).
 	private boolean alwaysUnsafe = false;
 	
 	private static int anonymousClassCount = 0;
@@ -148,7 +148,7 @@ public class Class implements Type {
 	
 	// Used in special methods to make new object of this Class.
 	// That object will have all fields set to null, except
-	// String fields, which will have given safety value.
+	// String fields that will have given safety value.
 	//
 	public ObjValue getDefaultObject(boolean isSafe)
 	{
@@ -161,7 +161,6 @@ public class Class implements Type {
 				Field field = (Field)o;
 				if(field.getType().isRefType())
 				{
-					// TODO: check are all string fields stored like this
 					if (field.getType().type.getName().equals("String"))
 					{
 						result.setField(field.getName(), StringVal.getString(isSafe));
@@ -226,7 +225,6 @@ public class Class implements Type {
 	
 						ExpressionParser g = new ExpressionParser(l);
 						g.setErrorPS(System.err);
-						//g.setInfoPS(null);
 						
 						g.setParsingTopMethod(m);
 						
@@ -299,7 +297,7 @@ public class Class implements Type {
 			return this.findBestMatchingCandidate(candidates, args);
 		}
 		
-		if (args.size() == 0) { // add default constructor
+		if (args.size() == 0) { // Add default constructor.
 			Method defCon = new Method(name, true);
 			defCon.complFormalParamAdding();
 			defCon.setParsed(true);
@@ -319,10 +317,8 @@ public class Class implements Type {
 				Method fieldInitMethod = defCon.getParentClass().getFieldsInitializerMethod();
 				if (fieldInitMethod != null)
 				{
-					List<VariableExec> args1 = new LinkedList<VariableExec>();
 					MethCallStatement fieldInitMethCall = new MethCallStatement(
-							null, 
-							//defCon.getParentClass().getFieldInitializerMethodName(), 
+							null,
 							fieldInitMethod,
 							new VariableExec("this", defCon.getParentClass()), 
 							args);
@@ -332,7 +328,6 @@ public class Class implements Type {
 				if (!defCon.isContainsExplSuperConstructorCall()) {
 					if (defCon.getParentClass().getSuperClass() != null && defCon.getParentClass().getSuperClass().type != null) {
 						Class superClass = (Class)defCon.getParentClass().getSuperClass().type;
-						List<VariableExec> args1 = new LinkedList<VariableExec>();
 						Field superField = defCon.getParentClass().findField("super");
 						List<String> name = new LinkedList<String>();
 						name.add("this"); name.add("super");
@@ -349,23 +344,6 @@ public class Class implements Type {
 			defCon.getBody().addStatement(new ReturnStatement(new VariableExec("this", defCon.getParentClass())));
 			defCon.getBody().addStatement(new EndExecBlockStatement(false /*reduce*/));
 			return defCon;
-			
-//			if (fieldInitMethod != null)
-//			{
-//				List<VariableExec> emptyArgs = new LinkedList<VariableExec>();
-//				MethCallStatement fieldInitMethCall = new MethCallStatement(null, fieldInitMethod, emptyArgs);
-//				defCon.addStatement(fieldInitMethCall);
-//			}
-//			
-//			if (this.superClass != null && this.superClass.type != null) {
-//				Class superClass = (Class)this.superClass.type;
-//				VariableExec superField = new VariableExec("super", this.findField("super"));
-//				defCon.addStatement(new ConstructorCallStatement(superField, superClass.findConstructor(args), args));
-//			}
-//			
-//			defCon.getBody().addStatement(new ReturnStatement(new VariableExec("this", this)));
-//			defCon.getBody().addStatement(new EndExecBlockStatement(true /* reduce */));
-//			return defCon;
 		}
 		
 		return null;
@@ -427,7 +405,7 @@ public class Class implements Type {
 				}
 				else
 				{
-					// TODO: add logic derived type match
+					// TODO: add logic derived type match.
 					Type paramSourceType = param.getType().type;
 					int paramArrayLevel = 0;
 					if (paramSourceType instanceof ArrayType)

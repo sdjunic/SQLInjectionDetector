@@ -7,7 +7,6 @@ import java.util.List;
 import execution.ExecutionBlock;
 import execution.Task;
 import execution.TaskExecutor;
-import object.values.MethodValuesHolder;
 
 public class EndExecBlockStatement extends Statement {
 
@@ -20,7 +19,7 @@ public class EndExecBlockStatement extends Statement {
 	@Override
 	public void execute(List<Task> taskGroup) throws Exception {
 		
-		// Delete local variables
+		// Delete local variables.
 		List<String> localVarToRemove = TaskExecutor.activeExecutionBlock.statements.getBlockLocalVariables();
 		for (String var : localVarToRemove)
 		{
@@ -30,7 +29,7 @@ public class EndExecBlockStatement extends Statement {
 			}
 		}
 		
-		// Reduce if needed
+		// Reduce if needed.
 		if (reduce && taskGroup.size() > 1)
 		{
 			List<byte[]> taskValuesHash = new LinkedList<>();
@@ -56,7 +55,7 @@ public class EndExecBlockStatement extends Statement {
 			}
 		}
 		
-		// Return task to parent EB
+		// Return task to parent EB.
 		ExecutionBlock eb = TaskExecutor.activeExecutionBlock;
 		assert (taskGroup.size() == eb.taskTable.size());
 		
@@ -68,7 +67,7 @@ public class EndExecBlockStatement extends Statement {
 		}
 		else
 		{
-			// End of execution
+			// End of execution!
 			TaskExecutor.finalTaskCount = taskGroup.size(); 
 		}
 		
